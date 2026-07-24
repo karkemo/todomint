@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Register - Todo App</title>
+  <link rel="icon" type="image/png" href="/assets/favicon.png">
+  <link href="/output.css" rel="stylesheet">
+</head>
+
+<body
+  class="font-audiowide bg-[#0b1120] text-white min-h-screen flex flex-col justify-between antialiased selection:bg-blue-500 selection:text-white">
+  <main class="grow flex items-center justify-center px-4 py-8">
+    <div
+      class="w-full max-w-md bg-[#0f172a] border border-gray-800 rounded-3xl p-8 sm:p-10 shadow-2xl relative overflow-hidden">
+      <div class="absolute -top-12 -right-12 w-32 h-32 bg-blue-600/20 rounded-full blur-2xl pointer-events-none"></div>
+      <div
+        class="w-full h-fit flex flex-row items-center justify-center p-4 pb-2 mb-2 border-b-2 dark:border-gray-800 border-gray-200">
+        <a href="/" class="flex items-center gap-2 text-3xl tracking-wider hover:opacity-80 transition">
+          <img src="/assets/logo.png" alt="Logo" class="sm:w-8 sm:h-8 w-16 h-16 object-contain">
+          Todo
+        </a>
+      </div>
+      <div class="text-center mb-8">
+        <h1 class="text-3xl font-extrabold tracking-tight mb-2 text-white">Create Account</h1>
+        <p class="text-sm text-gray-400">Start organizing your tasks in seconds</p>
+      </div>
+      <form action="/register" method="POST" class="space-y-5">
+        <div>
+          <label for="name" class="block text-xs font-semibold uppercase tracking-wider text-gray-400 mb-2">
+            Full Name
+          </label>
+          <input type="text" id="name" name="name" required placeholder="John Doe"
+            class="w-full px-4 py-3 rounded-xl bg-[#070d1e] border border-gray-800 text-white placeholder-gray-500 focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500 transition duration-200">
+        </div>
+        <div>
+          <label for="email" class="block text-xs font-semibold uppercase tracking-wider text-gray-400 mb-2">
+            Email Address
+          </label>
+          <input type="email" id="email" name="email" required placeholder="name@example.com"
+            class="w-full px-4 py-3 rounded-xl bg-[#070d1e] border border-gray-800 text-white placeholder-gray-500 focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500 transition duration-200">
+        </div>
+        <div>
+          <label for="password" class="block text-xs font-semibold uppercase tracking-wider text-gray-400 mb-2">
+            Password
+          </label>
+          <input type="password" id="password" name="password" required placeholder="••••••••"
+            class="w-full px-4 py-3 rounded-xl bg-[#070d1e] border border-gray-800 text-white placeholder-gray-500 focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500 transition duration-200">
+        </div>
+        <button type="submit"
+          class="w-full mt-2 py-3.5 px-4 bg-blue-600 hover:bg-blue-500 active:scale-[0.99] text-white font-semibold rounded-xl shadow-lg shadow-blue-600/30 transition duration-200 cursor-pointer">
+          Get Started
+        </button>
+        <div class="w-full h-fit flex items-center justify-center">
+          <a href="/login" class="text-sm font-semibold text-gray-300 hover:text-white transition">
+            Already have an account? <span class="text-blue-500 underline ml-1">Sign In</span>
+          </a>
+        </div>
+      </form>
+      <p class="text-xs text-center text-gray-500 mt-6">
+        By signing up, you agree to our <a href="#" class="underline hover:text-gray-400">Terms</a> and <a href="#"
+          class="underline hover:text-gray-400">Privacy Policy</a>.
+      </p>
+    </div>
+  </main>
+  <footer class="py-6 text-center text-gray-600 text-xs">
+    © 2026 Todo. All rights reserved.
+  </footer>
+</body>
+
+</html>

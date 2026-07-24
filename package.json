@@ -14,9 +14,12 @@
   "description": "",
   "dependencies": {
     "@tailwindcss/cli": "^4.3.3",
+    "bcrypt": "^6.0.0",
     "better-sqlite3": "^13.0.1",
     "daisyui": "^5.7.0",
     "express": "^5.2.1",
-    "tailwindcss": "^4.3.3"
+    "express-session": "^1.19.0",
+    "tailwindcss": "^4.3.3",
+    "uuid": "^14.0.1"
   }
 }
