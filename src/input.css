@@ -5,3 +5,5 @@
 @theme {
   --font-audiowide: 'Audiowide', cursive;
 }
+
+@custom-variant dark (&:where(.dark, .dark *));

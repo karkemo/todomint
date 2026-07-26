@@ -1,11 +1,315 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Document</title>
+  <link href="/output.css" rel="stylesheet">
+  <link rel="icon" type="image/png" href="/assets/logo.png">
+  <title>Dashboard - Todo</title>
+  <script src="/dashboard.js"></script>
+  <script src="/calendar.js"></script>
+  <script>
+    if (localStorage.getItem('color-theme') === 'dark' || (!('color-theme' in localStorage) && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
+      document.documentElement.classList.add('dark');
+    } else {
+      document.documentElement.classList.remove('dark');
+    }
+  </script>
+  <style>
+    html.dark {
+      background-color: #0b1120;
+    }
+
+    html {
+      background-color: #faf7f5;
+    }
+  </style>
 </head>
+
 <body>
-  <p>hello to dashboard</p>
+  <div class="w-full h-screen bg-[#faf7f5] dark:bg-[#0f172a] flex flex-col font-audiowide">
+    <!-- Navbar -->
+    <nav
+      class="w-[99%] h-fit px-6 py-5 bg- mt-5 mx-3 rounded-2xl flex flex-row items-center justify-between bg-[#efeae6] dark:bg-[#0c1425] z-1000">
+      <a href="/" class="flex flex-row gap-3 items-center cursor-pointer">
+        <img src="/assets/logo.png" alt="logo" class="size-10">
+        <p class="text-2xl font-mono dark:text-white text-black">Todo</p>
+      </a>
+
+      <div class="gap-5 flex flex-row">
+        <button id="theme-toggle" type="button" aria-label="Toggle theme"
+          class="p-2 rounded-xl bg-gray-200 dark:bg-gray-800 text-gray-800 dark:text-gray-200 hover:opacity-80 transition duration-200 cursor-pointer">
+          <svg id="theme-toggle-light-icon" class="hidden w-5 h-5 fill-current" viewBox="0 0 20 20">
+            <path
+              d="M10 2a1 1 0 011 1v1a1 1 0 11-2 0V3a1 1 0 011-1zm4 8a4 4 0 11-8 0 4 4 0 018 0zm-.464 4.95l.707.707a1 1 0 001.414-1.414l-.707-.707a1 1 0 00-1.414 1.414zm2.12-10.607a1 1 0 010 1.414l-.706.707a1 1 0 11-1.414-1.414l.707-.707a1 1 0 011.414 0zM17 11a1 1 0 100-2h-1a1 1 0 100 2h1zm-7 4a1 1 0 011 1v1a1 1 0 11-2 0v-1a1 1 0 011-1zM5.05 6.464A1 1 0 106.465 5.05l-.708-.707a1 1 0 00-1.414 1.414l.707.707zm1.414 8.486l-.707.707a1 1 0 01-1.414-1.414l.707-.707a1 1 0 011.414 1.414zM4 11a1 1 0 100-2H3a1 1 0 100 2h1z">
+            </path>
+          </svg>
+          <svg id="theme-toggle-dark-icon" class="hidden w-5 h-5 fill-current" viewBox="0 0 20 20">
+            <path d="M17.293 13.293A8 8 0 016.707 2.707a8.001 8.001 0 1010.586 10.586z"></path>
+          </svg>
+        </button>
+
+        <div class="dropdown dropdown-end">
+          <div tabindex="0" role="button" class="avatar avatar-placeholder transition-transform active:scale-95">
+            <div
+              class="bg-slate-200 dark:bg-slate-800 text-slate-700 dark:text-slate-200 ring-2 ring-slate-300 dark:ring-slate-700 w-10 h-10 rounded-full flex items-center justify-center cursor-pointer shadow-sm hover:opacity-90">
+              <span id="username" class="text-base font-semibold uppercase">
+                <span class="loading loading-spinner loading-xs"></span>
+              </span>
+            </div>
+          </div>
+
+          <ul tabindex="-1"
+            class="dropdown-content menu p-2 mt-2 shadow-xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl w-48 z-50 text-slate-700 dark:text-slate-200 space-y-1">
+            <li>
+              <a href="/profile"
+                class="flex items-center gap-2 px-3 py-2.5 font-medium rounded-xl hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors">
+                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.8"
+                  stroke="currentColor" class="w-4 h-4 text-slate-500 dark:text-slate-400">
+                  <path stroke-linecap="round" stroke-linejoin="round"
+                    d="M15.75 6a3.75 3.75 0 1 1-7.5 0 3.75 3.75 0 0 1 7.5 0ZM4.501 20.118a7.5 7.5 0 0 1 14.998 0A17.933 17.933 0 0 1 12 21.75c-2.676 0-5.216-.584-7.499-1.632Z" />
+                </svg>
+                <span>Profile</span>
+              </a>
+            </li>
+            <div class="my-1 border-t border-slate-100 dark:border-slate-800"></div>
+            <li>
+              <a href="/logout"
+                class="flex items-center gap-2 px-3 py-2.5 font-medium rounded-xl text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-950/40 transition-colors">
+                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.8"
+                  stroke="currentColor" class="w-4 h-4">
+                  <path stroke-linecap="round" stroke-linejoin="round"
+                    d="M15.75 9V5.25A2.25 2.25 0 0 0 13.5 3h-6a2.25 2.25 0 0 0-2.25 2.25v13.5A2.25 2.25 0 0 0 7.5 21h6a2.25 2.25 0 0 0 2.25-2.25V15M12 9l3 3m0 0-3 3m3-3H2.25" />
+                </svg>
+                <span>Logout</span>
+              </a>
+            </li>
+          </ul>
+        </div>
+      </div>
+    </nav>
+    <!-- Body -->
+    <div class="w-full h-full bg-transparent flex flex-row pb-8">
+      <!-- sidebar -->
+      <div
+        class="w-[10%] px-6 py-5 mt-5 mx-3 h-full rounded-2xl flex flex-col gap-6 items-center text-gray-800 dark:text-gray-200 bg-[#efeae6] dark:bg-[#0c1425] z-1000">
+        <button onclick="document.getElementById('add_task_modal').showModal()"
+          class="btn btn-primary btn-outline w-full">Add Todo +</button>
+        <div class="flex flex-col items-center justify-center gap-2 w-full">
+          <p>Navigation</p>
+          <button class="btn btn-primary w-full flex items-center justify-between flex-row">
+            <div class="flex flex-row items-center justify-center gap-2">
+              <svg xmlns="http://www.w3.org/2000/svg" height="24px" viewBox="0 -960 960 960" width="24px"
+                fill="#e3e3e3">
+                <path
+                  d="M240-200h120v-240h240v240h120v-360L480-740 240-560v360Zm-80 80v-480l320-240 320 240v480H520v-240h-80v240H160Zm320-350Z" />
+              </svg>
+              Home
+            </div>
+          </button>
+          <button class="btn btn-primary w-full flex items-center justify-between flex-row">
+            <div class="flex flex-row items-center justify-center gap-2">
+              <svg xmlns="http://www.w3.org/2000/svg" height="24px" viewBox="0 -960 960 960" width="24px"
+                fill="#e3e3e3">
+                <path
+                  d="M440-760v-160h80v160h-80Zm266 110-55-55 112-115 56 57-113 113Zm54 210v-80h160v80H760ZM440-40v-160h80v160h-80ZM254-652 140-763l57-56 113 113-56 54Zm508 512L651-255l54-54 114 110-57 59ZM40-440v-80h160v80H40Zm157 300-56-57 112-112 29 27 29 28-114 114Zm113-170q-70-70-70-170t70-170q70-70 170-70t170 70q70 70 70 170t-70 170q-70 70-170 70t-170-70Z" />
+              </svg>
+              Today
+            </div>
+            <span id="today-count">(3)</span>
+          </button>
+          <button class="btn btn-warning w-full flex items-center justify-between flex-row">
+            <div class="flex flex-row items-center justify-center gap-2">
+              <svg xmlns="http://www.w3.org/2000/svg" height="24px" viewBox="0 -960 960 960" width="24px"
+                fill="#e3e3e3">
+                <path d="m233-120 65-281L80-590l288-25 112-265 112 265 288 25-218 189 65 281-247-149-247 149Z" />
+              </svg>
+              Important
+            </div>
+            <span id="important-count">(1)</span>
+          </button>
+          <button class="btn btn-primary w-full flex items-center justify-between flex-row">
+            <div class="flex flex-row items-center justify-center gap-2">
+              <svg xmlns="http://www.w3.org/2000/svg" height="24px" viewBox="0 -960 960 960" width="24px"
+                fill="#e3e3e3">
+                <path
+                  d="M200-80q-33 0-56.5-23.5T120-160v-560q0-33 23.5-56.5T200-800h40v-80h80v80h320v-80h80v80h40q33 0 56.5 23.5T840-720v560q0 33-23.5 56.5T760-80H200Zm0-80h560v-400H200v400Zm0-480h560v-80H200v80Zm0 0v-80 80Zm280 240q-17 0-28.5-11.5T440-440q0-17 11.5-28.5T480-480q17 0 28.5 11.5T520-440q0 17-11.5 28.5T480-400Zm-188.5-11.5Q280-423 280-440t11.5-28.5Q303-480 320-480t28.5 11.5Q360-457 360-440t-11.5 28.5Q337-400 320-400t-28.5-11.5ZM640-400q-17 0-28.5-11.5T600-440q0-17 11.5-28.5T640-480q17 0 28.5 11.5T680-440q0 17-11.5 28.5T640-400ZM480-240q-17 0-28.5-11.5T440-280q0-17 11.5-28.5T480-320q17 0 28.5 11.5T520-280q0 17-11.5 28.5T480-240Zm-188.5-11.5Q280-263 280-280t11.5-28.5Q303-320 320-320t28.5 11.5Q360-297 360-280t-11.5 28.5Q337-240 320-240t-28.5-11.5ZM640-240q-17 0-28.5-11.5T600-280q0-17 11.5-28.5T640-320q17 0 28.5 11.5T680-280q0 17-11.5 28.5T640-240Z" />
+              </svg>
+              Calendar
+            </div>
+            <span id="today-date">(25/7)</span>
+          </button>
+          <button class="btn btn-primary w-full flex items-center justify-between flex-row">
+            <div class="flex flex-row items-center justify-center gap-2">
+              <svg xmlns="http://www.w3.org/2000/svg" height="24px" viewBox="0 -960 960 960" width="24px"
+                fill="#e3e3e3">
+                <path
+                  d="M160-160q-33 0-56.5-23.5T80-240v-480q0-33 23.5-56.5T160-800h240l80 80h320q33 0 56.5 23.5T880-640v400q0 33-23.5 56.5T800-160H160Zm0-80h640v-400H447l-80-80H160v480Zm0 0v-480 480Z" />
+              </svg>
+              All Todos
+            </div>
+            <span id="todos-count">(10)</span>
+          </button>
+          <button class="btn btn-primary w-full flex items-center justify-between flex-row">
+            <div class="flex flex-row items-center justify-center gap-2">
+              <svg xmlns="http://www.w3.org/2000/svg" height="24px" viewBox="0 -960 960 960" width="24px"
+                fill="#e3e3e3">
+                <path
+                  d="M200-120q-33 0-56.5-23.5T120-200v-560q0-33 23.5-56.5T200-840h560q8 0 15 1.5t14 4.5l-74 74H200v560h560v-266l80-80v346q0 33-23.5 56.5T760-120H200Zm261-160L235-506l56-56 170 170 367-367 57 55-424 424Z" />
+              </svg>
+              Completed
+            </div>
+            <span id="completed-count">(3)</span>
+          </button>
+        </div>
+        <div class="flex flex-col items-center justify-center gap-2 w-full">
+          <p>My Lists</p>
+          <button class="btn btn-primary w-full">Default</button>
+          <button class="btn btn-primary btn-outline w-full">New List +</button>
+        </div>
+      </div>
+      <!-- main -->
+      <div
+        class="w-full flex-1 px-6 py-5 mt-5 mx-3 h-full rounded-2xl grid grid-cols-2 gap-6  text-gray-800 dark:text-gray-200 bg-[#efeae6] dark:bg-[#0c1425]">
+        <div class="w-full flex flex-col items-start justify-start gap-8">
+          <div class="w-fit flex flex-col items-center justify-center gap-2">
+            <p class="text-3xl">Today's Todos</p>
+            <p class="font-bold">"Saturday, 25 July"</p>
+          </div>
+          <ul class="w-full flex flex-col gap-3" id="todos-list"></ul>
+          <button onclick="document.getElementById('add_task_modal').showModal()"
+            class="btn btn-primary btn-outline w-full">Add Todo +</button>
+        </div>
+        <!-- second section (calendar) -->
+        <div class="w-full flex flex-col items-start justify-start gap-8">
+          <p class="text-3xl">Calendar</p>
+          <div
+            class="w-full flex flex-col gap-5 p-5 rounded-2xl bg-white dark:bg-[#131f38] border border-gray-200/80 dark:border-slate-800 shadow-sm">
+
+            <div class="flex items-center justify-between">
+              <div>
+                <h2 id="calendar-month-year" class="text-xl font-bold text-gray-900 dark:text-white">July 2026</h2>
+                <p class="text-xs text-gray-500 dark:text-gray-400 font-medium">Monthly Overview</p>
+              </div>
+
+              <div class="flex items-center gap-1 bg-gray-100 dark:bg-[#0c1425] p-1 rounded-xl">
+                <button id="prev-month-btn" aria-label="Previous month"
+                  class="cursor-pointer p-1.5 text-gray-600 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white rounded-lg hover:bg-white dark:hover:bg-slate-800 transition-all">
+                  <svg xmlns="http://www.w3.org/2000/svg" class="size-4" fill="none" viewBox="0 0 24 24"
+                    stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7" />
+                  </svg>
+                </button>
+                <button id="next-month-btn" aria-label="Next month"
+                  class="cursor-pointer p-1.5 text-gray-600 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white rounded-lg hover:bg-white dark:hover:bg-slate-800 transition-all">
+                  <svg xmlns="http://www.w3.org/2000/svg" class="size-4" fill="none" viewBox="0 0 24 24"
+                    stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
+                  </svg>
+                </button>
+              </div>
+            </div>
+            <div class="grid grid-cols-7 text-center text-xs font-semibold text-gray-400 dark:text-gray-500">
+              <span>Su</span>
+              <span>Mo</span>
+              <span>Tu</span>
+              <span>We</span>
+              <span>Th</span>
+              <span>Fr</span>
+              <span>Sa</span>
+            </div>
+            <div id="calendar-days-grid" class="grid grid-cols-7 gap-1 text-center text-sm font-medium"></div>
+            <div class="flex items-center justify-center text-gray-600 dark:text-gray-400">Select a day to view its todos</div>
+          </div>
+          <div
+            class="w-full flex flex-col gap-5 p-5 rounded-2xl bg-white dark:bg-[#131f38] border border-gray-200/80 dark:border-slate-800 shadow-sm">
+            <p id="selected-day-label" class="text-sm font-semibold text-gray-600 dark:text-gray-400">No Todos For
+              Today</p>
+            <div id="selected-day-todos" class="w-full flex flex-col gap-3"></div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script src="/theme_changer.js"></script>
 </body>
+
+<!-- Add Task Modal -->
+<dialog id="add_task_modal"
+  class="m-auto backdrop:bg-black/60 p-0 rounded-2xl bg-transparent border-0 max-w-md w-[90%] outline-none">
+  <div
+    class="w-full p-6 bg-white dark:bg-[#131f38] text-gray-800 dark:text-gray-100 rounded-2xl shadow-2xl border border-gray-200/80 dark:border-slate-800 font-sans">
+
+    <!-- Modal Header -->
+    <div class="flex items-center justify-between pb-4 border-b border-gray-100 dark:border-slate-800 mb-5">
+      <h3 class="text-xl font-bold font-audiowide">Add Todo</h3>
+      <form method="dialog">
+        <button
+          class="text-gray-400 hover:text-gray-600 dark:hover:text-gray-200 transition-colors cursor-pointer p-1 rounded-lg hover:bg-gray-100 dark:hover:bg-slate-800">
+          <svg xmlns="http://www.w3.org/2000/svg" class="size-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+          </svg>
+        </button>
+      </form>
+    </div>
+
+    <!-- Task Form -->
+    <form id="add-task-form" class="flex flex-col gap-4" action="/api/todos" method="POST">
+
+      <!-- Task Title Input -->
+      <div class="flex flex-col gap-1.5">
+        <label for="task-title" class="text-xs font-semibold text-gray-500 dark:text-gray-400">Todo Title</label>
+        <input type="text" id="task-title" name="title" required placeholder="Enter Todo..."
+          class="w-full px-3.5 py-2.5 rounded-xl bg-gray-50 dark:bg-[#0c1425] border border-gray-200 dark:border-slate-700 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 transition-all placeholder:text-gray-400" />
+      </div>
+
+      <!-- Date Input -->
+      <div class="flex flex-col gap-1.5">
+        <label for="task-date" class="text-xs font-semibold text-gray-500 dark:text-gray-400">Due Date</label>
+        <input type="date" id="task-date" name="due_date"
+          class="w-full px-3.5 py-2.5 rounded-xl bg-gray-50 dark:bg-[#0c1425] border border-gray-200 dark:border-slate-700 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 transition-all text-gray-800 dark:text-gray-200 scheme-light dark:scheme-dark" />
+      </div>
+
+      <!-- Priority & List Grid -->
+      <div class="grid grid-cols-2 gap-3">
+
+        <!-- Priority Select -->
+        <div class="flex flex-col gap-1.5">
+          <label for="task-priority" class="text-xs font-semibold text-gray-500 dark:text-gray-400">Priority</label>
+          <select id="task-priority" name="priority"
+            class="w-full px-3 py-2.5 rounded-xl bg-gray-50 dark:bg-[#0c1425] border border-gray-200 dark:border-slate-700 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 transition-all cursor-pointer">
+            <option value="low">Low</option>
+            <option value="medium" selected>Medium</option>
+            <option value="high">High</option>
+          </select>
+        </div>
+
+        <!-- List Select -->
+        <div class="flex flex-col gap-1.5">
+          <label for="task-list" class="text-xs font-semibold text-gray-500 dark:text-gray-400">List</label>
+          <select id="task-list" name="list_id" required
+            class="w-full px-3 py-2.5 rounded-xl bg-gray-50 dark:bg-[#0c1425] border border-gray-200 dark:border-slate-700 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 transition-all cursor-pointer">
+            <option value="" disabled selected>Loading lists...</option>
+          </select>
+        </div>
+      </div>
+
+      <!-- Modal Actions -->
+      <div class="flex items-center justify-end gap-3 mt-4 pt-3 border-t border-gray-100 dark:border-slate-800">
+        <button type="button" onclick="document.getElementById('add_task_modal').close()"
+          class="px-4 py-2 rounded-xl text-sm font-medium text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-slate-800 transition-colors cursor-pointer">
+          Cancel
+        </button>
+        <button type="submit"
+          class="px-5 py-2 rounded-xl text-sm font-medium bg-blue-600 hover:bg-blue-700 text-white shadow-md shadow-blue-500/20 active:scale-95 transition-all cursor-pointer">
+          Save Task
+        </button>
+      </div>
+
+    </form>
+  </div>
+</dialog>
+
 </html>

@@ -6,7 +6,23 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <link href="/output.css" rel="stylesheet">
   <link rel="icon" type="image/png" href="/assets/logo.png">
-  <title>To-do List</title>
+  <title>Todo</title>
+  <script>
+    if (localStorage.getItem('color-theme') === 'dark' || (!('color-theme' in localStorage) && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
+      document.documentElement.classList.add('dark');
+    } else {
+      document.documentElement.classList.remove('dark');
+    }
+  </script>
+  <style>
+    html.dark {
+      background-color: #0b1120;
+    }
+
+    html {
+      background-color: #faf7f5;
+    }
+  </style>
 </head>
 
 <body>
@@ -14,13 +30,24 @@
     <!-- Navbar -->
     <nav
       class="w-[99%] h-fit px-6 py-5 bg- mt-5 mx-3 rounded-2xl flex flex-row items-center justify-between bg-[#efeae6] dark:bg-[#0c1425] z-1000">
-      <div class="flex flex-row gap-5 items-center">
+      <div class="flex flex-row gap-3 items-center">
         <img src="/assets/logo.png" alt="logo" class="size-10">
-        <p class="text-2xl font-mono">Todo</p>
+        <p class="text-2xl font-mono dark:text-white text-black">Todo</p>
       </div>
       <div class="gap-5 flex flex-row">
-        <a href="/register" class="btn  btn-primary">Register</a>
-        <a href="/sign-in" class="btn btn-soft btn-info">Sign In</a>
+        <button id="theme-toggle" type="button" aria-label="Toggle theme"
+          class="p-2 rounded-xl bg-gray-200 dark:bg-gray-800 text-gray-800 dark:text-gray-200 hover:opacity-80 transition duration-200 cursor-pointer">
+          <svg id="theme-toggle-light-icon" class="hidden w-5 h-5 fill-current" viewBox="0 0 20 20">
+            <path
+              d="M10 2a1 1 0 011 1v1a1 1 0 11-2 0V3a1 1 0 011-1zm4 8a4 4 0 11-8 0 4 4 0 018 0zm-.464 4.95l.707.707a1 1 0 001.414-1.414l-.707-.707a1 1 0 00-1.414 1.414zm2.12-10.607a1 1 0 010 1.414l-.706.707a1 1 0 11-1.414-1.414l.707-.707a1 1 0 011.414 0zM17 11a1 1 0 100-2h-1a1 1 0 100 2h1zm-7 4a1 1 0 011 1v1a1 1 0 11-2 0v-1a1 1 0 011-1zM5.05 6.464A1 1 0 106.465 5.05l-.708-.707a1 1 0 00-1.414 1.414l.707.707zm1.414 8.486l-.707.707a1 1 0 01-1.414-1.414l.707-.707a1 1 0 011.414 1.414zM4 11a1 1 0 100-2H3a1 1 0 100 2h1z">
+            </path>
+          </svg>
+          <svg id="theme-toggle-dark-icon" class="hidden w-5 h-5 fill-current" viewBox="0 0 20 20">
+            <path d="M17.293 13.293A8 8 0 016.707 2.707a8.001 8.001 0 1010.586 10.586z"></path>
+          </svg>
+        </button>
+        <a href="/register" class="btn btn-primary">Register</a>
+        <a href="/login" class="btn btn-outline btn-info">Sign In</a>
       </div>
     </nav>
     <!-- Body -->
@@ -31,7 +58,7 @@
         <img src="/assets/logo.png" alt="logo"
           class="w-48 sm:w-64 md:w-80 lg:w-100 h-auto object-contain transition-all duration-200">
         <p
-          class="text-2xl sm:text-3xl md:text-4xl lg:text-6xl max-w-xs sm:max-w-xl lg:max-w-3xl text-center font-bold leading-tight">
+          class="text-2xl sm:text-3xl md:text-4xl lg:text-6xl max-w-xs sm:max-w-xl lg:max-w-3xl text-center font-bold leading-tight text-black dark:text-white">
           A simple, intuitive to-do list designed to keep you focused on what matters.
         </p>
         <a href="/register"
@@ -137,6 +164,8 @@
       </footer>
     </div>
   </div>
+
+  <script src="/theme_changer.js"></script>
 </body>
 
 </html>
