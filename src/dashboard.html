@@ -31,7 +31,7 @@
   <div class="w-full h-screen bg-[#faf7f5] dark:bg-[#0f172a] flex flex-col font-audiowide">
     <!-- Navbar -->
     <nav
-      class="w-[99%] h-fit px-6 py-5 bg- mt-5 mx-3 rounded-2xl flex flex-row items-center justify-between bg-[#efeae6] dark:bg-[#0c1425] z-1000">
+      class="w-[99%] h-fit px-6 py-5 mt-5 mx-3 rounded-2xl flex flex-row items-center justify-between bg-[#efeae6] dark:bg-[#0c1425] z-1000">
       <a href="/" class="flex flex-row gap-3 items-center cursor-pointer">
         <img src="/assets/logo.png" alt="logo" class="size-10">
         <p class="text-2xl font-mono dark:text-white text-black">Todo</p>
@@ -98,7 +98,7 @@
           class="btn btn-primary btn-outline w-full">Add Todo +</button>
         <div class="flex flex-col items-center justify-center gap-2 w-full">
           <p>Navigation</p>
-          <button class="btn btn-primary w-full flex items-center justify-between flex-row">
+          <a href="/dashboard?view=home" onclick="event.preventDefault(); navigateTo('home');" class="btn btn-primary w-full flex items-center justify-between flex-row">
             <div class="flex flex-row items-center justify-center gap-2">
               <svg xmlns="http://www.w3.org/2000/svg" height="24px" viewBox="0 -960 960 960" width="24px"
                 fill="#e3e3e3">
@@ -107,8 +107,8 @@
               </svg>
               Home
             </div>
-          </button>
-          <button class="btn btn-primary w-full flex items-center justify-between flex-row">
+          </a>
+          <a href="/dashboard?view=home" onclick="event.preventDefault(); navigateTo('today');" class="btn btn-primary w-full flex items-center justify-between flex-row">
             <div class="flex flex-row items-center justify-center gap-2">
               <svg xmlns="http://www.w3.org/2000/svg" height="24px" viewBox="0 -960 960 960" width="24px"
                 fill="#e3e3e3">
@@ -118,7 +118,7 @@
               Today
             </div>
             <span id="today-count">(3)</span>
-          </button>
+          </a>
           <button class="btn btn-warning w-full flex items-center justify-between flex-row">
             <div class="flex flex-row items-center justify-center gap-2">
               <svg xmlns="http://www.w3.org/2000/svg" height="24px" viewBox="0 -960 960 960" width="24px"
@@ -170,65 +170,8 @@
         </div>
       </div>
       <!-- main -->
-      <div
-        class="w-full flex-1 px-6 py-5 mt-5 mx-3 h-full rounded-2xl grid grid-cols-2 gap-6  text-gray-800 dark:text-gray-200 bg-[#efeae6] dark:bg-[#0c1425]">
-        <div class="w-full flex flex-col items-start justify-start gap-8">
-          <div class="w-fit flex flex-col items-center justify-center gap-2">
-            <p class="text-3xl">Today's Todos</p>
-            <p class="font-bold">"Saturday, 25 July"</p>
-          </div>
-          <ul class="w-full flex flex-col gap-3" id="todos-list"></ul>
-          <button onclick="document.getElementById('add_task_modal').showModal()"
-            class="btn btn-primary btn-outline w-full">Add Todo +</button>
-        </div>
-        <!-- second section (calendar) -->
-        <div class="w-full flex flex-col items-start justify-start gap-8">
-          <p class="text-3xl">Calendar</p>
-          <div
-            class="w-full flex flex-col gap-5 p-5 rounded-2xl bg-white dark:bg-[#131f38] border border-gray-200/80 dark:border-slate-800 shadow-sm">
-
-            <div class="flex items-center justify-between">
-              <div>
-                <h2 id="calendar-month-year" class="text-xl font-bold text-gray-900 dark:text-white">July 2026</h2>
-                <p class="text-xs text-gray-500 dark:text-gray-400 font-medium">Monthly Overview</p>
-              </div>
-
-              <div class="flex items-center gap-1 bg-gray-100 dark:bg-[#0c1425] p-1 rounded-xl">
-                <button id="prev-month-btn" aria-label="Previous month"
-                  class="cursor-pointer p-1.5 text-gray-600 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white rounded-lg hover:bg-white dark:hover:bg-slate-800 transition-all">
-                  <svg xmlns="http://www.w3.org/2000/svg" class="size-4" fill="none" viewBox="0 0 24 24"
-                    stroke="currentColor">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7" />
-                  </svg>
-                </button>
-                <button id="next-month-btn" aria-label="Next month"
-                  class="cursor-pointer p-1.5 text-gray-600 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white rounded-lg hover:bg-white dark:hover:bg-slate-800 transition-all">
-                  <svg xmlns="http://www.w3.org/2000/svg" class="size-4" fill="none" viewBox="0 0 24 24"
-                    stroke="currentColor">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
-                  </svg>
-                </button>
-              </div>
-            </div>
-            <div class="grid grid-cols-7 text-center text-xs font-semibold text-gray-400 dark:text-gray-500">
-              <span>Su</span>
-              <span>Mo</span>
-              <span>Tu</span>
-              <span>We</span>
-              <span>Th</span>
-              <span>Fr</span>
-              <span>Sa</span>
-            </div>
-            <div id="calendar-days-grid" class="grid grid-cols-7 gap-1 text-center text-sm font-medium"></div>
-            <div class="flex items-center justify-center text-gray-600 dark:text-gray-400">Select a day to view its todos</div>
-          </div>
-          <div
-            class="w-full flex flex-col gap-5 p-5 rounded-2xl bg-white dark:bg-[#131f38] border border-gray-200/80 dark:border-slate-800 shadow-sm">
-            <p id="selected-day-label" class="text-sm font-semibold text-gray-600 dark:text-gray-400">No Todos For
-              Today</p>
-            <div id="selected-day-todos" class="w-full flex flex-col gap-3"></div>
-          </div>
-        </div>
+      <div id="main-content"
+        class="w-full flex-1 px-6 py-5 mt-5 mx-3 h-full rounded-2xl block text-gray-800 dark:text-gray-200 bg-[#efeae6] dark:bg-[#0c1425]">
       </div>
     </div>
   </div>
@@ -268,7 +211,7 @@
       <!-- Date Input -->
       <div class="flex flex-col gap-1.5">
         <label for="task-date" class="text-xs font-semibold text-gray-500 dark:text-gray-400">Due Date</label>
-        <input type="date" id="task-date" name="due_date"
+        <input type="date" id="task-date" required name="due_date"
           class="w-full px-3.5 py-2.5 rounded-xl bg-gray-50 dark:bg-[#0c1425] border border-gray-200 dark:border-slate-700 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 transition-all text-gray-800 dark:text-gray-200 scheme-light dark:scheme-dark" />
       </div>
 

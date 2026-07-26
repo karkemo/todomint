@@ -23,6 +23,21 @@ function getTodayDateString() {
   return `${year}-${month}-${day}`;
 }
 
+function formatTodayDateForDisplay() {
+  return new Date().toLocaleDateString('en-US', {
+    weekday: 'long',
+    day: 'numeric',
+    month: 'long'
+  });
+}
+
+function updateShowDate() {
+  const showDateElement = document.getElementById('show-date');
+  if (showDateElement) {
+    showDateElement.textContent = formatTodayDateForDisplay();
+  }
+}
+
 function isTodoDueToday(todo) {
   if (!todo?.due_date) return false;
   return String(todo.due_date).split('T')[0] === getTodayDateString();
@@ -174,11 +189,115 @@ function createTodoElement(todo) {
   return li;
 }
 
+function getCurrentView() {
+  const urlParams = new URLSearchParams(window.location.search);
+  return urlParams.get('view') || 'home';
+}
+
+function navigateTo(viewName) {
+  window.history.pushState({ view: viewName }, '', `${window.location.pathname}?view=${viewName}`);
+  renderDashboard();
+}
+
+async function renderDashboard() {
+  const currentView = getCurrentView();
+  const main = document.getElementById('main-content');
+  if (!main) return;
+
+  switch (currentView) {
+    case 'today':
+      main.innerHTML = renderTodayLayout();
+      const dueDateInput = document.getElementById('task-date');
+      if (dueDateInput) {
+        dueDateInput.value = getTodayDateString();
+      }
+      break;
+    case 'home':
+    default:
+      main.innerHTML = renderHomeLayout();
+      break;
+  }
+
+  if (typeof window.initCalendar === 'function') {
+    window.initCalendar();
+  }
+
+  updateShowDate();
+  await loadDashboardTodos();
+}
+
+function renderHomeLayout() {
+  return `
+    <div class="grid grid-cols-1 lg:grid-cols-2 gap-8 w-full">
+      <!-- Section 1: Todos -->
+      <div class="w-full flex flex-col items-start justify-start gap-6">
+        <div class="w-fit flex flex-col items-start justify-center gap-1">
+          <h1 class="text-3xl font-bold">Today's Todos</h1>
+          <p id="show-date" class="font-semibold text-gray-500 dark:text-gray-400">"Saturday, July 25"</p>
+        </div>
+        <ul class="w-full flex flex-col gap-3" id="todos-list"></ul>
+        <button onclick="document.getElementById('add_task_modal').showModal()"
+          class="btn btn-primary btn-outline w-full">Add Todo +</button>
+      </div>
+
+      <!-- Section 2: Calendar -->
+      <div class="w-full flex flex-col items-start justify-start gap-6">
+        <h2 class="text-3xl font-bold">Calendar</h2>
+        <div class="w-full flex flex-col gap-5 p-5 rounded-2xl bg-white dark:bg-[#131f38] border border-gray-200/80 dark:border-slate-800 shadow-sm">
+          <div class="flex items-center justify-between">
+            <div>
+              <h2 id="calendar-month-year" class="text-xl font-bold text-gray-900 dark:text-white">July 2026</h2>
+              <p class="text-xs text-gray-500 dark:text-gray-400 font-medium">Monthly Overview</p>
+            </div>
+            <div class="flex items-center gap-1 bg-gray-100 dark:bg-[#0c1425] p-1 rounded-xl">
+              <button id="prev-month-btn" aria-label="Previous month" class="p-1.5 text-gray-600 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white rounded-lg hover:bg-white dark:hover:bg-slate-800 transition-all">
+                <svg xmlns="http://www.w3.org/2000/svg" class="size-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7" />
+                </svg>
+              </button>
+              <button id="next-month-btn" aria-label="Next month" class="p-1.5 text-gray-600 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white rounded-lg hover:bg-white dark:hover:bg-slate-800 transition-all">
+                <svg xmlns="http://www.w3.org/2000/svg" class="size-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
+                </svg>
+              </button>
+            </div>
+          </div>
+          <div class="grid grid-cols-7 text-center text-xs font-semibold text-gray-400 dark:text-gray-500">
+            <span>Su</span><span>Mo</span><span>Tu</span><span>We</span><span>Th</span><span>Fr</span><span>Sa</span>
+          </div>
+          <div id="calendar-days-grid" class="grid grid-cols-7 gap-1 text-center text-sm font-medium"></div>
+          <div class="flex items-center justify-center text-gray-600 dark:text-gray-400 text-sm">Select a day to view its todos</div>
+        </div>
+
+        <div class="w-full flex flex-col gap-3 p-5 rounded-2xl bg-white dark:bg-[#131f38] border border-gray-200/80 dark:border-slate-800 shadow-sm">
+          <p id="selected-day-label" class="text-sm font-semibold text-gray-600 dark:text-gray-400">No Todos For Today</p>
+          <div id="selected-day-todos" class="w-full flex flex-col gap-3"></div>
+        </div>
+      </div>
+    </div>
+  `;
+}
+
+function renderTodayLayout() {
+  return /*html*/ `
+    <div class="w-full max-w-3xl mx-auto flex flex-col gap-6">
+      <div class="w-full flex flex-col gap-2 items-center justify-center">
+        <h1 class="text-3xl font-bold">Today's Focus</h1>
+        <p id="show-date" class="font-semibold text-gray-500 dark:text-gray-400">"Saturday, July 25"</p>
+      </div>
+      <ul class="w-full flex flex-col gap-3" id="todos-list"></ul>
+      <button onclick="document.getElementById('add_task_modal').showModal()" class="btn btn-primary btn-outline w-full">Add Todo +</button>
+    </div>
+  `;
+}
+
 function escapeHTML(str) {
   return str.replace(/[&<>'"]/g,
     tag => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', "'": '&#39;', '"': '&quot;' }[tag] || tag)
   );
 }
+
+window.addEventListener('popstate', renderDashboard);
 
 document.addEventListener('DOMContentLoaded', () => {
   const addTaskForm = document.getElementById('add-task-form');
@@ -243,6 +362,6 @@ document.addEventListener('DOMContentLoaded', () => {
   });
 
   loadNavbarUsername();
-  loadDashboardTodos();
   loadUserLists();
+  renderDashboard();
 });

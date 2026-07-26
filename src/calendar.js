@@ -1,4 +1,4 @@
-document.addEventListener('DOMContentLoaded', () => {
+function initCalendar() {
   const monthYearLabel = document.getElementById('calendar-month-year');
   const daysGrid = document.getElementById('calendar-days-grid');
   const prevBtn = document.getElementById('prev-month-btn');
@@ -135,4 +135,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
   renderCalendar();
   updateSelectedDayTodos();
-});
+}
+
+document.addEventListener('DOMContentLoaded', initCalendar);
+window.initCalendar = initCalendar;
