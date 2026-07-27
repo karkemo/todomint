@@ -12,6 +12,7 @@ function initCalendar() {
   const today = new Date();
   let allTodos = [];
   let selectedDateKey = formatDateKey(today.getFullYear(), today.getMonth(), today.getDate());
+  window.selectedCalendarDate = selectedDateKey;
 
   function formatDateKey(year, month, day) {
     const y = year;
@@ -99,8 +100,12 @@ function initCalendar() {
 
       button.addEventListener('click', () => {
         selectedDateKey = dateKey;
+        window.selectedCalendarDate = dateKey;
         renderCalendar();
         updateSelectedDayTodos();
+        if (typeof window.syncAddTaskModalDate === 'function') {
+          window.syncAddTaskModalDate();
+        }
       });
 
       daysGrid.appendChild(button);

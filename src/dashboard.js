@@ -23,6 +23,33 @@ function getTodayDateString() {
   return `${year}-${month}-${day}`;
 }
 
+function syncAddTaskModalDate() {
+  const dueDateInput = document.getElementById('task-date');
+  if (!dueDateInput) return;
+
+  const currentView = getCurrentView();
+  if (currentView === 'calendar' && window.selectedCalendarDate) {
+    dueDateInput.value = window.selectedCalendarDate;
+    return;
+  }
+
+  if (currentView === 'today') {
+    dueDateInput.value = getTodayDateString();
+  }
+
+  if (currentView === 'home') {
+    dueDateInput.value = getTodayDateString();
+  }
+}
+
+function openAddTaskModal() {
+  syncAddTaskModalDate();
+  const modal = document.getElementById('add_task_modal');
+  if (modal) {
+    modal.showModal();
+  }
+}
+
 function formatTodayDateForDisplay() {
   return new Date().toLocaleDateString('en-US', {
     weekday: 'long',
@@ -43,13 +70,20 @@ function isTodoDueToday(todo) {
   return String(todo.due_date).split('T')[0] === getTodayDateString();
 }
 
+function isTodoImportant(todo) {
+  return todo?.priority === 'high';
+}
+
+function isTodoCompleted(todo) {
+  return todo?.is_completed === 1;
+}
+
 function dispatchTodosLoaded(todos) {
   document.dispatchEvent(new CustomEvent('todosLoaded', { detail: { todos } }));
 }
 
 async function loadDashboardTodos() {
   const todosContainer = document.getElementById('todos-list');
-  if (!todosContainer) return;
 
   try {
     const response = await fetch('/api/todos');
@@ -59,6 +93,8 @@ async function loadDashboardTodos() {
     const todosForToday = todos.filter(isTodoDueToday);
 
     dispatchTodosLoaded(todos);
+
+    if (!todosContainer) return;
 
     todosContainer.innerHTML = '';
 
@@ -72,14 +108,11 @@ async function loadDashboardTodos() {
       todosContainer.appendChild(todoElement);
     });
 
-    const countElement = document.getElementById('todos-count');
-    if (countElement) {
-      countElement.textContent = `(${todos.length})`;
-    }
-
   } catch (error) {
     console.error('Error loading todos:', error);
-    todosContainer.innerHTML = '<p class="text-red-500 py-2">Failed to load tasks.</p>';
+    if (todosContainer) {
+      todosContainer.innerHTML = '<p class="text-red-500 py-2">Failed to load tasks.</p>';
+    }
   }
 }
 
@@ -154,6 +187,7 @@ async function handleAddTodoSubmit(event) {
     if (modal) modal.close();
     await loadDashboardTodos();
     await loadUserLists();
+    await renderCount();
   } catch (error) {
     console.error('Error creating todo:', error);
     alert(error.message || 'Failed to create todo');
@@ -178,7 +212,7 @@ function createTodoElement(todo) {
       ${isHighPriority ? '<span class="text-xs text-red-600 dark:text-red-400 bg-red-100 dark:bg-red-950/50 px-2.5 py-1 rounded-md font-semibold">High Priority</span>' : ''}
       ${isMediumPriority ? '<span class="text-xs text-amber-700 dark:text-amber-400 bg-amber-100 dark:bg-amber-950/50 px-2.5 py-1 rounded-md font-semibold">Medium Priority</span>' : ''}
       ${isLowPriority ? '<span class="text-xs text-blue-700 dark:text-blue-400 bg-blue-100 dark:bg-blue-950/50 px-2.5 py-1 rounded-md font-semibold">Low Priority</span>' : ''}
-      <button data-id="${todo.id}" class="delete-btn opacity-0 group-hover:opacity-100 text-gray-400 hover:text-red-500 transition-opacity p-1 cursor-pointer">
+      <button id="delete-btn-${todo.id}" data-id="${todo.id}" class="delete-btn opacity-0 group-hover:opacity-100 text-gray-400 hover:text-red-500 transition-opacity p-1 cursor-pointer">
         <svg xmlns="http://www.w3.org/2000/svg" class="size-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
           <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
         </svg>
@@ -187,6 +221,140 @@ function createTodoElement(todo) {
   `;
 
   return li;
+}
+
+function dayMonth() {
+  const today = new Date();
+  const month = today.getMonth() + 1
+  const day = today.getDate()
+  const sidebarDate = document.getElementById('today-date');
+  if (sidebarDate) {
+    sidebarDate.textContent = `(${day}/${month})`;
+  }
+}
+
+async function loadImportantTodos() {
+  const element = document.getElementById('important-todos');
+  if (!element) return;
+
+  try {
+    const response = await fetch('/api/todos');
+    if (!response.ok) throw new Error('Failed to fetch todos');
+
+    const todos = await response.json();
+    const importantTodos = todos.filter(isTodoImportant);
+
+    dispatchTodosLoaded(todos);
+
+    element.innerHTML = '';
+
+    if (importantTodos.length === 0) {
+      element.innerHTML = '<p class="text-gray-500">No important todos found.</p>';
+      return;
+    }
+
+    importantTodos.forEach(todo => {
+      const todoElement = createTodoElement(todo);
+      element.appendChild(todoElement);
+    });
+  } catch (error) {
+    console.error('Error loading todos: error');
+    element.innerHTML = '<p class="text-red-500 py-2">Failed to load tasks.</p>';
+  }
+}
+
+async function loadCompletedTodos() {
+  const element = document.getElementById('completed-todos');
+  if (!element) return;
+
+  try {
+    const response = await fetch('/api/todos');
+    if (!response.ok) throw new Error('Failed to fetch todos');
+
+    const todos = await response.json();
+    const importantTodos = todos.filter(isTodoCompleted);
+
+    dispatchTodosLoaded(todos);
+
+    element.innerHTML = '';
+
+    if (importantTodos.length === 0) {
+      element.innerHTML = '<p class="text-gray-500">No completed todos found.</p>';
+      return;
+    }
+
+    importantTodos.forEach(todo => {
+      const todoElement = createTodoElement(todo);
+      element.appendChild(todoElement);
+    });
+  } catch (error) {
+    console.error('Error loading todos: ', error);
+    element.innerHTML = '<p class="text-red-500 py-2">Failed to load tasks.</p>';
+  }
+}
+
+async function loadAllTodos() {
+  const element = document.getElementById('all-todos');
+  if (!element) return;
+
+  try {
+    const response = await fetch('/api/todos');
+    if (!response.ok) throw new Error('Failed to fetch todos');
+
+    const todos = await response.json();
+
+    dispatchTodosLoaded(todos);
+
+    element.innerHTML = '';
+
+    if (todos.length === 0) {
+      element.innerHTML = '<p class="text-gray-500">No completed todos found.</p>';
+      return;
+    }
+
+    todos.forEach(todo => {
+      const todoElement = createTodoElement(todo);
+      element.appendChild(todoElement);
+    })
+  } catch (error) {
+    console.error('Error loading todos: ', error);
+    element.innerHTML = '<p class="text-red-500 py-2">Failed to load tasks.</p>';
+  }
+}
+
+async function renderCount() {
+  try {
+    const response = await fetch('/api/todos');
+    if (!response.ok) return;
+
+    const todos = await response.json();
+
+    const importantTodos = todos.filter(isTodoImportant);
+    const todayTodos = todos.filter(isTodoDueToday);
+    const completedTodos = todos.filter(isTodoCompleted);
+
+    const importantCount = document.getElementById('important-count');
+    if (importantCount) {
+      importantCount.innerHTML = `(${importantTodos.length})`;
+    }
+
+    const todayCount = document.getElementById('today-count');
+    if (todayCount) {
+      todayCount.textContent = `(${todayTodos.length})`;
+    }
+
+    const allCount = document.getElementById('todos-count');
+    if (allCount) {
+      allCount.textContent = `(${todos.length})`;
+    }
+
+    const completedCount = document.getElementById('completed-count');
+    if (completedCount) {
+      completedCount.textContent = `(${completedTodos.length})`;
+    }
+  } catch (error) {
+    console.error('Error in renderCount:', error);
+  }
 }
 
 function getCurrentView() {
@@ -207,16 +375,31 @@ async function renderDashboard() {
   switch (currentView) {
     case 'today':
       main.innerHTML = renderTodayLayout();
-      const dueDateInput = document.getElementById('task-date');
-      if (dueDateInput) {
-        dueDateInput.value = getTodayDateString();
-      }
       break;
     case 'home':
+      main.innerHTML = renderHomeLayout();
+      break;
+    case 'important':
+      main.innerHTML = renderImportantLayout();
+      await loadImportantTodos();
+      break;
+    case 'completed':
+      main.innerHTML = renderCompletedLayout();
+      await loadCompletedTodos();
+      break;
+    case 'all':
+      main.innerHTML = renderAllLayout();
+      await loadAllTodos();
+      break;
+    case 'calendar':
+      main.innerHTML = renderCalendarLayout();
+      break;
     default:
       main.innerHTML = renderHomeLayout();
       break;
   }
+
+  syncAddTaskModalDate();
 
   if (typeof window.initCalendar === 'function') {
     window.initCalendar();
@@ -224,10 +407,11 @@ async function renderDashboard() {
 
   updateShowDate();
   await loadDashboardTodos();
+  await renderCount();
 }
 
 function renderHomeLayout() {
-  return `
+  return /*html*/`
     <div class="grid grid-cols-1 lg:grid-cols-2 gap-8 w-full">
       <!-- Section 1: Todos -->
       <div class="w-full flex flex-col items-start justify-start gap-6">
@@ -250,12 +434,12 @@ function renderHomeLayout() {
               <p class="text-xs text-gray-500 dark:text-gray-400 font-medium">Monthly Overview</p>
             </div>
             <div class="flex items-center gap-1 bg-gray-100 dark:bg-[#0c1425] p-1 rounded-xl">
-              <button id="prev-month-btn" aria-label="Previous month" class="p-1.5 text-gray-600 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white rounded-lg hover:bg-white dark:hover:bg-slate-800 transition-all">
+              <button id="prev-month-btn" aria-label="Previous month" class="cursor-pointer p-1.5 text-gray-600 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white rounded-lg hover:bg-white dark:hover:bg-slate-800 transition-all">
                 <svg xmlns="http://www.w3.org/2000/svg" class="size-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                   <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7" />
                 </svg>
               </button>
-              <button id="next-month-btn" aria-label="Next month" class="p-1.5 text-gray-600 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white rounded-lg hover:bg-white dark:hover:bg-slate-800 transition-all">
+              <button id="next-month-btn" aria-label="Next month" class="cursor-pointer p-1.5 text-gray-600 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white rounded-lg hover:bg-white dark:hover:bg-slate-800 transition-all">
                 <svg xmlns="http://www.w3.org/2000/svg" class="size-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                   <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
                 </svg>
@@ -272,6 +456,8 @@ function renderHomeLayout() {
         <div class="w-full flex flex-col gap-3 p-5 rounded-2xl bg-white dark:bg-[#131f38] border border-gray-200/80 dark:border-slate-800 shadow-sm">
           <p id="selected-day-label" class="text-sm font-semibold text-gray-600 dark:text-gray-400">No Todos For Today</p>
           <div id="selected-day-todos" class="w-full flex flex-col gap-3"></div>
+          <button onclick="openAddTaskModal()"
+          class="btn btn-primary btn-outline w-full">Add Todo +</button>
         </div>
       </div>
     </div>
@@ -286,9 +472,90 @@ function renderTodayLayout() {
         <p id="show-date" class="font-semibold text-gray-500 dark:text-gray-400">"Saturday, July 25"</p>
       </div>
       <ul class="w-full flex flex-col gap-3" id="todos-list"></ul>
-      <button onclick="document.getElementById('add_task_modal').showModal()" class="btn btn-primary btn-outline w-full">Add Todo +</button>
+      <button onclick="openAddTaskModal()" class="btn btn-primary btn-outline w-full">Add Todo +</button>
     </div>
   `;
+}
+
+function renderImportantLayout() {
+  return /*html*/`
+    <div class="w-full max-w-3xl mx-auto flex flex-col gap-6 items-center justify-center">
+      <h1 class="text-3xl font-bold">Important Todos</h1>
+      <ul class="w-full flex flex-col gap-3 items-center justify-center" id="important-todos"></ul>
+    </div>
+  `
+}
+
+function renderCompletedLayout() {
+  return /*html*/`
+    <div class="w-full max-w-3xl mx-auto flex flex-col gap-6 items-center justify-center">
+      <h1 class="text-3xl font-bold">Completed Todos</h1>
+      <ul class="w-full flex flex-col gap-3 items-center justify-center" id="completed-todos"></ul>
+    </div>
+  `
+}
+
+function renderAllLayout() {
+  return /*html*/`
+    <div class="w-full max-w-3xl mx-auto flex flex-col gap-6 items-center justify-center">
+      <h1 class="text-3xl font-bold">All Todos</h1>
+      <ul class="w-full flex flex-col gap-3 items-center justify-center" id="all-todos"></ul>
+    </div>
+  `
+}
+
+function renderCalendarLayout() {
+  return /*html*/`
+    <div class="w-full flex flex-col items-start justify-start gap-6">
+      <div class="w-full flex flex-col gap-8 lg:grid lg:grid-cols-[1.7fr_1fr]">
+        <div class="w-full flex flex-col gap-5 p-5 rounded-2xl bg-white dark:bg-[#131f38] border border-gray-200/80 dark:border-slate-800 shadow-sm">
+          <div class="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+            <div>
+              <h2 class="text-3xl font-bold">Calendar</h2>
+              <p class="text-sm text-gray-500 dark:text-gray-400">Monthly overview of your todos</p>
+            </div>
+            <div class="flex items-center gap-1 bg-gray-100 dark:bg-[#0c1425] p-1 rounded-xl">
+              <button id="prev-month-btn" aria-label="Previous month" class="cursor-pointer p-2 text-gray-600 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white rounded-lg hover:bg-white dark:hover:bg-slate-800 transition-all">
+                <svg xmlns="http://www.w3.org/2000/svg" class="size-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7" />
+                </svg>
+              </button>
+              <button id="next-month-btn" aria-label="Next month" class="cursor-pointer p-2 text-gray-600 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white rounded-lg hover:bg-white dark:hover:bg-slate-800 transition-all">
+                <svg xmlns="http://www.w3.org/2000/svg" class="size-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
+                </svg>
+              </button>
+            </div>
+          </div>
+
+          <div class="flex flex-col gap-4">
+            <div class="flex items-center justify-between">
+              <h3 id="calendar-month-year" class="text-xl font-bold text-gray-900 dark:text-white">July 2026</h3>
+              <span class="text-xs text-gray-500 dark:text-gray-400 uppercase tracking-[0.2em]">Month</span>
+            </div>
+            <div class="grid grid-cols-7 text-center text-xs font-semibold text-gray-400 dark:text-gray-500">
+              <span>Su</span><span>Mo</span><span>Tu</span><span>We</span><span>Th</span><span>Fr</span><span>Sa</span>
+            </div>
+            <div id="calendar-days-grid" class="grid grid-cols-7 gap-2 text-center text-sm font-medium"></div>
+          </div>
+
+          <div class="flex items-center justify-center text-gray-600 dark:text-gray-400 text-sm">Select a day to view its todos</div>
+        </div>
+
+        <div class="w-full flex flex-col gap-4 p-5 rounded-2xl bg-white dark:bg-[#131f38] border border-gray-200/80 dark:border-slate-800 shadow-sm">
+          <div class="flex items-center justify-between gap-2">
+            <div>
+              <p id="selected-day-label" class="text-lg font-semibold text-gray-800 dark:text-gray-100">No Todos For Today</p>
+              <!-- <p class="text-sm text-gray-500 dark:text-gray-400">View tasks for the selected date.</p> -->
+            </div>
+          </div>
+          <div id="selected-day-todos" class="w-full flex flex-col gap-3"></div>
+          <button onclick="openAddTaskModal()"
+          class="btn btn-primary btn-outline w-full">Add Todo +</button>
+        </div>
+      </div>
+    </div>
+  `
 }
 
 function escapeHTML(str) {
@@ -325,6 +592,7 @@ document.addEventListener('DOMContentLoaded', () => {
       }
 
       await loadDashboardTodos();
+      await renderCount();
     } catch (error) {
       console.error('Error updating todo:', error);
       checkbox.checked = !checkbox.checked;
@@ -333,7 +601,7 @@ document.addEventListener('DOMContentLoaded', () => {
   });
 
   document.addEventListener('click', async (event) => {
-    const deleteButton = event.target.closest('.delete-btn');
+    const deleteButton = event.target.closest('[id^="delete-btn-"]');
     if (!deleteButton) return;
 
     const todoId = Number(deleteButton.dataset.id);
@@ -355,6 +623,8 @@ document.addEventListener('DOMContentLoaded', () => {
       }
 
       await loadDashboardTodos();
+      await renderDashboard();
+      await renderCount();
     } catch (error) {
       console.error('Error deleting todo:', error);
       alert(error.message || 'Failed to delete todo');
@@ -364,4 +634,6 @@ document.addEventListener('DOMContentLoaded', () => {
   loadNavbarUsername();
   loadUserLists();
   renderDashboard();
+  renderCount();
+  dayMonth();
 });
