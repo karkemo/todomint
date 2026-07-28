@@ -386,6 +386,26 @@ app.get('/api/lists', isAuthenticated, (req, res) => {
   }
 });
 
+app.post('/api/lists', isAuthenticated, (req, res) => {
+  try {
+    const userId = req.session.userId;
+    const { title } = req.body;
+    const trimmedTitle = title?.trim();
+
+    if (!trimmedTitle) {
+      return res.status(400).json({ error: 'List title is required' });
+    }
+
+    const stmt = db.prepare('INSERT INTO lists (title, user_id) VALUES (?, ?)');
+    const result = stmt.run(trimmedTitle, userId);
+
+    res.status(201).json({ id: result.lastInsertRowid, title: trimmedTitle });
+  } catch (err) {
+    console.error('Error creating list:', err);
+    res.status(500).json({ error: 'Failed to create list' });
+  }
+});
+
 app.get('/', (req, res) => {
   res.sendFile(path.join(__dirname, 'src', 'index.html'));
 });

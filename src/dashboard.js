@@ -50,6 +50,34 @@ function openAddTaskModal() {
   }
 }
 
+function openAddListModal() {
+  const modal = document.getElementById('add_list_modal');
+  if (modal) {
+    modal.showModal();
+  }
+}
+
+function getCurrentListParam() {
+  const params = new URLSearchParams(window.location.search);
+  return params.get('list');
+}
+
+function isListActive(list) {
+  return getCurrentView() === 'list' && String(getCurrentListParam()) === String(list?.id);
+}
+
+function navigateToList(list) {
+  const params = new URLSearchParams(window.location.search);
+  params.set('view', 'list');
+  params.set('list', list?.id != null ? String(list.id) : String(list?.title || ''));
+
+  const nextUrl = `${window.location.pathname}?${params.toString()}`;
+  window.history.pushState({ list: list?.id ?? list?.title ?? '' }, '', nextUrl);
+  renderDashboard();
+  loadUserLists();
+  loadDashboardLists();
+}
+
 function formatTodayDateForDisplay() {
   return new Date().toLocaleDateString('en-US', {
     weekday: 'long',
@@ -116,7 +144,39 @@ async function loadDashboardTodos() {
   }
 }
 
-async function loadUserLists() {
+async function loadDashboardLists() {
+  const listsContainer = document.getElementById('lists');
+  if (!listsContainer) return;
+
+  try {
+    const [listsResponse, todosResponse] = await Promise.all([
+      fetch('/api/lists'),
+      fetch('/api/todos')
+    ]);
+
+    if (!listsResponse.ok) throw new Error('Failed to load lists');
+    if (!todosResponse.ok) throw new Error('Failed to load todos');
+
+    const lists = await listsResponse.json();
+    const todos = await todosResponse.json();
+    listsContainer.innerHTML = '';
+
+    if (lists.length === 0) {
+      listsContainer.innerHTML = '<p class="text-sm text-gray-500">No lists yet</p>';
+      return;
+    }
+
+    lists.forEach((list) => {
+      const listElement = createListElement(list, todos);
+      listsContainer.appendChild(listElement);
+    });
+  } catch (error) {
+    console.error('Error loading lists:', error);
+    listsContainer.innerHTML = '<p class="text-red-500 py-2">Failed to load lists.</p>';
+  }
+}
+
+async function loadUserLists(selectedListId = null) {
   const selectElement = document.getElementById('task-list');
   if (!selectElement) return;
 
@@ -137,12 +197,52 @@ async function loadUserLists() {
       const option = document.createElement('option');
       option.value = list.id;
       option.textContent = list.title;
-      if (index === 0) option.selected = true;
+
+      const shouldSelect = selectedListId
+        ? Number(option.value) === Number(selectedListId)
+        : index === 0;
+
+      if (shouldSelect) option.selected = true;
       selectElement.appendChild(option);
-    })
+    });
   } catch (err) {
     console.error('Error loading lists', err);
     selectElement.innerHTML = '<option value="" disabled>No lists found</option>';
+  }
+}
+
+async function addList(event) {
+  event.preventDefault();
+
+  const form = event.currentTarget;
+  const listTitleInput = document.getElementById('list-title');
+  const modal = document.getElementById('add_list_modal');
+  const listName = listTitleInput?.value.trim();
+
+  if (!listName) return;
+
+  try {
+    const response = await fetch('/api/lists', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ title: listName })
+    });
+
+    const data = await response.json().catch(() => ({}));
+
+    if (!response.ok) {
+      throw new Error(data.error || 'Failed to create list');
+    }
+
+    form.reset();
+    if (modal) modal.close();
+    await loadUserLists(data.id);
+    await loadDashboardLists();
+    await loadDashboardTodos();
+    await renderCount();
+  } catch (error) {
+    console.error('Error creating list:', error);
+    alert(error.message || 'Failed to create list');
   }
 }
 
@@ -187,6 +287,8 @@ async function handleAddTodoSubmit(event) {
     if (modal) modal.close();
     await loadDashboardTodos();
     await loadUserLists();
+    await loadDashboardLists();
+    await loadListTodos();
     await renderCount();
   } catch (error) {
     console.error('Error creating todo:', error);
@@ -194,6 +296,7 @@ async function handleAddTodoSubmit(event) {
   }
 }
 
+// create new todo
 function createTodoElement(todo) {
   const li = document.createElement('li');
   li.className = 'w-full p-4 rounded-xl bg-white dark:bg-[#131f38] border border-gray-200/80 dark:border-slate-800 shadow-sm hover:shadow-md transition-all flex items-center justify-between group';
@@ -223,6 +326,54 @@ function createTodoElement(todo) {
   return li;
 }
 
+// create new list
+function createListElement(list, todos = []) {
+  const li = document.createElement('li');
+  li.className = 'w-full';
+
+  const isActive = isListActive(list);
+  const button = document.createElement('button');
+  button.type = 'button';
+
+  const activeClasses = [
+    'bg-[#605dff]/15',
+    'text-slate-900',
+    'font-semibold',
+    'dark:bg-[#605dff]/25',
+    'dark:text-white'
+  ];
+
+  button.className = `btn btn-primary w-full sidebar-list-btn flex items-center justify-between gap-2 transition-colors duration-150 ${
+    isActive ? activeClasses.join(' ') : ''
+  }`;
+
+  const icon = document.createElement('img');
+  icon.src = '/assets/list.svg';
+  icon.alt = 'List icon';
+  icon.className = 'size-6 shrink-0';
+
+  const label = document.createElement('span');
+  label.className = 'flex-1 text-left truncate';
+  label.textContent = list.title;
+
+  const countBadge = document.createElement('span');
+  countBadge.className = 'text-xs font-normal opacity-70 shrink-0 ml-auto';
+  const todoCount = todos.filter((todo) => String(todo.list_id) === String(list.id)).length;
+  countBadge.textContent = `(${todoCount})`;
+
+  button.appendChild(icon);
+  button.appendChild(label);
+  button.appendChild(countBadge);
+
+  button.addEventListener('click', () => {
+    navigateToList(list);
+  });
+
+  li.appendChild(button);
+  return li;
+}
+
+// returns: day/month
 function dayMonth() {
   const today = new Date();
   const month = today.getMonth() + 1
@@ -233,6 +384,7 @@ function dayMonth() {
   }
 }
 
+// load important todos only
 async function loadImportantTodos() {
   const element = document.getElementById('important-todos');
   if (!element) return;
@@ -263,6 +415,7 @@ async function loadImportantTodos() {
   }
 }
 
+// load completed todos only
 async function loadCompletedTodos() {
   const element = document.getElementById('completed-todos');
   if (!element) return;
@@ -293,6 +446,40 @@ async function loadCompletedTodos() {
   }
 }
 
+// load todos of a specific list
+async function loadListTodos() {
+  const element = document.getElementById('todos-list-only');
+  if (!element) return;
+
+  try {
+    const response = await fetch('/api/todos');
+    if (!response.ok) throw new Error('Failed to fetch todos');
+
+    const todos = await response.json();
+    const currentListId = getCurrentListID();
+
+    if (currentListId === null) return;
+
+    dispatchTodosLoaded(todos);
+    element.innerHTML = '';
+    const listTodos = todos.filter(todo => String(todo.list_id) === String(currentListId));
+
+    if (listTodos.length === 0) {
+      element.innerHTML = '<p class="text-gray-500">No todos found in this list.</p>';
+      return;
+    }
+
+    listTodos.forEach(todo => {
+      const todoElement = createTodoElement(todo);
+      element.appendChild(todoElement);
+    });
+  } catch (error) {
+    console.error('Error loading todos: ', error);
+    element.innerHTML = '<p class="text-red-500 py-2">Failed to load tasks.</p>';
+  }
+}
+
+// load any todo
 async function loadAllTodos() {
   const element = document.getElementById('all-todos');
   if (!element) return;
@@ -362,9 +549,24 @@ function getCurrentView() {
   return urlParams.get('view') || 'home';
 }
 
+function getCurrentListID() {
+  const urlParams = new URLSearchParams(window.location.search);
+  const listParam = urlParams.get('list');
+  return listParam ? listParam : null;
+}
+
 function navigateTo(viewName) {
-  window.history.pushState({ view: viewName }, '', `${window.location.pathname}?view=${viewName}`);
+  const params = new URLSearchParams(window.location.search);
+  params.set('view', viewName);
+
+  if (viewName !== 'list') {
+    params.delete('list');
+  }
+
+  const nextUrl = `${window.location.pathname}?${params.toString()}`;
+  window.history.pushState({ view: viewName }, '', nextUrl);
   renderDashboard();
+  loadDashboardLists();
 }
 
 async function renderDashboard() {
@@ -393,6 +595,10 @@ async function renderDashboard() {
       break;
     case 'calendar':
       main.innerHTML = renderCalendarLayout();
+      break;
+    case 'list':
+      main.innerHTML = renderListLayout();
+      await loadListTodos();
       break;
     default:
       main.innerHTML = renderHomeLayout();
@@ -558,6 +764,16 @@ function renderCalendarLayout() {
   `
 }
 
+function renderListLayout() {
+  return /*html*/`
+    <div class="w-full max-w-3xl mx-auto flex flex-col gap-6 items-center justify-center">
+      <h1 id="list-name" class="text-3xl font-bold">List name</h1>
+      <ul class="w-full flex flex-col gap-3 items-center justify-center" id="todos-list-only"></ul>
+      <button onclick="openAddTaskModal()" class="btn btn-primary btn-outline w-full">Add Todo +</button>
+    </div>
+  `
+}
+
 function escapeHTML(str) {
   return str.replace(/[&<>'"]/g,
     tag => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', "'": '&#39;', '"': '&quot;' }[tag] || tag)
@@ -570,6 +786,11 @@ document.addEventListener('DOMContentLoaded', () => {
   const addTaskForm = document.getElementById('add-task-form');
   if (addTaskForm) {
     addTaskForm.addEventListener('submit', handleAddTodoSubmit);
+  }
+
+  const addListForm = document.getElementById('add-list-form');
+  if (addListForm) {
+    addListForm.addEventListener('submit', addList);
   }
 
   document.addEventListener('change', async (event) => {
@@ -623,7 +844,9 @@ document.addEventListener('DOMContentLoaded', () => {
       }
 
       await loadDashboardTodos();
+      await loadDashboardLists();
       await renderDashboard();
+      await loadListTodos();
       await renderCount();
     } catch (error) {
       console.error('Error deleting todo:', error);
@@ -633,6 +856,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
   loadNavbarUsername();
   loadUserLists();
+  loadDashboardLists();
   renderDashboard();
   renderCount();
   dayMonth();

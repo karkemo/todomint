@@ -165,8 +165,9 @@
         </div>
         <div class="flex flex-col items-center justify-center gap-2 w-full">
           <p>My Lists</p>
-          <button class="btn btn-primary w-full">Default</button>
-          <button class="btn btn-primary btn-outline w-full">New List +</button>
+          <!-- <button class="btn btn-primary w-full">Default</button> -->
+          <ul id="lists" class="w-full gap-2 flex flex-col"></ul>
+          <button type="button" onclick="openAddListModal()" class="btn btn-primary btn-outline w-full">New List +</button>
         </div>
       </div>
       <!-- main -->
@@ -179,7 +180,7 @@
   <script src="/theme_changer.js"></script>
 </body>
 
-<!-- Add Task Modal -->
+<!-- Add todo Modal -->
 <dialog id="add_task_modal"
   class="m-auto backdrop:bg-black/60 p-0 rounded-2xl bg-transparent border-0 max-w-md w-[90%] outline-none">
   <div
@@ -248,6 +249,51 @@
         <button type="submit"
           class="px-5 py-2 rounded-xl text-sm font-medium bg-blue-600 hover:bg-blue-700 text-white shadow-md shadow-blue-500/20 active:scale-95 transition-all cursor-pointer">
           Save Task
+        </button>
+      </div>
+
+    </form>
+  </div>
+</dialog>
+
+<!-- add list modal -->
+<dialog id="add_list_modal"
+  class="m-auto backdrop:bg-black/60 p-0 rounded-2xl bg-transparent border-0 max-w-md w-[90%] outline-none">
+  <div
+    class="w-full p-6 bg-white dark:bg-[#131f38] text-gray-800 dark:text-gray-100 rounded-2xl shadow-2xl border border-gray-200/80 dark:border-slate-800 font-sans">
+
+    <!-- Modal Header -->
+    <div class="flex items-center justify-between pb-4 border-b border-gray-100 dark:border-slate-800 mb-5">
+      <h3 class="text-xl font-bold font-audiowide">Add Todo</h3>
+      <form method="dialog">
+        <button
+          class="text-gray-400 hover:text-gray-600 dark:hover:text-gray-200 transition-colors cursor-pointer p-1 rounded-lg hover:bg-gray-100 dark:hover:bg-slate-800">
+          <svg xmlns="http://www.w3.org/2000/svg" class="size-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+          </svg>
+        </button>
+      </form>
+    </div>
+
+    <!-- List Form -->
+    <form id="add-list-form" class="flex flex-col gap-4">
+
+      <!-- List Title Input -->
+      <div class="flex flex-col gap-1.5">
+        <label for="list-title" class="text-xs font-semibold text-gray-500 dark:text-gray-400">Todo Title</label>
+        <input type="text" id="list-title" name="title" required placeholder="Enter Todo..."
+          class="w-full px-3.5 py-2.5 rounded-xl bg-gray-50 dark:bg-[#0c1425] border border-gray-200 dark:border-slate-700 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 transition-all placeholder:text-gray-400" />
+      </div>
+
+      <!-- Modal Actions -->
+      <div class="flex items-center justify-end gap-3 mt-4 pt-3 border-t border-gray-100 dark:border-slate-800">
+        <button type="button" onclick="document.getElementById('add_list_modal').close()"
+          class="px-4 py-2 rounded-xl text-sm font-medium text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-slate-800 transition-colors cursor-pointer">
+          Cancel
+        </button>
+        <button type="submit"
+          class="px-5 py-2 rounded-xl text-sm font-medium bg-blue-600 hover:bg-blue-700 text-white shadow-md shadow-blue-500/20 active:scale-95 transition-all cursor-pointer">
+          Add List
         </button>
       </div>
 
