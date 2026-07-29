@@ -406,6 +406,62 @@ app.post('/api/lists', isAuthenticated, (req, res) => {
   }
 });
 
+app.delete('/api/lists/:id', isAuthenticated, (req, res) => {
+  const listId = Number(req.params.id);
+
+  if (Number.isNaN(listId)) {
+    return res.status(400).json({ error: 'Invalid list id' });
+  }
+
+  try {
+    const checkList = db.prepare('SELECT id FROM lists WHERE id = ? AND user_id = ?');
+    const listExists = checkList.get(listId, req.session.userId);
+
+    if (!listExists) {
+      return res.status(404).json({ error: 'List not found' });
+    }
+
+    const deleteList = db.prepare('DELETE FROM lists WHERE id = ?');
+    deleteList.run(listId);
+
+    res.json({ success: true, id: listId });
+  } catch (err) {
+    console.error('Error deleting list:', err.message);
+    res.status(500).json({ error: 'Failed to delete list' });
+  }
+});
+
+app.patch('/api/lists/:id', isAuthenticated, (req, res) => {
+  const listId = Number(req.params.id);
+  const { title } = req.body;
+  const trimmedTitle = title?.trim();
+
+  if (Number.isNaN(listId)) {
+    return res.status(400).json({ error: 'Invalid list id' });
+  }
+
+  if (!trimmedTitle) {
+    return res.status(400).json({ error: 'List title is required' });
+  }
+
+  try {
+    const checkList = db.prepare('SELECT id FROM lists WHERE id = ? AND user_id = ?');
+    const listExists = checkList.get(listId, req.session.userId);
+
+    if (!listExists) {
+      return res.status(404).json({ error: 'List not found or unauthorized' });
+    }
+
+    const updateList = db.prepare('UPDATE lists SET title = ? WHERE id = ?');
+    updateList.run(trimmedTitle, listId);
+
+    res.json({ success: true, id: listId, title: trimmedTitle });
+  } catch (err) {
+    console.error('Error updating list:', err.message);
+    res.status(500).json({ error: 'Failed to update list' });
+  }
+})
+
 app.get('/', (req, res) => {
   res.sendFile(path.join(__dirname, 'src', 'index.html'));
 });

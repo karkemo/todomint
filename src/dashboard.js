@@ -323,8 +323,61 @@ function createTodoElement(todo) {
     </div>
   `;
 
+  // on right click
+  li.addEventListener('contextmenu', (event) => {
+    event.preventDefault();
+    showTodoContextMenu(event, todo);
+  })
+
   return li;
 }
+
+function showTodoContextMenu(event, todo) {
+  const menu = document.getElementById('todo-menu');
+  if (!menu) return;
+
+  const todoId = todo.id ?? todo._id;
+  menu.dataset.selectedTodoId = todoId;
+  menu.dataset.selectedTodoTitle = todo.title;
+
+  menu.classList.remove('hidden');
+
+  const menuWidth = menu.offsetWidth;
+  const menuHeight = menu.offsetHeight;
+  const windowWidth = window.innerWidth;
+  const windowHeight = window.innerHeight;
+
+  let left = event.clientX;
+  let top = event.clientY;
+
+  if (left + menuWidth > windowWidth) {
+    left = windowWidth - menuWidth - 10;
+  }
+  if (top + menuHeight > windowHeight) {
+    top = windowHeight - menuHeight - 10;
+  }
+
+  menu.style.left = `${left}px`;
+  menu.style.top = `${top}px`;
+}
+
+function hideTodoContextMenu() {
+  const menu = document.getElementById('todo-menu');
+  if (menu && !menu.classList.contains('hidden')) {
+    menu.classList.add('hidden');
+  }
+}
+
+document.addEventListener('keydown', (e) => {
+  if (e.key === 'Escape') hideTodoContextMenu();
+});
+
+document.addEventListener('click', (e) => {
+  const menu = document.getElementById('todo-menu');
+  if (menu && !menu.contains(e.target)) {
+    hideTodoContextMenu();
+  }
+});
 
 // create new list
 function createListElement(list, todos = []) {
@@ -343,19 +396,27 @@ function createListElement(list, todos = []) {
     'dark:text-white'
   ];
 
-  button.className = `btn btn-primary w-full sidebar-list-btn flex items-center justify-between gap-2 transition-colors duration-150 ${
-    isActive ? activeClasses.join(' ') : ''
-  }`;
+  button.className = `btn btn-primary w-full sidebar-list-btn flex items-center justify-between gap-2 transition-colors duration-150 ${isActive ? activeClasses.join(' ') : ''
+    }`;
 
-  const icon = document.createElement('img');
-  icon.src = '/assets/list.svg';
-  icon.alt = 'List icon';
-  icon.className = 'size-6 shrink-0';
+  // list icon
+  const svgNS = 'http://www.w3.org/2000/svg';
+  const icon = document.createElementNS(svgNS, 'svg');
+  icon.setAttribute('height', '24px');
+  icon.setAttribute('width', '24px');
+  icon.setAttribute('viewBox', '0 -960 960 960');
+  icon.setAttribute('class', 'size-5 shrink-0 fill-current opacity-80');
 
+  const path = document.createElementNS(svgNS, 'path');
+  path.setAttribute('d', 'M280-600v-80h560v80H280Zm0 160v-80h560v80H280Zm0 160v-80h560v80H280ZM160-600q-17 0-28.5-11.5T120-640q0-17 11.5-28.5T160-680q17 0 28.5 11.5T200-640q0 17-11.5 28.5T160-600Zm0 160q-17 0-28.5-11.5T120-480q0-17 11.5-28.5T160-520q17 0 28.5 11.5T200-480q0 17-11.5 28.5T160-440Zm0 160q-17 0-28.5-11.5T120-320q0-17 11.5-28.5T160-360q17 0 28.5 11.5T200-320q0 17-11.5 28.5T160-280Z');
+  icon.appendChild(path);
+
+  // list name
   const label = document.createElement('span');
   label.className = 'flex-1 text-left truncate';
   label.textContent = list.title;
 
+  // list's todos number
   const countBadge = document.createElement('span');
   countBadge.className = 'text-xs font-normal opacity-70 shrink-0 ml-auto';
   const todoCount = todos.filter((todo) => String(todo.list_id) === String(list.id)).length;
@@ -369,9 +430,144 @@ function createListElement(list, todos = []) {
     navigateToList(list);
   });
 
+  // on right click
+  button.addEventListener('contextmenu', (event) => {
+    event.preventDefault();
+    showListContextMenu(event, list);
+  })
+
   li.appendChild(button);
   return li;
 }
+
+// show list context menu
+function showListContextMenu(event, list) {
+  const menu = document.getElementById('list-menu');
+  if (!menu) return;
+
+  const listId = list.id ?? list._id;
+  menu.dataset.selectedListId = listId;
+  menu.dataset.selectedListTitle = list.title;
+  menu.classList.remove('hidden');
+  const menuWidth = menu.offsetWidth;
+  const menuHeight = menu.offsetHeight;
+  const windowWidth = window.innerWidth;
+  const windowHeight = window.innerHeight;
+
+  let left = event.clientX;
+  let top = event.clientY;
+
+  if (left + menuWidth > windowWidth) {
+    left = windowWidth - menuWidth - 10;
+  }
+  if (top + menuHeight > windowHeight) {
+    top = windowHeight - menuHeight - 10;
+  }
+
+  menu.style.left = `${left}px`;
+  menu.style.top = `${top}px`;
+}
+
+// hide list context menu
+function hideListContextMenu() {
+  const menu = document.getElementById('list-menu');
+  if (menu && !menu.classList.contains('hidden')) {
+    menu.classList.add('hidden');
+  }
+}
+
+// hide context menu if clicked outside
+document.addEventListener('click', (e) => {
+  const menu = document.getElementById('list-menu');
+  if (menu && !menu.contains(e.target)) {
+    hideListContextMenu();
+  }
+});
+
+// hide context menu if clicked esc
+document.addEventListener('keydown', (e) => {
+  if (e.key === 'Escape') hideListContextMenu();
+});
+
+async function deleteList(listId) {
+  if (!listId) return;
+
+  const confirmed = window.confirm('Are you sure you want to delete this list and its todos?');
+  if (!confirmed) return;
+
+  try {
+    const response = await fetch(`/api/lists/${listId}`, {
+      method: 'DELETE'
+    });
+
+    if (!response.ok) {
+      const errorData = await response.json().catch(() => ({}));
+      throw new Error(errorData.error || 'Failed to delete list');
+    }
+
+    if (getCurrentView() === 'list' && String(getCurrentListID()) === String(listId)) {
+      navigateTo('home');
+    } else {
+      await renderDashboard();
+    }
+
+    await loadUserLists();
+    await loadDashboardLists();
+    await loadDashboardTodos();
+    await renderCount();
+  } catch (error) {
+    console.error('Error deleting list:', error);
+    alert(error.message || 'Failed to delete list');
+  }
+}
+
+// Open rename list modal and prefill data
+function openRenameListModal(listId, currentTitle) {
+  const modal = document.getElementById('rename_list_modal');
+  const titleInput = document.getElementById('list-title-edit');
+  const idInput = document.getElementById('rename-list-id');
+
+  if (titleInput && idInput && modal) {
+    idInput.value = listId;
+    titleInput.value = currentTitle;
+    modal.showModal();
+  }
+}
+
+async function handleRenameListSubmit(event) {
+  event.preventDefault();
+
+  const modal = document.getElementById('rename_list_modal');
+  const listId = document.getElementById('rename-list-id')?.value;
+  const newTitle = document.getElementById('list-title-edit')?.value.trim();
+
+  if (!listId || !newTitle) return;
+
+  try {
+    const response = await fetch(`/api/lists/${listId}`, {
+      method: 'PATCH',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ title: newTitle })
+    });
+
+    const data = await response.json().catch(() => ({}));
+
+    if (!response.ok) {
+      throw new Error(data.error || 'Failed to rename list');
+    }
+
+    if (modal) modal.close();
+
+    await loadUserLists();
+    await loadDashboardLists();
+    await renderDashboard();
+  } catch (error) {
+    console.error('Error renaming list:', error);
+    alert(error.message || 'Failed to rename list');
+  }
+}
+
+
 
 // returns: day/month
 function dayMonth() {
@@ -449,19 +645,29 @@ async function loadCompletedTodos() {
 // load todos of a specific list
 async function loadListTodos() {
   const element = document.getElementById('todos-list-only');
-  if (!element) return;
+  const title = document.getElementById('list-name');
+  if (!element || !title) return;
+
+  const currentListId = getCurrentListID();
+  if (currentListId === null) return;
 
   try {
-    const response = await fetch('/api/todos');
-    if (!response.ok) throw new Error('Failed to fetch todos');
+    const [listsRes, todosRes] = await Promise.all([
+      fetch('/api/lists'),
+      fetch('/api/todos')
+    ]);
 
-    const todos = await response.json();
-    const currentListId = getCurrentListID();
+    if (!listsRes.ok || !todosRes.ok) throw new Error('Failed to fetch data');
 
-    if (currentListId === null) return;
+    const lists = await listsRes.json();
+    const todos = await todosRes.json();
+
+    const currentList = lists.find(l => String(l.id ?? l._id) === String(currentListId));
+    title.textContent = currentList ? currentList.title : 'List';
 
     dispatchTodosLoaded(todos);
     element.innerHTML = '';
+
     const listTodos = todos.filter(todo => String(todo.list_id) === String(currentListId));
 
     if (listTodos.length === 0) {
@@ -791,6 +997,50 @@ document.addEventListener('DOMContentLoaded', () => {
   const addListForm = document.getElementById('add-list-form');
   if (addListForm) {
     addListForm.addEventListener('submit', addList);
+  }
+
+  document.getElementById('rename-todo-btn')?.addEventListener('click', () => {
+    const menu = document.getElementById('todo-menu');
+    const todoId = menu?.dataset.selectedTodoId;
+
+    hideTodoContextMenu();
+    if (todoId) {
+      console.log(`Rename todo: ${todoId}`);
+    }
+  });
+
+  document.getElementById('delete-todo-btn')?.addEventListener('click', () => {
+    const menu = document.getElementById('todo-menu');
+    const todoId = menu?.dataset.selectedTodoId;
+
+    hideTodoContextMenu();
+    if (todoId) {
+      console.log(`Delete todo: ${todoId}`);
+    }
+  });
+
+  document.getElementById('delete-list-btn')?.addEventListener('click', async () => {
+    const menu = document.getElementById('list-menu');
+    const listId = menu?.dataset.selectedListId;
+    hideListContextMenu();
+    await deleteList(listId);
+  });
+
+  document.getElementById('rename-list-btn')?.addEventListener('click', () => {
+    const menu = document.getElementById('list-menu');
+    const listId = menu?.dataset.selectedListId;
+    const currentTitle = menu?.dataset.selectedListTitle;
+
+    hideListContextMenu();
+    if (listId && currentTitle) {
+      openRenameListModal(listId, currentTitle);
+    }
+  });
+
+  // 2. Attach submit handler for the rename list modal form
+  const renameListForm = document.getElementById('rename-list-form');
+  if (renameListForm) {
+    renameListForm.addEventListener('submit', handleRenameListSubmit);
   }
 
   document.addEventListener('change', async (event) => {
