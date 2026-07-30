@@ -980,6 +980,105 @@ function renderListLayout() {
   `
 }
 
+function openRenameTodoModal(todoId, currentTitle) {
+  const modal = document.getElementById('rename_todo_modal');
+  const titleInput = document.getElementById('todo-title-edit');
+  const idInput = document.getElementById('rename-todo-id');
+
+  if (titleInput && idInput && modal) {
+    idInput.value = todoId;
+    titleInput.value = currentTitle;
+    modal.showModal();
+  }
+}
+
+async function handleRenameTodoSubmit(event) {
+  event.preventDefault();
+
+  const modal = document.getElementById('rename_todo_modal');
+  const todoId = document.getElementById('rename-todo-id')?.value;
+  const newTitle = document.getElementById('todo-title-edit')?.value.trim();
+
+  if (!todoId || !newTitle) return;
+
+  try {
+    const response = await fetch(`/api/todos/${todoId}/details`, {
+      method: 'PATCH',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ title: newTitle })
+    });
+
+    const data = await response.json().catch(() => ({}));
+
+    if (!response.ok) {
+      throw new Error(data.error || 'Failed to rename todo');
+    }
+
+    if (modal) modal.close();
+
+    await loadDashboardTodos();
+    await loadListTodos();
+    await renderDashboard();
+  } catch (error) {
+    console.error('Error renaming todo:', error);
+    alert(error.message || 'Failed to rename todo');
+  }
+}
+
+// Update todo title or priority
+async function updateTodoDetails(todoId, payload) {
+  try {
+    const response = await fetch(`/api/todos/${todoId}/details`, {
+      method: 'PATCH',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(payload)
+    });
+
+    if (!response.ok) {
+      const errorData = await response.json().catch(() => ({}));
+      throw new Error(errorData.error || 'Failed to update todo');
+    }
+
+    await reloadDashboardState();
+  } catch (error) {
+    console.error('Error updating todo:', error);
+    alert(error.message || 'Failed to update todo');
+  }
+}
+
+// Delete todo item
+async function deleteTodoItem(todoId) {
+  if (!todoId) return;
+
+  const confirmed = window.confirm('Are you sure you want to delete this todo?');
+  if (!confirmed) return;
+
+  try {
+    const response = await fetch(`/api/todos/${todoId}`, {
+      method: 'DELETE'
+    });
+
+    if (!response.ok) {
+      const errorData = await response.json().catch(() => ({}));
+      throw new Error(errorData.error || 'Failed to delete todo');
+    }
+
+    await reloadDashboardState();
+  } catch (error) {
+    console.error('Error deleting todo:', error);
+    alert(error.message || 'Failed to delete todo');
+  }
+}
+
+// Refresh all dashboard containers safely
+async function reloadDashboardState() {
+  await loadDashboardTodos();
+  await loadDashboardLists();
+  await renderDashboard();
+  await loadListTodos();
+  await renderCount();
+}
+
 function escapeHTML(str) {
   return str.replace(/[&<>'"]/g,
     tag => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', "'": '&#39;', '"': '&quot;' }[tag] || tag)
@@ -999,23 +1098,48 @@ document.addEventListener('DOMContentLoaded', () => {
     addListForm.addEventListener('submit', addList);
   }
 
-  document.getElementById('rename-todo-btn')?.addEventListener('click', () => {
+  document.getElementById('rename-todo-btn')?.addEventListener('click', async () => {
     const menu = document.getElementById('todo-menu');
-    const todoId = menu?.dataset.selectedTodoId;
+    const todoId = Number(menu?.dataset.selectedTodoId);
+    const currentTitle = menu?.dataset.selectedTodoTitle || '';
 
     hideTodoContextMenu();
-    if (todoId) {
-      console.log(`Rename todo: ${todoId}`);
+
+    if (todoId && currentTitle) {
+      openRenameTodoModal(todoId, currentTitle);
     }
   });
 
-  document.getElementById('delete-todo-btn')?.addEventListener('click', () => {
+  const renameTodoForm = document.getElementById('rename-todo-form');
+  if (renameTodoForm) {
+    renameTodoForm.addEventListener('submit', handleRenameTodoSubmit);
+  }
+
+  // 2. Change Priority Submenu Actions
+  const priorityButtons = document.querySelectorAll('#todo-menu [data-priority]');
+  priorityButtons.forEach((btn) => {
+    btn.addEventListener('click', async (e) => {
+      const priority = e.currentTarget.dataset.priority;
+      const menu = document.getElementById('todo-menu');
+      const todoId = Number(menu?.dataset.selectedTodoId);
+
+      hideTodoContextMenu();
+
+      if (todoId && priority) {
+        await updateTodoDetails(todoId, { priority });
+      }
+    });
+  });
+
+  // 3. Delete Todo Context Menu Action
+  document.getElementById('delete-todo-btn')?.addEventListener('click', async () => {
     const menu = document.getElementById('todo-menu');
-    const todoId = menu?.dataset.selectedTodoId;
+    const todoId = Number(menu?.dataset.selectedTodoId);
 
     hideTodoContextMenu();
+
     if (todoId) {
-      console.log(`Delete todo: ${todoId}`);
+      await deleteTodoItem(todoId);
     }
   });
 

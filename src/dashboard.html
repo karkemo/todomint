@@ -379,32 +379,111 @@
   </button>
 </div>
 
+<!-- rename todo modal -->
+<dialog id="rename_todo_modal"
+  class="m-auto backdrop:bg-black/60 p-0 rounded-2xl bg-transparent border-0 max-w-md w-[90%] outline-none">
+  <div
+    class="w-full p-6 bg-white dark:bg-[#131f38] text-gray-800 dark:text-gray-100 rounded-2xl shadow-2xl border border-gray-200/80 dark:border-slate-800 font-sans">
+
+    <!-- Modal Header -->
+    <div class="flex items-center justify-between pb-4 border-b border-gray-100 dark:border-slate-800 mb-5">
+      <h3 class="text-xl font-bold font-audiowide">Rename List</h3>
+      <form method="dialog">
+        <button
+          class="text-gray-400 hover:text-gray-600 dark:hover:text-gray-200 transition-colors cursor-pointer p-1 rounded-lg hover:bg-gray-100 dark:hover:bg-slate-800">
+          <svg xmlns="http://www.w3.org/2000/svg" class="size-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+          </svg>
+        </button>
+      </form>
+    </div>
+
+    <!-- List Form -->
+    <form id="rename-todo-form" class="flex flex-col gap-4">
+
+      <!-- Hidden Input for List ID -->
+      <input type="hidden" id="rename-todo-id" name="id" />
+
+      <!-- List Title Input -->
+      <div class="flex flex-col gap-1.5">
+        <label for="todo-title-edit" class="text-xs font-semibold text-gray-500 dark:text-gray-400">Todo Title</label>
+        <input type="text" id="todo-title-edit" name="title" required placeholder="Enter new Todo title..."
+          class="w-full px-3.5 py-2.5 rounded-xl bg-gray-50 dark:bg-[#0c1425] border border-gray-200 dark:border-slate-700 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 transition-all placeholder:text-gray-400" />
+      </div>
+
+      <!-- Modal Actions -->
+      <div class="flex items-center justify-end gap-3 mt-4 pt-3 border-t border-gray-100 dark:border-slate-800">
+        <button type="button" onclick="document.getElementById('rename_todo_modal').close()"
+          class="px-4 py-2 rounded-xl text-sm font-medium text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-slate-800 transition-colors cursor-pointer">
+          Cancel
+        </button>
+        <button type="submit"
+          class="px-5 py-2 rounded-xl text-sm font-medium bg-blue-600 hover:bg-blue-700 text-white shadow-md shadow-blue-500/20 active:scale-95 transition-all cursor-pointer">
+          Save Changes
+        </button>
+      </div>
+
+    </form>
+  </div>
+</dialog>
+
 <!-- todo button context menu -->
 <div id="todo-menu"
-  class="fixed hidden z-1000 min-w-40 bg-white dark:bg-[#131f38] text-gray-700 dark:text-gray-200 border border-gray-200 dark:border-slate-800 rounded-xl shadow-xl py-1.5 font-sans transition-all duration-100">
+  class="fixed hidden z-1000 min-w-48 bg-white dark:bg-[#131f38] text-gray-700 dark:text-gray-200 border border-gray-200 dark:border-slate-800 rounded-xl shadow-xl py-1.5 font-sans transition-all duration-100">
+  <!-- Rename Button -->
   <button id="rename-todo-btn" type="button"
-    class="w-full text-left px-4 py-2 text-sm flex items-center gap-2 hover:bg-gray-100 dark:hover:bg-slate-800 hover:text-gray-900 dark:hover:text-white transition-colors cursor-pointer">
-    <svg xmlns="http://www.w3.org/2000/svg" class="size-4 opacity-70" fill="none" viewBox="0 0 24 24"
-      stroke="currentColor">
+    class="w-full text-left px-3.5 py-2 text-sm flex items-center gap-2.5 hover:bg-gray-100 dark:hover:bg-slate-800/70 hover:text-gray-900 dark:hover:text-white transition-colors cursor-pointer rounded-lg mx-auto max-w-[calc(100%-0.75rem)]">
+    <svg xmlns="http://www.w3.org/2000/svg" class="size-4 opacity-75 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
       <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
         d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
     </svg>
     Rename Todo
   </button>
   <div class="my-1 border-t border-gray-100 dark:border-slate-800"></div>
-  <button id="priority-change-btn" type="button"
-    class="w-full text-left px-4 py-2 text-sm flex items-center gap-2 hover:bg-gray-100 dark:hover:bg-slate-800 hover:text-gray-900 dark:hover:text-white transition-colors cursor-pointer">
-    <svg xmlns="http://www.w3.org/2000/svg" class="size-4 opacity-70" viewBox="0 -960 960 960" fill="#e3e3e3">
-      <path
-        d="m354-287 126-76 126 77-33-144 111-96-146-13-58-136-58 135-146 13 111 97-33 143ZM233-120l65-281L80-590l288-25 112-265 112 265 288 25-218 189 65 281-247-149-247 149Zm247-350Z" />
-    </svg>
-    Change Priority
-  </button>
+  <div class="dropdown dropdown-left dropdown-hover w-full">
+    <div tabindex="0" role="button"
+      class="w-full text-left px-3.5 py-2 text-sm flex items-center justify-between hover:bg-gray-100 dark:hover:bg-slate-800/70 hover:text-gray-900 dark:hover:text-white transition-colors cursor-pointer rounded-lg mx-auto max-w-[calc(100%-0.75rem)]">
+      <div class="flex items-center gap-2.5">
+        <svg xmlns="http://www.w3.org/2000/svg" class="size-4 opacity-75 shrink-0 fill-current" viewBox="0 -960 960 960">
+          <path d="m354-287 126-76 126 77-33-144 111-96-146-13-58-136-58 135-146 13 111 97-33 143ZM233-120l65-281L80-590l288-25 112-265 112 265 288 25-218 189 65 281-247-149-247 149Zm247-350Z" />
+        </svg>
+        Change Priority
+      </div>
+      <!-- Submenu Indicator Arrow -->
+      <svg xmlns="http://www.w3.org/2000/svg" class="size-3.5 opacity-50" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7" />
+      </svg>
+    </div>
+
+    <!-- Submenu Content -->
+    <ul tabindex="0" class="dropdown-content menu z-1010 p-1.5 shadow-2xl bg-white dark:bg-[#131f38] border border-gray-200 dark:border-slate-800 rounded-xl w-44 gap-1 mr-1">
+      <li>
+        <button type="button" data-priority="high" class="w-full text-xs font-semibold px-2.5 py-2 rounded-lg text-red-600 dark:text-red-400 bg-red-50 dark:bg-red-950/40 hover:bg-red-100 dark:hover:bg-red-900/60 flex items-center gap-2">
+          <span class="size-2 rounded-full bg-red-500"></span>
+          High Priority
+        </button>
+      </li>
+      <li>
+        <button type="button" data-priority="medium" class="w-full text-xs font-semibold px-2.5 py-2 rounded-lg text-amber-700 dark:text-amber-400 bg-amber-50 dark:bg-amber-950/40 hover:bg-amber-100 dark:hover:bg-amber-900/60 flex items-center gap-2">
+          <span class="size-2 rounded-full bg-amber-500"></span>
+          Medium Priority
+        </button>
+      </li>
+      <li>
+        <button type="button" data-priority="low" class="w-full text-xs font-semibold px-2.5 py-2 rounded-lg text-blue-700 dark:text-blue-400 bg-blue-50 dark:bg-blue-950/40 hover:bg-blue-100 dark:hover:bg-blue-900/60 flex items-center gap-2">
+          <span class="size-2 rounded-full bg-blue-500"></span>
+          Low Priority
+        </button>
+      </li>
+    </ul>
+  </div>
+
   <div class="my-1 border-t border-gray-100 dark:border-slate-800"></div>
+
+  <!-- Delete Button -->
   <button id="delete-todo-btn" type="button"
-    class="w-full text-left px-4 py-2 text-sm flex items-center gap-2 text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-950/40 transition-colors cursor-pointer">
-    <svg xmlns="http://www.w3.org/2000/svg" class="size-4 opacity-70" fill="none" viewBox="0 0 24 24"
-      stroke="currentColor">
+    class="w-full text-left px-3.5 py-2 text-sm flex items-center gap-2.5 text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-950/40 transition-colors cursor-pointer rounded-lg mx-auto max-w-[calc(100%-0.75rem)]">
+    <svg xmlns="http://www.w3.org/2000/svg" class="size-4 opacity-75 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
       <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
         d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
     </svg>

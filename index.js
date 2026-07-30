@@ -373,6 +373,64 @@ app.get('/api/todos', isAuthenticated, (req, res) => {
   }
 });
 
+app.patch('/api/todos/:id/details', isAuthenticated, (req, res) => {
+  const todoId = Number(req.params.id);
+  const { title, priority } = req.body;
+
+  if (Number.isNaN(todoId)) {
+    return res.status(400).json({ error: 'Invalid todo id' });
+  }
+
+  try {
+    const currentUserId = String(req.session.userId);
+
+    const checkTodo = db.prepare(`
+      SELECT todos.id 
+      FROM todos 
+      JOIN lists ON todos.list_id = lists.id 
+      WHERE todos.id = ? AND lists.user_id = ?
+    `);
+    
+    const todoExists = checkTodo.get(todoId, currentUserId);
+
+    if (!todoExists) {
+      return res.status(404).json({ error: 'Todo not found or unauthorized' });
+    }
+
+    const updates = [];
+    const params = [];
+
+    if (title !== undefined && title.trim() !== '') {
+      updates.push('title = ?');
+      params.push(title.trim());
+    }
+
+    if (priority !== undefined) {
+      const cleanPriority = String(priority).toLowerCase();
+      if (['low', 'medium', 'high'].includes(cleanPriority)) {
+        updates.push('priority = ?');
+        params.push(cleanPriority);
+      }
+    }
+
+    if (updates.length === 0) {
+      return res.status(400).json({ error: 'No valid fields provided for update' });
+    }
+
+    params.push(todoId);
+    const sql = `UPDATE todos SET ${updates.join(', ')} WHERE id = ?`;
+    db.prepare(sql).run(...params);
+
+    // Return the updated task
+    const updatedTodo = db.prepare('SELECT * FROM todos WHERE id = ?').get(todoId);
+    return res.json(updatedTodo);
+
+  } catch (err) {
+    console.error('PATCH /api/todos/:id/details error:', err);
+    return res.status(500).json({ error: 'Failed to update todo details' });
+  }
+});
+
 app.get('/api/lists', isAuthenticated, (req, res) => {
   try {
     const userId = req.session.userId;
