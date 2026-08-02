@@ -52,7 +52,7 @@ db.exec(`
 `);
 
 // get user
-app.get('/profile', isAuthenticated, (req, res) => {
+app.get('/api/user', isAuthenticated, (req, res) => {
   try {
     const userId = req.session.userId;
     const data = db.prepare('SELECT id, name, email, created_at FROM users WHERE id = ?');
@@ -83,6 +83,30 @@ app.get('/api/user/name', isAuthenticated, (req, res) => {
   } catch (err) {
     console.log(err);
     res.status(500).json({ error: 'Error while trying to fetch username' });
+  }
+});
+
+app.delete('/api/user', isAuthenticated, (req, res) => {
+  try {
+    const userId = req.session.userId;
+    
+    const userExist = db.prepare(`SELECT id FROM users WHERE id = ?`).get(userId);
+    if (!userExist) return res.status(404).json({ error: 'User not found' });
+
+    const deleteUser = db.prepare(`DELETE FROM users WHERE id = ?`);
+    deleteUser.run(userId);
+
+    req.session.destroy((err) => {
+      if (err) {
+        console.error('Session destruction error:', err);
+      }
+      res.clearCookie('connect.sid');
+      return res.json({ success: true, id: userId });
+    });
+
+  } catch (error) {
+    console.error('Error deleting user: ', error);
+    res.status(500).json({ error: 'Failed to delete user' });
   }
 });
 
@@ -176,48 +200,6 @@ app.post('/login', isGuest, async (req, res) => {
     res.status(500).send('Error while trying to log in');
   }
 });
-
-// post new todo
-// app.post('/api/todos', (req, res) => {
-//   const { title, is_completed, due_date, priority, list_id } = req.body;
-  
-//   if (!title || !list_id) {
-//     return res.status(400).json({ error: "Title and list id are required" })
-//   }
-
-//   try {
-//     const stmt = db.prepare(`
-//       INSERT INTO todos (title, priority, due_date, list_id, is_completed)
-//       VALUES (?, ?, ?, ?, ?)
-//     `);
-
-//     const cleanPriority = priority ? priority.toLowerCase() : 'medium';
-
-//     const info = stmt.run(
-//       title.trim(),
-//       priority ? priority.toLowerCase() : 'medium',
-//       due_date || null,
-//       list_id,
-//       is_completed ? 1 : 0
-//     );
-
-//     res.status(201).json({
-//       id: info.lastInsertRowid,
-//       title,
-//       priority: priority ? priority.toLowerCase() : 'medium',
-//       due_date: due_date || null,
-//       list_id,
-//       is_completed: is_completed ? 1 : 0
-//     });
-//   } catch (error) {
-//     console.error('Error inserting todo:', err.message);
-//     if (err.code === 'SQLITE_CONSTRAINT_FOREIGNKEY') {
-//       return res.status(400).json({ error: 'Invalid list_id. List does not exist.' });
-//     }
-
-//     res.status(500).json({ error: 'Failed to create todo' });
-//   }
-// })
 
 app.post('/api/todos', isAuthenticated, (req, res) => {
   const { title, is_completed, due_date, priority, list_id } = req.body;
@@ -545,6 +527,10 @@ app.get('/logout', (req, res) => {
     res.redirect('/');
   });
 });
+
+app.get('/profile', isAuthenticated, (req, res) => {
+  res.sendFile(path.join(__dirname, 'src', 'profile.html'));
+})
 
 // host on localhost
 app.listen(PORT, () => {
