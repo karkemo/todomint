@@ -104,6 +104,40 @@
   </footer>
 
   <script src="/theme_changer.js"></script>
+  <script>
+    document.addEventListener('DOMContentLoaded', () => {
+      const form = document.querySelector('form[action="/login"]');
+      form.addEventListener('submit', async (e) => {
+        e.preventDefault();
+        const email = document.getElementById('email').value.trim();
+        const password = document.getElementById('password').value;
+
+        try {
+          const res = await fetch('/api/login', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ email, password })
+          });
+          const data = await res.json();
+          if (!res.ok) {
+            alert(data.error || 'Login failed');
+            return;
+          }
+
+          if (data.requireVerification) {
+            window.location = '/verify?email=' + encodeURIComponent(email);
+            return;
+          }
+
+          // logged in
+          window.location = '/dashboard';
+        } catch (err) {
+          console.error(err);
+          alert('Network error');
+        }
+      });
+    });
+  </script>
 </body>
 
 </html>

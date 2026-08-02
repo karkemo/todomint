@@ -4,6 +4,7 @@ const { randomUUID } = require('crypto');
 const path = require('path');
 const bcrypt = require('bcrypt');
 const session = require('express-session');
+const { sendVerificationCode } = require('./services/email');
 
 const app = express();
 const PORT = 3000;
@@ -29,6 +30,9 @@ db.exec(`
     name TEXT NOT NULL,
     email TEXT UNIQUE NOT NULL,
     password TEXT NOT NULL,
+    is_verified INTEGER DEFAULT 0,
+    verification_code TEXT,
+    code_expires_at DATETIME,
     created_at DATETIME DEFAULT CURRENT_TIMESTAMP
   );
 
@@ -111,15 +115,35 @@ app.delete('/api/user', isAuthenticated, (req, res) => {
 });
 
 function isAuthenticated(req, res, next) {
-  if (req.session.userId) {
-    return next();
+  if (!req.session || !req.session.userId) {
+    return res.redirect('/login');
   }
-  res.redirect('/login');
+
+  try {
+    const user = db.prepare('SELECT id, is_verified FROM users WHERE id = ?').get(req.session.userId);
+    if (!user) return res.redirect('/login');
+    if (user.is_verified !== 1 && user.is_verified !== '1') {
+      return res.redirect('/verify');
+    }
+    return next();
+  } catch (err) {
+    console.error('isAuthenticated middleware error:', err);
+    return res.redirect('/login');
+  }
 }
 
 function isGuest(req, res, next) {
   if (req.session && req.session.userId) {
-    return res.redirect('/dashboard');
+    try {
+      const user = db.prepare('SELECT is_verified FROM users WHERE id = ?').get(req.session.userId);
+      if (user && (user.is_verified === 1 || user.is_verified === '1')) {
+        return res.redirect('/dashboard');
+      }
+      return res.redirect('/verify');
+    } catch (err) {
+      console.error('isGuest middleware error:', err);
+      return res.redirect('/login');
+    }
   }
   next();
 }
@@ -143,20 +167,31 @@ app.post('/register', isGuest, async (req, res) => {
     const hashedPassword = await bcrypt.hash(password, 10);
     const userId = randomUUID();
 
-    const createUserWithDefaultList = db.transaction((id, userName, userEmail, userPassword) => {
-      const insertUser = db.prepare('INSERT INTO users (id, name, email, password) VALUES (?, ?, ?, ?)');
-      insertUser.run(id, userName, userEmail, userPassword);
+    const code = generate6DigitCode();
+    const expiresAt = expiresInMinutes(10);
+
+    const createUserWithDefaultList = db.transaction((id, userName, userEmail, userPassword, vcode, vexp) => {
+      const insertUser = db.prepare('INSERT INTO users (id, name, email, password, is_verified, verification_code, code_expires_at) VALUES (?, ?, ?, ?, ?, ?, ?)');
+      insertUser.run(id, userName, userEmail, userPassword, 0, vcode, vexp);
 
       const insertList = db.prepare('INSERT INTO lists (title, user_id) VALUES (?, ?)');
       insertList.run('Default', id);
     });
 
-    createUserWithDefaultList(userId, name.trim(), email.toLowerCase().trim(), hashedPassword);
+    createUserWithDefaultList(userId, name.trim(), email.toLowerCase().trim(), hashedPassword, code, expiresAt);
 
-    req.session.userId = userId;
-    req.session.userName = name;
+    // store pending user id in session until verification completes
+    req.session.pendingUserId = userId;
+    req.session.pendingUserName = name;
 
-    res.redirect('/dashboard');
+    // send verification email (best-effort)
+    try {
+      await sendVerificationCode(email.toLowerCase().trim(), code);
+    } catch (err) {
+      console.error('Error sending verification email (register):', err);
+    }
+
+    return res.redirect('/verify');
 
   } catch (err) {
     console.error('Registration Error:', err);
@@ -188,6 +223,26 @@ app.post('/login', isGuest, async (req, res) => {
 
     if (!isPasswordValid) {
       return res.status(400).send('Invalid email or password');
+    }
+
+    if (existingUser.is_verified === 0 || existingUser.is_verified === '0') {
+      // generate new code, update DB, send email and redirect to verify page
+      const code = generate6DigitCode();
+      const expiresAt = expiresInMinutes(10);
+
+      const update = db.prepare('UPDATE users SET verification_code = ?, code_expires_at = ? WHERE id = ?');
+      update.run(code, expiresAt, existingUser.id);
+
+      req.session.pendingUserId = existingUser.id;
+      req.session.pendingUserName = existingUser.name;
+
+      try {
+        await sendVerificationCode(email.toLowerCase().trim(), code);
+      } catch (err) {
+        console.error('Error sending verification email (login):', err);
+      }
+
+      return res.redirect('/verify');
     }
 
     req.session.userId = existingUser.id;
@@ -313,20 +368,6 @@ app.delete('/api/todos/:id', isAuthenticated, (req, res) => {
   }
 });
 
-// temp path
-// app.post('/api/users', async (req, res) => {
-//   const { name, email, password } = req.body;
-//   const userId = randomUUID();
-//   try {
-//     const hashedPassword = await bcrypt.hash(password, 10);
-//     const insert = db.prepare('INSERT INTO users (id, name, email, password) VALUES (?, ?, ?, ?)');
-//     insert.run(userId, name, email, hashedPassword);
-//     res.json({ success: true, id: userId });
-//   } catch (err) {
-//     res.status(400).json({ error: "wrong data or email exists" });
-//   }
-// });
-
 // pages
 app.get('/api/hello', (req, res) => {
   res.json({ message: "Hello, World!" });
@@ -335,6 +376,118 @@ app.get('/api/hello', (req, res) => {
 app.get('/api/users', (req, res) => {
   const users = db.prepare('SELECT id, name, email FROM users').all();
   res.json(users);
+});
+
+function generate6DigitCode() {
+  return String(Math.floor(100000 + Math.random() * 900000));
+}
+
+function expiresInMinutes(minutes) {
+  return new Date(Date.now() + minutes * 60 * 1000).toISOString();
+}
+
+app.post('/api/register', async (req, res) => {
+  const { name, email, password } = req.body;
+
+  if (!name || !email || !password) {
+    return res.status(400).json({ error: 'All fields are required' });
+  }
+
+  try {
+    const checkUser = db.prepare('SELECT id FROM users WHERE email = ?');
+    const existingUser = checkUser.get(email.toLowerCase().trim());
+
+    if (existingUser) {
+      return res.status(400).json({ error: 'This email is not available' });
+    }
+
+    const hashedPassword = await bcrypt.hash(password, 10);
+    const userId = randomUUID();
+
+    const code = generate6DigitCode();
+    const expiresAt = expiresInMinutes(10);
+
+    const createUserWithDefaultList = db.transaction((id, userName, userEmail, userPassword, vcode, vexp) => {
+      const insertUser = db.prepare('INSERT INTO users (id, name, email, password, is_verified, verification_code, code_expires_at) VALUES (?, ?, ?, ?, ?, ?, ?)');
+      insertUser.run(id, userName, userEmail, userPassword, 0, vcode, vexp);
+
+      const insertList = db.prepare('INSERT INTO lists (title, user_id) VALUES (?, ?)');
+      insertList.run('Default', id);
+    });
+
+    createUserWithDefaultList(userId, name.trim(), email.toLowerCase().trim(), hashedPassword, code, expiresAt);
+
+    // send verification email (don't block on failure)
+    try {
+      await sendVerificationCode(email.toLowerCase().trim(), code);
+    } catch (err) {
+      console.error('Error sending verification email:', err);
+    }
+
+    return res.status(201).json({ requireVerification: true, email: email.toLowerCase().trim() });
+  } catch (err) {
+    console.error('Registration Error (API):', err);
+    return res.status(500).json({ error: 'Error while trying to sign up' });
+  }
+});
+
+// API: login with verification handling
+app.post('/api/login', async (req, res) => {
+  // if already have active session
+  if (req.session && req.session.userId) {
+    return res.json({ success: true, message: 'Already authenticated' });
+  }
+
+  const { email, password } = req.body;
+
+  if (!email || !password) {
+    return res.status(400).json({ error: 'All fields are required' });
+  }
+
+  try {
+    const checkUser = db.prepare('SELECT id, name, password, is_verified FROM users WHERE email = ?');
+    const existingUser = checkUser.get(email.toLowerCase().trim());
+
+    if (!existingUser) {
+      return res.status(400).json({ error: 'Invalid email or password' });
+    }
+
+    if (!existingUser.password) {
+      return res.status(400).json({ error: 'Invalid email or password' });
+    }
+
+    const isPasswordValid = await bcrypt.compare(password, existingUser.password);
+
+    if (!isPasswordValid) {
+      return res.status(400).json({ error: 'Invalid email or password' });
+    }
+
+    if (existingUser.is_verified === 0 || existingUser.is_verified === '0') {
+      // generate new code, update DB, send email and prompt verification
+      const code = generate6DigitCode();
+      const expiresAt = expiresInMinutes(10);
+
+      const update = db.prepare('UPDATE users SET verification_code = ?, code_expires_at = ? WHERE id = ?');
+      update.run(code, expiresAt, existingUser.id);
+
+      try {
+        await sendVerificationCode(email.toLowerCase().trim(), code);
+      } catch (err) {
+        console.error('Error sending verification email (login):', err);
+      }
+
+      return res.status(200).json({ requireVerification: true, email: email.toLowerCase().trim() });
+    }
+
+    // verified -> create session
+    req.session.userId = existingUser.id;
+    req.session.userName = existingUser.name;
+
+    return res.json({ success: true, message: 'Logged in' });
+  } catch (err) {
+    console.error('Login Error (API):', err);
+    return res.status(500).json({ error: 'Error while trying to log in' });
+  }
 });
 
 app.get('/api/todos', isAuthenticated, (req, res) => {
@@ -530,7 +683,72 @@ app.get('/logout', (req, res) => {
 
 app.get('/profile', isAuthenticated, (req, res) => {
   res.sendFile(path.join(__dirname, 'src', 'profile.html'));
+});
+
+app.get('/settings', isAuthenticated, (req, res) => {
+  res.sendFile(path.join(__dirname, 'src', 'settings.html'));
 })
+
+// verify page (serve static html)
+app.get('/verify', (req, res) => {
+  // If logged in and verified -> dashboard; if logged in but not verified -> show verify page
+  if (req.session && req.session.userId) {
+    try {
+      const user = db.prepare('SELECT is_verified FROM users WHERE id = ?').get(req.session.userId);
+      if (user && (user.is_verified === 1 || user.is_verified === '1')) {
+        return res.redirect('/dashboard');
+      }
+      // otherwise allow access to verify page
+    } catch (err) {
+      console.error('Error fetching user for /verify:', err);
+      return res.redirect('/login');
+    }
+  }
+
+  res.sendFile(path.join(__dirname, 'src', 'verify.html'));
+});
+
+// API: verify code
+app.post('/api/verify', async (req, res) => {
+  const { email, code } = req.body;
+
+  if (!email || !code) {
+    return res.status(400).json({ error: 'Email and code are required' });
+  }
+
+  try {
+    const user = db.prepare('SELECT id, name, verification_code, code_expires_at FROM users WHERE email = ?').get(email.toLowerCase().trim());
+    if (!user) return res.status(404).json({ error: 'User not found' });
+
+    if (!user.verification_code || !user.code_expires_at) {
+      return res.status(400).json({ error: 'No verification code set' });
+    }
+
+    const now = new Date();
+    const expiresAt = new Date(user.code_expires_at);
+    if (isNaN(expiresAt.getTime()) || now > expiresAt) {
+      return res.status(400).json({ error: 'Verification code expired' });
+    }
+
+    if (String(code).trim() !== String(user.verification_code)) {
+      return res.status(400).json({ error: 'Invalid verification code' });
+    }
+
+    const update = db.prepare('UPDATE users SET is_verified = 1, verification_code = NULL, code_expires_at = NULL WHERE id = ?');
+    update.run(user.id);
+
+    // establish session
+    req.session.userId = user.id;
+    req.session.userName = user.name;
+    delete req.session.pendingUserId;
+    delete req.session.pendingUserName;
+
+    return res.json({ success: true, redirectTo: '/dashboard' });
+  } catch (err) {
+    console.error('Error verifying code:', err);
+    return res.status(500).json({ error: 'Failed to verify code' });
+  }
+});
 
 // host on localhost
 app.listen(PORT, () => {

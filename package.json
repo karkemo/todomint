@@ -13,12 +13,16 @@
   "license": "ISC",
   "description": "",
   "dependencies": {
+    "@getbrevo/brevo": "^6.0.2",
     "@tailwindcss/cli": "^4.3.3",
     "bcrypt": "^6.0.0",
     "better-sqlite3": "^13.0.1",
+    "crypto": "^1.0.1",
     "daisyui": "^5.7.0",
+    "dotenv": "^17.4.2",
     "express": "^5.2.1",
     "express-session": "^1.19.0",
+    "nodemailer": "^9.0.3",
     "tailwindcss": "^4.3.3",
     "uuid": "^14.0.1"
   }

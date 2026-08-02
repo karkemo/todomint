@@ -113,6 +113,40 @@
   </footer>
 
   <script src="/theme_changer.js"></script>
+  <script>
+    document.addEventListener('DOMContentLoaded', () => {
+      const form = document.querySelector('form[action="/register"]');
+      form.addEventListener('submit', async (e) => {
+        e.preventDefault();
+        const name = document.getElementById('name').value.trim();
+        const email = document.getElementById('email').value.trim();
+        const password = document.getElementById('password').value;
+
+        try {
+          const res = await fetch('/api/register', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ name, email, password })
+          });
+          const data = await res.json();
+          if (!res.ok) {
+            alert(data.error || 'Registration failed');
+            return;
+          }
+
+          if (data.requireVerification) {
+            window.location = '/verify?email=' + encodeURIComponent(email);
+            return;
+          }
+
+          window.location = '/dashboard';
+        } catch (err) {
+          console.error(err);
+          alert('Network error');
+        }
+      });
+    });
+  </script>
 </body>
 
 </html>
