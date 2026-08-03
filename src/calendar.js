@@ -8,6 +8,8 @@ function initCalendar() {
 
   if (!monthYearLabel || !daysGrid || !prevBtn || !nextBtn || !selectedDayLabel || !selectedDayTodos) return;
 
+  let completedTodosPreference = 'keep';
+  let completedTodosPreferenceLoaded = false;
   let currentDate = new Date();
   const today = new Date();
   let allTodos = [];
@@ -27,9 +29,38 @@ function initCalendar() {
     return date.toLocaleDateString('en-US', { weekday: 'long', day: 'numeric', month: 'long' });
   }
 
+  async function getCompletedTodosPreference() {
+    if (completedTodosPreferenceLoaded) {
+      return completedTodosPreference;
+    }
+
+    try {
+      const response = await fetch('/api/user');
+      if (!response.ok) throw new Error('Failed to load completed preference');
+
+      const data = await response.json();
+      completedTodosPreference = data.completed_todos_action || 'keep';
+    } catch (error) {
+      console.error('Error loading completed todos preference for calendar:', error);
+      completedTodosPreference = 'keep';
+    }
+
+    completedTodosPreferenceLoaded = true;
+    return completedTodosPreference;
+  }
+
+  function shouldShowTodoInCalendar(todo, action = completedTodosPreference) {
+    if (action === 'move' && todo?.is_completed === 1) {
+      return false;
+    }
+
+    return true;
+  }
+
   function getTodosForDate(dateKey) {
     return allTodos.filter(todo => {
       if (!todo?.due_date) return false;
+      if (!shouldShowTodoInCalendar(todo)) return false;
       return String(todo.due_date).split('T')[0] === dateKey;
     });
   }
@@ -132,8 +163,9 @@ function initCalendar() {
     renderCalendar();
   });
 
-  document.addEventListener('todosLoaded', (event) => {
-    allTodos = event.detail?.todos || [];
+  document.addEventListener('todosLoaded', async (event) => {
+    const action = await getCompletedTodosPreference();
+    allTodos = (event.detail?.todos || []).filter((todo) => shouldShowTodoInCalendar(todo, action));
     renderCalendar();
     updateSelectedDayTodos();
   });

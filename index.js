@@ -5,6 +5,7 @@ const path = require('path');
 const bcrypt = require('bcrypt');
 const session = require('express-session');
 const { sendVerificationCode, sendEmailChangeNotification } = require('./services/email');
+const { resolveCompletedTodoAction } = require('./services/completed_todos_action');
 
 const app = express();
 const PORT = 3000;
@@ -487,6 +488,16 @@ app.patch('/api/todos/:id', isAuthenticated, (req, res) => {
     }
 
     const completedValue = is_completed === true || is_completed === 1 || is_completed === '1' ? 1 : 0;
+    const userPreference = db.prepare('SELECT completed_todos_action FROM users WHERE id = ?').get(req.session.userId);
+    const action = userPreference?.completed_todos_action || 'keep';
+    const actionMode = resolveCompletedTodoAction(action, completedValue === 1);
+
+    if (actionMode === 'delete') {
+      const deleteTodo = db.prepare('DELETE FROM todos WHERE id = ?');
+      deleteTodo.run(todoId);
+      return res.json({ success: true, deleted: true, id: todoId });
+    }
+
     const updateTodo = db.prepare('UPDATE todos SET is_completed = ? WHERE id = ?');
     updateTodo.run(completedValue, todoId);
 
@@ -544,7 +555,7 @@ app.get('/api/user', (req, res) => {
   }
 
   try {
-    const user = db.prepare('SELECT id, name, email, created_at FROM users WHERE id = ?').get(req.session.userId);
+    const user = db.prepare('SELECT id, name, email, completed_todos_action, created_at FROM users WHERE id = ?').get(req.session.userId);
     
     if (!user) {
       return res.status(404).json({ error: 'User not found' });

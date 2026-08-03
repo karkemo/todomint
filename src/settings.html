@@ -32,6 +32,11 @@
       Back to Dashboard
     </a>
 
+    <a href="/" class="flex flex-row items-center justify-center gap-2 -ml-12 sm:-ml-16">
+      <img src="/assets/logo.png" alt="logo" class="size-10">
+      <p class="text-2xl font-mono dark:text-white text-black">Todo</p>
+    </a>
+
     <button id="theme-toggle" type="button" aria-label="Toggle theme"
       class="p-2.5 rounded-xl bg-white dark:bg-slate-800/80 border border-slate-200 dark:border-slate-700/60 shadow-sm text-slate-600 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-800 transition-all cursor-pointer">
       <svg id="theme-toggle-light-icon" class="hidden w-5 h-5 fill-current" viewBox="0 0 20 20">
@@ -51,7 +56,7 @@
       class="w-full max-w-lg bg-white dark:bg-[#131f38] border border-slate-200/80 dark:border-slate-800 rounded-3xl shadow-xl overflow-hidden p-6 sm:p-8 space-y-6">
 
       <!-- Header Title -->
-      <div class="text-center">
+      <div class="text-center flex items-center justify-center flex-col">
         <h1 class="text-2xl font-bold tracking-tight text-slate-900 dark:text-white">Settings</h1>
         <p class="text-xs text-slate-500 dark:text-slate-400 mt-1">Manage your account and preferences</p>
       </div>
@@ -149,8 +154,7 @@
         </div>
 
         <div class="space-y-2">
-          <button
-            id="clear-todos-btn"
+          <button id="clear-todos-btn"
             class="w-full p-3 rounded-xl text-sm font-semibold bg-red-50 dark:bg-red-950/30 hover:bg-red-100 dark:hover:bg-red-900/40 text-red-600 dark:text-red-400 transition-all border border-red-100 dark:border-red-900/30 flex items-center justify-center gap-2 cursor-pointer">
             <svg xmlns="http://www.w3.org/2000/svg" class="size-4" fill="none" viewBox="0 0 24 24"
               stroke="currentColor">

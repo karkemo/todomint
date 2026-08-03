@@ -110,6 +110,37 @@ function dispatchTodosLoaded(todos) {
   document.dispatchEvent(new CustomEvent('todosLoaded', { detail: { todos } }));
 }
 
+let completedTodosPreference = 'keep';
+let completedTodosPreferenceLoaded = false;
+
+async function getCompletedTodosPreference() {
+  if (completedTodosPreferenceLoaded) {
+    return completedTodosPreference;
+  }
+
+  try {
+    const response = await fetch('/api/user');
+    if (!response.ok) throw new Error('Failed to load completed preference');
+
+    const data = await response.json();
+    completedTodosPreference = data.completed_todos_action || 'keep';
+  } catch (error) {
+    console.error('Error loading completed todos preference:', error);
+    completedTodosPreference = 'keep';
+  }
+
+  completedTodosPreferenceLoaded = true;
+  return completedTodosPreference;
+}
+
+function shouldShowTodoInActiveViews(todo, action = completedTodosPreference) {
+  if (action === 'move' && isTodoCompleted(todo)) {
+    return false;
+  }
+
+  return true;
+}
+
 async function loadDashboardTodos() {
   const todosContainer = document.getElementById('todos-list');
 
@@ -118,7 +149,8 @@ async function loadDashboardTodos() {
     if (!response.ok) throw new Error('Failed to fetch todos');
 
     const todos = await response.json();
-    const todosForToday = todos.filter(isTodoDueToday);
+    const action = await getCompletedTodosPreference();
+    const todosForToday = todos.filter((todo) => isTodoDueToday(todo) && shouldShowTodoInActiveViews(todo, action));
 
     dispatchTodosLoaded(todos);
 
@@ -159,6 +191,7 @@ async function loadDashboardLists() {
 
     const lists = await listsResponse.json();
     const todos = await todosResponse.json();
+    const action = await getCompletedTodosPreference();
     listsContainer.innerHTML = '';
 
     if (lists.length === 0) {
@@ -167,7 +200,7 @@ async function loadDashboardLists() {
     }
 
     lists.forEach((list) => {
-      const listElement = createListElement(list, todos);
+      const listElement = createListElement(list, todos, action);
       listsContainer.appendChild(listElement);
     });
   } catch (error) {
@@ -380,7 +413,7 @@ document.addEventListener('click', (e) => {
 });
 
 // create new list
-function createListElement(list, todos = []) {
+function createListElement(list, todos = [], action = completedTodosPreference) {
   const li = document.createElement('li');
   li.className = 'w-full';
 
@@ -419,7 +452,7 @@ function createListElement(list, todos = []) {
   // list's todos number
   const countBadge = document.createElement('span');
   countBadge.className = 'text-xs font-normal opacity-70 shrink-0 ml-auto';
-  const todoCount = todos.filter((todo) => String(todo.list_id) === String(list.id)).length;
+  const todoCount = todos.filter((todo) => String(todo.list_id) === String(list.id) && shouldShowTodoInActiveViews(todo, action)).length;
   countBadge.textContent = `(${todoCount})`;
 
   button.appendChild(icon);
@@ -590,7 +623,8 @@ async function loadImportantTodos() {
     if (!response.ok) throw new Error('Failed to fetch todos');
 
     const todos = await response.json();
-    const importantTodos = todos.filter(isTodoImportant);
+    const action = await getCompletedTodosPreference();
+    const importantTodos = todos.filter((todo) => isTodoImportant(todo) && shouldShowTodoInActiveViews(todo, action));
 
     dispatchTodosLoaded(todos);
 
@@ -661,6 +695,7 @@ async function loadListTodos() {
 
     const lists = await listsRes.json();
     const todos = await todosRes.json();
+    const action = await getCompletedTodosPreference();
 
     const currentList = lists.find(l => String(l.id ?? l._id) === String(currentListId));
     title.textContent = currentList ? currentList.title : 'List';
@@ -668,7 +703,7 @@ async function loadListTodos() {
     dispatchTodosLoaded(todos);
     element.innerHTML = '';
 
-    const listTodos = todos.filter(todo => String(todo.list_id) === String(currentListId));
+    const listTodos = todos.filter(todo => String(todo.list_id) === String(currentListId) && shouldShowTodoInActiveViews(todo, action));
 
     if (listTodos.length === 0) {
       element.innerHTML = '<p class="text-gray-500">No todos found in this list.</p>';
@@ -721,9 +756,10 @@ async function renderCount() {
     if (!response.ok) return;
 
     const todos = await response.json();
+    const action = await getCompletedTodosPreference();
 
     const importantTodos = todos.filter(isTodoImportant);
-    const todayTodos = todos.filter(isTodoDueToday);
+    const todayTodos = todos.filter((todo) => isTodoDueToday(todo) && (action !== 'move' || !isTodoCompleted(todo)));
     const completedTodos = todos.filter(isTodoCompleted);
 
     const importantCount = document.getElementById('important-count');
@@ -1186,8 +1222,7 @@ document.addEventListener('DOMContentLoaded', () => {
         throw new Error(errorData.error || 'Failed to update todo');
       }
 
-      await loadDashboardTodos();
-      await renderCount();
+      await reloadDashboardState();
     } catch (error) {
       console.error('Error updating todo:', error);
       checkbox.checked = !checkbox.checked;
@@ -1217,11 +1252,7 @@ document.addEventListener('DOMContentLoaded', () => {
         throw new Error(errorData.error || 'Failed to delete todo');
       }
 
-      await loadDashboardTodos();
-      await loadDashboardLists();
-      await renderDashboard();
-      await loadListTodos();
-      await renderCount();
+      await reloadDashboardState();
     } catch (error) {
       console.error('Error deleting todo:', error);
       alert(error.message || 'Failed to delete todo');
