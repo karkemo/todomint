@@ -35,3 +35,28 @@ export async function sendVerificationCode(toEmail, code) {
     return false;
   }
 }
+
+export async function sendEmailChangeNotification(oldEmail, newEmail) {
+  try {
+    const mailOptions = {
+      from: `"Todo App" <karem.kemo.ragab@gmail.com>`,
+      to: oldEmail,
+      subject: 'Email Change Requested',
+      html: `
+        <div style="font-family: Arial, sans-serif; padding: 20px;">
+          <h2>Security Notification</h2>
+          <p>A request was made to change your account email to <strong>${newEmail}</strong>.</p>
+          <p>If you made this request, please verify the new address using the code sent there.</p>
+          <p>If you did not request this change, please contact support immediately or reset your password.</p>
+        </div>
+      `,
+    };
+
+    const info = await transporter.sendMail(mailOptions);
+    console.log('✅ Email change notification sent to old email:', info.messageId);
+    return true;
+  } catch (error) {
+    console.error('❌ Email change notification failed:', error);
+    return false;
+  }
+}

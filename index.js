@@ -4,7 +4,7 @@ const { randomUUID } = require('crypto');
 const path = require('path');
 const bcrypt = require('bcrypt');
 const session = require('express-session');
-const { sendVerificationCode } = require('./services/email');
+const { sendVerificationCode, sendEmailChangeNotification } = require('./services/email');
 
 const app = express();
 const PORT = 3000;
@@ -24,6 +24,22 @@ app.use(express.static(path.join(__dirname, 'src')));
 
 db.pragma('foreign_keys = ON');
 
+function ensureColumn(table, column, definition) {
+  const columns = db.prepare(`PRAGMA table_info(${table})`).all();
+  const exists = columns.some((col) => col.name === column);
+  if (!exists) {
+    db.prepare(`ALTER TABLE ${table} ADD COLUMN ${column} ${definition}`).run();
+  }
+}
+
+function validateEmail(email) {
+  return typeof email === 'string' && /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email.trim());
+}
+
+function validatePassword(password) {
+  return typeof password === 'string' && password.trim().length >= 6;
+}
+
 db.exec(`
   CREATE TABLE IF NOT EXISTS users (
     id TEXT PRIMARY KEY,
@@ -33,6 +49,7 @@ db.exec(`
     is_verified INTEGER DEFAULT 0,
     verification_code TEXT,
     code_expires_at DATETIME,
+    completed_todos_action TEXT DEFAULT 'keep',
     created_at DATETIME DEFAULT CURRENT_TIMESTAMP
   );
 
@@ -55,21 +72,140 @@ db.exec(`
   );
 `);
 
-// get user
-app.get('/api/user', isAuthenticated, (req, res) => {
-  try {
-    const userId = req.session.userId;
-    const data = db.prepare('SELECT id, name, email, created_at FROM users WHERE id = ?');
-    const user = data.get(userId);
+ensureColumn('users', 'completed_todos_action', "TEXT DEFAULT 'keep'");
+ensureColumn('users', 'pending_email', 'TEXT');
 
+app.post('/api/settings/name', isAuthenticated, async (req, res) => {
+  const { newName } = req.body;
+
+  if (!newName || !newName.trim()) {
+    return res.status(400).json({ error: 'New name is required' });
+  }
+
+  const trimmedName = newName.trim();
+
+  if (trimmedName.length < 2 || trimmedName.length > 50) {
+    return res.status(400).json({ error: 'Name must be between 2 and 50 characters' });
+  }
+
+  try {
+    const user = db.prepare('SELECT id FROM users WHERE id = ?').get(req.session.userId);
     if (!user) {
-      return res.status(404).json({error: 'user not found'});
+      return res.status(404).json({ error: 'User not found' });
     }
 
-    res.json(user)
+    db.prepare('UPDATE users SET name = ? WHERE id = ?').run(trimmedName, req.session.userId);
+
+    return res.json({ 
+      success: true, 
+      message: 'Name updated successfully', 
+      name: trimmedName 
+    });
+
+  } catch (error) {
+    console.error('Error updating name:', error);
+    return res.status(500).json({ error: 'Internal server error while updating name' });
+  }
+});
+
+app.post('/api/settings/email', isAuthenticated, async (req, res) => {
+  const { newEmail, currentPassword } = req.body;
+
+  if (!newEmail || !currentPassword) {
+    return res.status(400).json({ error: 'New email and current password are required' });
+  }
+
+  if (!validateEmail(newEmail)) {
+    return res.status(400).json({ error: 'Invalid email address' });
+  }
+
+  try {
+    const normalizedNewEmail = newEmail.toLowerCase().trim();
+    const user = db.prepare('SELECT id, email, password FROM users WHERE id = ?').get(req.session.userId);
+    if (!user) return res.status(404).json({ error: 'User not found' });
+
+    const isPasswordValid = await bcrypt.compare(currentPassword, user.password);
+    if (!isPasswordValid) {
+      return res.status(401).json({ error: 'Current password is incorrect' });
+    }
+
+    if (user.email.toLowerCase() === normalizedNewEmail) {
+      return res.status(400).json({ error: 'New email must be different from current email' });
+    }
+
+    const existingEmailUser = db.prepare('SELECT id FROM users WHERE (email = ? OR pending_email = ?) AND id != ?').get(normalizedNewEmail, normalizedNewEmail, user.id);
+    if (existingEmailUser) {
+      return res.status(400).json({ error: 'Email is already in use' });
+    }
+
+    const code = generate6DigitCode();
+    const expiresAt = expiresInMinutes(10);
+    db.prepare('UPDATE users SET pending_email = ?, is_verified = 0, verification_code = ?, code_expires_at = ? WHERE id = ?')
+      .run(normalizedNewEmail, code, expiresAt, user.id);
+
+    try {
+      await sendVerificationCode(normalizedNewEmail, code);
+    } catch (err) {
+      console.error('Error sending verification email on email change:', err);
+    }
+
+    try {
+      await sendEmailChangeNotification(user.email, normalizedNewEmail);
+    } catch (err) {
+      console.error('Error sending email change notification to old email:', err);
+    }
+
+    return res.json({ success: true, requireVerification: true, email: newEmail.toLowerCase().trim() });
   } catch (err) {
-    res.status(500).json({error: 'Error while trying to fetch data'});
-    console.log(err);
+    console.error('Email change error:', err);
+    return res.status(500).json({ error: 'Failed to update email' });
+  }
+});
+
+app.post('/api/settings/password', isAuthenticated, async (req, res) => {
+  const { currentPassword, newPassword } = req.body;
+
+  if (!currentPassword || !newPassword) {
+    return res.status(400).json({ error: 'Current password and new password are required' });
+  }
+
+  if (!validatePassword(newPassword)) {
+    return res.status(400).json({ error: 'New password must be at least 6 characters long' });
+  }
+
+  try {
+    const user = db.prepare('SELECT password FROM users WHERE id = ?').get(req.session.userId);
+    if (!user) return res.status(404).json({ error: 'User not found' });
+
+    const isPasswordValid = await bcrypt.compare(currentPassword, user.password);
+    if (!isPasswordValid) {
+      return res.status(401).json({ error: 'Current password is incorrect' });
+    }
+
+    const hashedPassword = await bcrypt.hash(newPassword, 10);
+    db.prepare('UPDATE users SET password = ? WHERE id = ?').run(hashedPassword, req.session.userId);
+
+    return res.json({ success: true });
+  } catch (err) {
+    console.error('Password change error:', err);
+    return res.status(500).json({ error: 'Failed to update password' });
+  }
+});
+
+app.patch('/api/settings/completed-action', isAuthenticated, async (req, res) => {
+  const { action } = req.body;
+  const validActions = ['keep', 'delete', 'move'];
+
+  if (!validActions.includes(action)) {
+    return res.status(400).json({ error: 'Invalid completed todos action' });
+  }
+
+  try {
+    db.prepare('UPDATE users SET completed_todos_action = ? WHERE id = ?').run(action, req.session.userId);
+    return res.json({ success: true, action });
+  } catch (err) {
+    console.error('Completed action update error:', err);
+    return res.status(500).json({ error: 'Failed to save preference' });
   }
 });
 
@@ -305,6 +441,30 @@ app.post('/api/todos', isAuthenticated, (req, res) => {
   }
 });
 
+app.delete('/api/todos', isAuthenticated, (req, res) => {
+  const userId = req.session.userId;
+
+  try {
+    const stmt = db.prepare(`
+      DELETE FROM todos 
+      WHERE list_id IN (
+        SELECT id FROM lists WHERE user_id = ?
+      )
+    `);
+
+    const result = stmt.run(userId);
+
+    return res.json({ 
+      success: true, 
+      message: 'All todos deleted successfully',
+      deletedCount: result.changes
+    });
+  } catch (error) {
+    console.error('Error deleting todos:', error);
+    return res.status(500).json({ error: 'Failed to delete todos' });
+  }
+})
+
 app.patch('/api/todos/:id', isAuthenticated, (req, res) => {
   const todoId = Number(req.params.id);
   const { is_completed } = req.body;
@@ -376,6 +536,24 @@ app.get('/api/hello', (req, res) => {
 app.get('/api/users', (req, res) => {
   const users = db.prepare('SELECT id, name, email FROM users').all();
   res.json(users);
+});
+
+app.get('/api/user', (req, res) => {
+  if (!req.session || !req.session.userId) {
+    return res.status(401).json({ error: 'Unauthorized' });
+  }
+
+  try {
+    const user = db.prepare('SELECT id, name, email, created_at FROM users WHERE id = ?').get(req.session.userId);
+    
+    if (!user) {
+      return res.status(404).json({ error: 'User not found' });
+    }
+
+    res.json(user);
+  } catch (err) {
+    res.status(500).json({ error: 'Database error' });
+  }
 });
 
 function generate6DigitCode() {
@@ -717,7 +895,8 @@ app.post('/api/verify', async (req, res) => {
   }
 
   try {
-    const user = db.prepare('SELECT id, name, verification_code, code_expires_at FROM users WHERE email = ?').get(email.toLowerCase().trim());
+    const normalizedEmail = email.toLowerCase().trim();
+    const user = db.prepare('SELECT id, name, email, pending_email, verification_code, code_expires_at FROM users WHERE email = ? OR pending_email = ?').get(normalizedEmail, normalizedEmail);
     if (!user) return res.status(404).json({ error: 'User not found' });
 
     if (!user.verification_code || !user.code_expires_at) {
@@ -734,7 +913,20 @@ app.post('/api/verify', async (req, res) => {
       return res.status(400).json({ error: 'Invalid verification code' });
     }
 
-    const update = db.prepare('UPDATE users SET is_verified = 1, verification_code = NULL, code_expires_at = NULL WHERE id = ?');
+    if (user.pending_email) {
+      if (normalizedEmail !== user.pending_email.toLowerCase().trim()) {
+        return res.status(400).json({ error: 'Please verify the new email address from the verification email.' });
+      }
+    } else if (normalizedEmail !== user.email.toLowerCase().trim()) {
+      return res.status(400).json({ error: 'Email does not match the current account email.' });
+    }
+
+    let update;
+    if (user.pending_email) {
+      update = db.prepare('UPDATE users SET email = pending_email, pending_email = NULL, is_verified = 1, verification_code = NULL, code_expires_at = NULL WHERE id = ?');
+    } else {
+      update = db.prepare('UPDATE users SET is_verified = 1, verification_code = NULL, code_expires_at = NULL WHERE id = ?');
+    }
     update.run(user.id);
 
     // establish session
