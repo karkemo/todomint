@@ -1,3 +1,5 @@
+import flyToast from '/node_modules/fly-toast/index.js';
+
 async function loadAvatar() {
   try {
     const response = await fetch('/api/user/name');
@@ -45,6 +47,8 @@ async function loadUserData() {
 
 document.addEventListener('DOMContentLoaded', () => {
   const deleteBtn = document.getElementById('delete-account-btn');
+  const clearTodosBtn = document.getElementById('clear-todos-btn');
+  const clearTodosBtnText = document.getElementById('clear-btn-text');
 
   if (deleteBtn) {
     deleteBtn.addEventListener('click', async () => {
@@ -80,6 +84,40 @@ document.addEventListener('DOMContentLoaded', () => {
         deleteBtn.innerText = 'Delete Account';
       }
     });
+  }
+
+  if (clearTodosBtn && clearTodosBtnText) {
+    clearTodosBtn.addEventListener('click', async () => {
+      const confirmed = confirm('Are you sure you want to delete all todos? This action cannot be undone.');
+      if (!confirmed) return;
+
+      try {
+        clearTodosBtn.disabled = true;
+        clearTodosBtnText.innerText = 'Clearing...';
+
+        const response = await fetch('/api/todos', {
+          method: 'DELETE',
+          headers: { 'Content-Type': 'application/json' }
+        })
+
+        const data = await response.json();
+
+        if (response.ok && data.success) {
+          flyToast('Your Todos has been deleted.', 'success', 3, {position: 'top-right'});
+          clearTodosBtnText.innerText = 'Clear Todos';
+          clearTodosBtn.disabled = false;
+        } else {
+          flyToast(data.error || 'Failed to delete todos. Please try again.', 'error', 3, {position: 'top-right'});
+          clearTodosBtn.disabled = false;
+          clearTodosBtnText.innerText = 'Clear Todos';
+        }
+      } catch (error) {
+        console.error('Error during todos deletion:', error);
+        flyToast('A network error occurred. Please try again.', 'error', 3, {position: 'top-right'});
+        clearTodosBtn.disabled = false;
+        clearTodosBtnText.innerText = 'Clear Todos';
+      }
+    })
   }
   loadAvatar();
   loadUserData();

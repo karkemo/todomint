@@ -22,6 +22,7 @@ app.use(session({
 }));
 
 app.use(express.static(path.join(__dirname, 'src')));
+app.use('/node_modules', express.static(path.join(__dirname, 'node_modules')));
 
 db.pragma('foreign_keys = ON');
 

@@ -1,31 +1,14 @@
+import flyToast from '/node_modules/fly-toast/index.js';
+
 document.addEventListener('DOMContentLoaded', () => {
   const clearTodosBtn = document.getElementById('clear-todos-btn');
+  const clearTodosBtnText = document.getElementById('clear-btn-text');
   const deleteBtn = document.getElementById('delete-account-btn');
   const nameForm = document.querySelector('#name-modal form');
   const emailForm = document.querySelector('#email-modal form');
   const passwordForm = document.querySelector('#password-modal form');
   const completedSelect = document.getElementById('completed-todos-action');
   const completedMessage = document.getElementById('completed-action-message');
-
-  function showMessage(message, type = 'info') {
-    const existing = document.getElementById('settings-toast');
-    if (existing) existing.remove();
-
-    const toast = document.createElement('div');
-    toast.id = 'settings-toast';
-    toast.textContent = message;
-    toast.style.position = 'fixed';
-    toast.style.bottom = '24px';
-    toast.style.right = '24px';
-    toast.style.padding = '12px 16px';
-    toast.style.borderRadius = '12px';
-    toast.style.color = '#fff';
-    toast.style.zIndex = '9999';
-    toast.style.boxShadow = '0 10px 30px rgba(0,0,0,0.15)';
-    toast.style.backgroundColor = type === 'error' ? '#dc2626' : '#2563eb';
-    document.body.appendChild(toast);
-    setTimeout(() => toast.remove(), 4000);
-  }
 
   async function refreshCompletedAction() {
     if (!completedSelect) return;
@@ -57,7 +40,7 @@ document.addEventListener('DOMContentLoaded', () => {
         if (!response.ok) {
           completedMessage.textContent = result.error || 'Failed to save preference.';
           completedMessage.classList.add('text-red-500');
-          showMessage(result.error || 'Failed to save preference.', 'error');
+          flyToast(result.error || 'Failed to save preference.', 'error', 4, { position: 'top-right' });
           return;
         }
         completedMessage.textContent = 'Preference saved.';
@@ -81,9 +64,9 @@ document.addEventListener('DOMContentLoaded', () => {
     nameForm.addEventListener('submit', async (e) => {
       e.preventDefault();
       const newName = document.getElementById('new-name').value.trim();
-      
+
       if (!newName) {
-        showMessage('New name is required', 'error');
+        flyToast('New name is required', 'error', 4, { position: 'top-right' });
         return;
       }
 
@@ -95,14 +78,14 @@ document.addEventListener('DOMContentLoaded', () => {
         });
         const data = await response.json();
         if (!response.ok) {
-          showMessage(data.error || 'Failed to update name', 'error');
+          flyToast(data.error || 'Failed to update name', 'error', 4, { position: 'top-right' });
           return;
         }
-        showMessage('Name updated successfully', 'success');
+        flyToast('Name updated successfully', 'success', 4, { position: 'top-right' });
         closeModal('name-modal');
       } catch (error) {
         console.error('Name update error:', error);
-        showMessage('Network error while updating name.', 'error');
+        flyToast('Network error while updating name.', 'error', 4, { position: 'top-right' });
       }
     })
   }
@@ -114,7 +97,7 @@ document.addEventListener('DOMContentLoaded', () => {
       const currentPassword = document.getElementById('current-email-password').value;
 
       if (!newEmail || !currentPassword) {
-        showMessage('Both new email and current password are required.', 'error');
+        flyToast('Both new email and current password are required.', 'error', 4, { position: 'top-right' });
         return;
       }
 
@@ -126,15 +109,15 @@ document.addEventListener('DOMContentLoaded', () => {
         });
         const data = await response.json();
         if (!response.ok) {
-          showMessage(data.error || 'Failed to update email.', 'error');
+          flyToast(data.error || 'Failed to update email.', 'error', 4, { position: 'top-right' });
           return;
         }
 
-        showMessage('Verification code sent to new email.', 'success');
+        flyToast('Verification code sent to new email.', 'success', 4, { position: 'top-right' });
         window.location.href = '/verify?email=' + encodeURIComponent(data.email || newEmail);
       } catch (error) {
         console.error('Email update error:', error);
-        showMessage('Network error while updating email.', 'error');
+        flyToast('Network error while updating email.', 'error', 4, { position: 'top-right' });
       }
     });
   }
@@ -146,7 +129,7 @@ document.addEventListener('DOMContentLoaded', () => {
       const newPassword = document.getElementById('new-password').value;
 
       if (!currentPassword || !newPassword) {
-        showMessage('Both current and new password are required.', 'error');
+        flyToast('Both current and new password are required.', 'error', 4, { position: 'top-right' });
         return;
       }
 
@@ -158,27 +141,27 @@ document.addEventListener('DOMContentLoaded', () => {
         });
         const data = await response.json();
         if (!response.ok) {
-          showMessage(data.error || 'Failed to update password.', 'error');
+          flyToast(data.error || 'Failed to update password.', 'error', 4, { position: 'top-right' });
           return;
         }
 
-        showMessage('Password updated successfully.', 'success');
+        flyToast('Password updated successfully.', 'success', 4, { position: 'top-right' });
         closeModal('password-modal');
       } catch (error) {
         console.error('Password update error:', error);
-        showMessage('Network error while updating password.', 'error');
+        flyToast('Network error while updating password.', 'error', 4, { position: 'top-right' });
       }
     });
   }
 
-  if (clearTodosBtn) {
+  if (clearTodosBtn && clearTodosBtnText) {
     clearTodosBtn.addEventListener('click', async () => {
       const confirmed = confirm('Are you sure you want to delete all todos? This action cannot be undone.');
       if (!confirmed) return;
 
       try {
         clearTodosBtn.disabled = true;
-        clearTodosBtn.innerText = 'Clearing...';
+        clearTodosBtnText.innerText = 'Clearing...';
 
         const response = await fetch('/api/todos', {
           method: 'DELETE',
@@ -188,17 +171,19 @@ document.addEventListener('DOMContentLoaded', () => {
         const data = await response.json();
 
         if (response.ok && data.success) {
-          showMessage('Your Todos has been deleted.', 'success');
-        } else {
-          showMessage(data.error || 'Failed to delete todos. Please try again.', 'error');
+          flyToast('Your Todos has been deleted.', 'success', 3, { position: 'top-right' });
+          clearTodosBtnText.innerText = 'Clear Todos';
           clearTodosBtn.disabled = false;
-          clearTodosBtn.innerText = 'Clear Todos';
+        } else {
+          flyToast(data.error || 'Failed to delete todos. Please try again.', 'error', 3, { position: 'top-right' });
+          clearTodosBtn.disabled = false;
+          clearTodosBtnText.innerText = 'Clear Todos';
         }
       } catch (error) {
         console.error('Error during todos deletion:', error);
-        showMessage('A network error occurred. Please try again.', 'error');
+        flyToast('A network error occurred. Please try again.', 'error', 3, { position: 'top-right' });
         clearTodosBtn.disabled = false;
-        clearTodosBtn.innerText = 'Clear Todos';
+        clearTodosBtnText.innerText = 'Clear Todos';
       }
     })
   }
@@ -219,16 +204,16 @@ document.addEventListener('DOMContentLoaded', () => {
         const data = await response.json();
 
         if (response.ok && data.success) {
-          showMessage('Your account has been deleted.', 'success');
+          flyToast('Your account has been deleted.', 'success', 4, { position: 'top-right' });
           window.location.href = '/login';
         } else {
-          showMessage(data.error || 'Failed to delete account. Please try again.', 'error');
+          flyToast(data.error || 'Failed to delete account. Please try again.', 'error', 4, { position: 'top-right' });
           deleteBtn.disabled = false;
           deleteBtn.innerText = 'Delete Account';
         }
       } catch (error) {
         console.error('Error during account deletion:', error);
-        showMessage('A network error occurred. Please try again.', 'error');
+        flyToast('A network error occurred. Please try again.', 'error', 4, { position: 'top-right' });
         deleteBtn.disabled = false;
         deleteBtn.innerText = 'Delete Account';
       }

@@ -387,7 +387,7 @@
 
     <!-- Modal Header -->
     <div class="flex items-center justify-between pb-4 border-b border-gray-100 dark:border-slate-800 mb-5">
-      <h3 class="text-xl font-bold font-audiowide">Rename List</h3>
+      <h3 class="text-xl font-bold font-audiowide">Rename Todo</h3>
       <form method="dialog">
         <button
           class="text-gray-400 hover:text-gray-600 dark:hover:text-gray-200 transition-colors cursor-pointer p-1 rounded-lg hover:bg-gray-100 dark:hover:bg-slate-800">
@@ -433,44 +433,52 @@
   <!-- Rename Button -->
   <button id="rename-todo-btn" type="button"
     class="w-full text-left px-3.5 py-2 text-sm flex items-center gap-2.5 hover:bg-gray-100 dark:hover:bg-slate-800/70 hover:text-gray-900 dark:hover:text-white transition-colors cursor-pointer rounded-lg mx-auto max-w-[calc(100%-0.75rem)]">
-    <svg xmlns="http://www.w3.org/2000/svg" class="size-4 opacity-75 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+    <svg xmlns="http://www.w3.org/2000/svg" class="size-4 opacity-75 shrink-0" fill="none" viewBox="0 0 24 24"
+      stroke="currentColor">
       <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
         d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
     </svg>
     Rename Todo
   </button>
   <div class="my-1 border-t border-gray-100 dark:border-slate-800"></div>
-  <div class="dropdown dropdown-left dropdown-hover w-full">
+  <div class="dropdown dropdown-left w-full">
     <div tabindex="0" role="button"
-      class="w-full text-left px-3.5 py-2 text-sm flex items-center justify-between hover:bg-gray-100 dark:hover:bg-slate-800/70 hover:text-gray-900 dark:hover:text-white transition-colors cursor-pointer rounded-lg mx-auto max-w-[calc(100%-0.75rem)]">
+      class="w-full text-left px-3.5 py-2 text-sm flex items-center justify-between hover:bg-gray-100 dark:hover:bg-slate-800/70 hover:text-gray-900 dark:hover:text-white transition-colors cursor-pointer rounded-lg mx-auto max-w-[calc(100%-0.75rem)] focus:outline-none">
       <div class="flex items-center gap-2.5">
-        <svg xmlns="http://www.w3.org/2000/svg" class="size-4 opacity-75 shrink-0 fill-current" viewBox="0 -960 960 960">
-          <path d="m354-287 126-76 126 77-33-144 111-96-146-13-58-136-58 135-146 13 111 97-33 143ZM233-120l65-281L80-590l288-25 112-265 112 265 288 25-218 189 65 281-247-149-247 149Zm247-350Z" />
+        <svg xmlns="http://www.w3.org/2000/svg" class="size-4 opacity-75 shrink-0 fill-current"
+          viewBox="0 -960 960 960">
+          <path
+            d="m354-287 126-76 126 77-33-144 111-96-146-13-58-136-58 135-146 13 111 97-33 143ZM233-120l65-281L80-590l288-25 112-265 112 265 288 25-218 189 65 281-247-149-247 149Zm247-350Z" />
         </svg>
         Change Priority
       </div>
       <!-- Submenu Indicator Arrow -->
-      <svg xmlns="http://www.w3.org/2000/svg" class="size-3.5 opacity-50" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+      <svg xmlns="http://www.w3.org/2000/svg" class="size-3.5 opacity-50" fill="none" viewBox="0 0 24 24"
+        stroke="currentColor">
         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7" />
       </svg>
     </div>
 
     <!-- Submenu Content -->
-    <ul tabindex="0" class="dropdown-content menu z-1010 p-1.5 shadow-2xl bg-white dark:bg-[#131f38] border border-gray-200 dark:border-slate-800 rounded-xl w-44 gap-1 mr-1">
+    <ul tabindex="0"
+      class="dropdown-content menu z-1010 mr-2 p-1.5 shadow-2xl bg-white dark:bg-[#131f38] border border-gray-200 dark:border-slate-800 rounded-xl w-44 gap-1 before:absolute before:-right-3 before:top-0 before:h-full before:w-4 before:content-['']">
       <li>
-        <button type="button" data-priority="high" class="w-full text-xs font-semibold px-2.5 py-2 rounded-lg text-red-600 dark:text-red-400 bg-red-50 dark:bg-red-950/40 hover:bg-red-100 dark:hover:bg-red-900/60 flex items-center gap-2">
+        <button type="button" data-priority="high"
+          class="w-full text-xs font-semibold px-2.5 py-2 rounded-lg text-red-600 dark:text-red-400 bg-red-50 dark:bg-red-950/40 hover:bg-red-100 dark:hover:bg-red-900/60 flex items-center gap-2">
           <span class="size-2 rounded-full bg-red-500"></span>
           High Priority
         </button>
       </li>
       <li>
-        <button type="button" data-priority="medium" class="w-full text-xs font-semibold px-2.5 py-2 rounded-lg text-amber-700 dark:text-amber-400 bg-amber-50 dark:bg-amber-950/40 hover:bg-amber-100 dark:hover:bg-amber-900/60 flex items-center gap-2">
+        <button type="button" data-priority="medium"
+          class="w-full text-xs font-semibold px-2.5 py-2 rounded-lg text-amber-700 dark:text-amber-400 bg-amber-50 dark:bg-amber-950/40 hover:bg-amber-100 dark:hover:bg-amber-900/60 flex items-center gap-2">
           <span class="size-2 rounded-full bg-amber-500"></span>
           Medium Priority
         </button>
       </li>
       <li>
-        <button type="button" data-priority="low" class="w-full text-xs font-semibold px-2.5 py-2 rounded-lg text-blue-700 dark:text-blue-400 bg-blue-50 dark:bg-blue-950/40 hover:bg-blue-100 dark:hover:bg-blue-900/60 flex items-center gap-2">
+        <button type="button" data-priority="low"
+          class="w-full text-xs font-semibold px-2.5 py-2 rounded-lg text-blue-700 dark:text-blue-400 bg-blue-50 dark:bg-blue-950/40 hover:bg-blue-100 dark:hover:bg-blue-900/60 flex items-center gap-2">
           <span class="size-2 rounded-full bg-blue-500"></span>
           Low Priority
         </button>
@@ -483,7 +491,8 @@
   <!-- Delete Button -->
   <button id="delete-todo-btn" type="button"
     class="w-full text-left px-3.5 py-2 text-sm flex items-center gap-2.5 text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-950/40 transition-colors cursor-pointer rounded-lg mx-auto max-w-[calc(100%-0.75rem)]">
-    <svg xmlns="http://www.w3.org/2000/svg" class="size-4 opacity-75 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+    <svg xmlns="http://www.w3.org/2000/svg" class="size-4 opacity-75 shrink-0" fill="none" viewBox="0 0 24 24"
+      stroke="currentColor">
       <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
         d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
     </svg>
