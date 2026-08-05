@@ -66,7 +66,7 @@ document.addEventListener('DOMContentLoaded', () => {
       const newName = document.getElementById('new-name').value.trim();
 
       if (!newName) {
-        flyToast('New name is required', 'error', 4, { position: 'top-right' });
+        flyToast('New name is required', 'error');
         return;
       }
 
@@ -78,14 +78,14 @@ document.addEventListener('DOMContentLoaded', () => {
         });
         const data = await response.json();
         if (!response.ok) {
-          flyToast(data.error || 'Failed to update name', 'error', 4, { position: 'top-right' });
+          flyToast(data.error || 'Failed to update name', 'error');
           return;
         }
-        flyToast('Name updated successfully', 'success', 4, { position: 'top-right' });
+        flyToast('Name updated successfully', 'success');
         closeModal('name-modal');
       } catch (error) {
         console.error('Name update error:', error);
-        flyToast('Network error while updating name.', 'error', 4, { position: 'top-right' });
+        flyToast('Network error while updating name.', 'error');
       }
     })
   }
@@ -97,7 +97,7 @@ document.addEventListener('DOMContentLoaded', () => {
       const currentPassword = document.getElementById('current-email-password').value;
 
       if (!newEmail || !currentPassword) {
-        flyToast('Both new email and current password are required.', 'error', 4, { position: 'top-right' });
+        flyToast('Both new email and current password are required.', 'error');
         return;
       }
 
@@ -109,15 +109,15 @@ document.addEventListener('DOMContentLoaded', () => {
         });
         const data = await response.json();
         if (!response.ok) {
-          flyToast(data.error || 'Failed to update email.', 'error', 4, { position: 'top-right' });
+          flyToast(data.error || 'Failed to update email.', 'error');
           return;
         }
 
-        flyToast('Verification code sent to new email.', 'success', 4, { position: 'top-right' });
+        flyToast('Verification code sent to new email.', 'success');
         window.location.href = '/verify?email=' + encodeURIComponent(data.email || newEmail);
       } catch (error) {
         console.error('Email update error:', error);
-        flyToast('Network error while updating email.', 'error', 4, { position: 'top-right' });
+        flyToast('Network error while updating email.', 'error');
       }
     });
   }
@@ -129,7 +129,7 @@ document.addEventListener('DOMContentLoaded', () => {
       const newPassword = document.getElementById('new-password').value;
 
       if (!currentPassword || !newPassword) {
-        flyToast('Both current and new password are required.', 'error', 4, { position: 'top-right' });
+        flyToast('Both current and new password are required.', 'error');
         return;
       }
 
@@ -141,22 +141,23 @@ document.addEventListener('DOMContentLoaded', () => {
         });
         const data = await response.json();
         if (!response.ok) {
-          flyToast(data.error || 'Failed to update password.', 'error', 4, { position: 'top-right' });
+          flyToast(data.error || 'Failed to update password.', 'error');
           return;
         }
 
-        flyToast('Password updated successfully.', 'success', 4, { position: 'top-right' });
+        flyToast('Password updated successfully.', 'success');
         closeModal('password-modal');
       } catch (error) {
         console.error('Password update error:', error);
-        flyToast('Network error while updating password.', 'error', 4, { position: 'top-right' });
+        flyToast('Network error while updating password.', 'error');
       }
     });
   }
 
   if (clearTodosBtn && clearTodosBtnText) {
     clearTodosBtn.addEventListener('click', async () => {
-      const confirmed = confirm('Are you sure you want to delete all todos? This action cannot be undone.');
+      // const confirmed = confirm('Are you sure you want to delete all todos? This action cannot be undone.'); 
+      const confirmed = await showConfirm('Are you sure you want to delete all todos? This action cannot be undone.', 'Delete All Todos?');
       if (!confirmed) return;
 
       try {
@@ -171,17 +172,17 @@ document.addEventListener('DOMContentLoaded', () => {
         const data = await response.json();
 
         if (response.ok && data.success) {
-          flyToast('Your Todos has been deleted.', 'success', 3, { position: 'top-right' });
+          flyToast('Your Todos has been deleted.', 'success');
           clearTodosBtnText.innerText = 'Clear Todos';
           clearTodosBtn.disabled = false;
         } else {
-          flyToast(data.error || 'Failed to delete todos. Please try again.', 'error', 3, { position: 'top-right' });
+          flyToast(data.error || 'Failed to delete todos. Please try again.', 'error');
           clearTodosBtn.disabled = false;
           clearTodosBtnText.innerText = 'Clear Todos';
         }
       } catch (error) {
         console.error('Error during todos deletion:', error);
-        flyToast('A network error occurred. Please try again.', 'error', 3, { position: 'top-right' });
+        flyToast('A network error occurred. Please try again.', 'error');
         clearTodosBtn.disabled = false;
         clearTodosBtnText.innerText = 'Clear Todos';
       }
@@ -190,7 +191,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
   if (deleteBtn) {
     deleteBtn.addEventListener('click', async () => {
-      const confirmed = confirm('Are you sure you want to delete your account? This action cannot be undone.');
+      const confirmed = await showConfirm('Are you sure you want to delete your account? This action cannot be undone.', 'Delete Your Account?');
       if (!confirmed) return;
 
       try {
@@ -204,16 +205,16 @@ document.addEventListener('DOMContentLoaded', () => {
         const data = await response.json();
 
         if (response.ok && data.success) {
-          flyToast('Your account has been deleted.', 'success', 4, { position: 'top-right' });
+          flyToast('Your account has been deleted.', 'success');
           window.location.href = '/login';
         } else {
-          flyToast(data.error || 'Failed to delete account. Please try again.', 'error', 4, { position: 'top-right' });
+          flyToast(data.error || 'Failed to delete account. Please try again.', 'error');
           deleteBtn.disabled = false;
           deleteBtn.innerText = 'Delete Account';
         }
       } catch (error) {
         console.error('Error during account deletion:', error);
-        flyToast('A network error occurred. Please try again.', 'error', 4, { position: 'top-right' });
+        flyToast('A network error occurred. Please try again.', 'error');
         deleteBtn.disabled = false;
         deleteBtn.innerText = 'Delete Account';
       }

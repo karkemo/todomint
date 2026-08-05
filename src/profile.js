@@ -52,7 +52,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
   if (deleteBtn) {
     deleteBtn.addEventListener('click', async () => {
-      const confirmed = confirm('Are you sure you want to delete your account? This action cannot be undone.');
+      const confirmed = await showConfirm('Are you sure you want to delete your account? This action cannot be undone.', 'Delete Your account?');
       
       if (!confirmed) return;
 
@@ -88,7 +88,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
   if (clearTodosBtn && clearTodosBtnText) {
     clearTodosBtn.addEventListener('click', async () => {
-      const confirmed = confirm('Are you sure you want to delete all todos? This action cannot be undone.');
+      const confirmed = await showConfirm('Are you sure you want to delete all todos? This action cannot be undone.', 'Delete All Todos?');
       if (!confirmed) return;
 
       try {
@@ -103,17 +103,17 @@ document.addEventListener('DOMContentLoaded', () => {
         const data = await response.json();
 
         if (response.ok && data.success) {
-          flyToast('Your Todos has been deleted.', 'success', 3, {position: 'top-right'});
+          flyToast('Your Todos has been deleted.', 'success');
           clearTodosBtnText.innerText = 'Clear Todos';
           clearTodosBtn.disabled = false;
         } else {
-          flyToast(data.error || 'Failed to delete todos. Please try again.', 'error', 3, {position: 'top-right'});
+          flyToast(data.error || 'Failed to delete todos. Please try again.', 'error');
           clearTodosBtn.disabled = false;
           clearTodosBtnText.innerText = 'Clear Todos';
         }
       } catch (error) {
         console.error('Error during todos deletion:', error);
-        flyToast('A network error occurred. Please try again.', 'error', 3, {position: 'top-right'});
+        flyToast('A network error occurred. Please try again.', 'error');
         clearTodosBtn.disabled = false;
         clearTodosBtnText.innerText = 'Clear Todos';
       }

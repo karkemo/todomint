@@ -22,7 +22,7 @@
     "dotenv": "^17.4.2",
     "express": "^5.2.1",
     "express-session": "^1.19.0",
-    "fly-toast": "^1.0.1",
+    "fly-toast": "^2.0.1",
     "nodemailer": "^9.0.3",
     "tailwindcss": "^4.3.3",
     "uuid": "^14.0.1"
