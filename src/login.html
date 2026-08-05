@@ -107,7 +107,9 @@
   </footer>
 
   <script src="/theme_changer.js"></script>
-  <script>
+  <script type="module">
+    import flyToast from '/node_modules/fly-toast/index.js';
+
     document.addEventListener('DOMContentLoaded', () => {
       const form = document.querySelector('form[action="/login"]');
       form.addEventListener('submit', async (e) => {
@@ -123,7 +125,7 @@
           });
           const data = await res.json();
           if (!res.ok) {
-            alert(data.error || 'Login failed');
+            flyToast(data.error, 'error');
             return;
           }
 
@@ -136,7 +138,7 @@
           window.location = '/dashboard';
         } catch (err) {
           console.error(err);
-          alert('Network error');
+          flyToast('Network error', 'error');
         }
       });
     });

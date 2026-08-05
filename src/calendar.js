@@ -82,7 +82,14 @@ function initCalendar() {
     }
 
     todosForSelectedDay.forEach(todo => {
-      const todoElement = createTodoElement(todo);
+      const todoElement = typeof window.createTodoElement === 'function'
+        ? window.createTodoElement(todo)
+        : (() => {
+            const fallback = document.createElement('div');
+            fallback.className = 'rounded-lg border border-gray-200/80 bg-white px-4 py-3 text-sm text-gray-700 dark:border-slate-800 dark:bg-slate-900/50 dark:text-gray-200';
+            fallback.textContent = todo?.title || 'Todo';
+            return fallback;
+          })();
       selectedDayTodos.appendChild(todoElement);
     });
   }

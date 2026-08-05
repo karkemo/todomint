@@ -1,3 +1,5 @@
+import flyToast from '/node_modules/fly-toast/index.js';
+
 async function loadNavbarUsername() {
   try {
     const response = await fetch('/api/user/name');
@@ -275,7 +277,8 @@ async function addList(event) {
     await renderCount();
   } catch (error) {
     console.error('Error creating list:', error);
-    alert(error.message || 'Failed to create list');
+    // alert(error.message || 'Failed to create list');
+    flyToast(error.message || 'Failed to create list', 'error');
   }
 }
 
@@ -325,7 +328,8 @@ async function handleAddTodoSubmit(event) {
     await renderCount();
   } catch (error) {
     console.error('Error creating todo:', error);
-    alert(error.message || 'Failed to create todo');
+    // alert(error.message || 'Failed to create todo');
+    flyToast(error.message || 'Failed to create todo', 'error');
   }
 }
 
@@ -364,6 +368,9 @@ function createTodoElement(todo) {
 
   return li;
 }
+
+window.createTodoElement = createTodoElement;
+window.syncAddTaskModalDate = syncAddTaskModalDate;
 
 function showTodoContextMenu(event, todo) {
   const menu = document.getElementById('todo-menu');
@@ -550,7 +557,8 @@ async function deleteList(listId) {
     await renderCount();
   } catch (error) {
     console.error('Error deleting list:', error);
-    alert(error.message || 'Failed to delete list');
+    // alert(error.message || 'Failed to delete list');
+    flyToast(error.message || 'Failed to delete list', 'error');
   }
 }
 
@@ -596,7 +604,8 @@ async function handleRenameListSubmit(event) {
     await renderDashboard();
   } catch (error) {
     console.error('Error renaming list:', error);
-    alert(error.message || 'Failed to rename list');
+    // alert(error.message || 'Failed to rename list');
+    flyToast(error.message || 'Failed to rename list', 'error');
   }
 }
 
@@ -1057,7 +1066,8 @@ async function handleRenameTodoSubmit(event) {
     await renderDashboard();
   } catch (error) {
     console.error('Error renaming todo:', error);
-    alert(error.message || 'Failed to rename todo');
+    // alert(error.message || 'Failed to rename todo');
+    flyToast(error.message || 'Failed to rename todo', 'error');
   }
 }
 
@@ -1078,7 +1088,7 @@ async function updateTodoDetails(todoId, payload) {
     await reloadDashboardState();
   } catch (error) {
     console.error('Error updating todo:', error);
-    alert(error.message || 'Failed to update todo');
+    flyToast(error.message || 'Failed to update todo', 'error');
   }
 }
 
@@ -1102,7 +1112,7 @@ async function deleteTodoItem(todoId) {
     await reloadDashboardState();
   } catch (error) {
     console.error('Error deleting todo:', error);
-    alert(error.message || 'Failed to delete todo');
+    flyToast(error.message || 'Failed to delete todo', 'error');
   }
 }
 
@@ -1122,6 +1132,29 @@ function escapeHTML(str) {
 }
 
 window.addEventListener('popstate', renderDashboard);
+
+Object.assign(window, {
+  openAddTaskModal,
+  openAddListModal,
+  navigateTo,
+  renderDashboard,
+  loadDashboardTodos,
+  loadDashboardLists,
+  loadUserLists,
+  loadListTodos,
+  renderCount,
+  reloadDashboardState,
+  deleteTodoItem,
+  updateTodoDetails,
+  openRenameTodoModal,
+  openRenameListModal,
+  deleteList,
+  showTodoContextMenu,
+  hideTodoContextMenu,
+  hideListContextMenu,
+  createTodoElement,
+  syncAddTaskModalDate
+});
 
 document.addEventListener('DOMContentLoaded', () => {
   const addTaskForm = document.getElementById('add-task-form');
@@ -1226,7 +1259,7 @@ document.addEventListener('DOMContentLoaded', () => {
     } catch (error) {
       console.error('Error updating todo:', error);
       checkbox.checked = !checkbox.checked;
-      alert(error.message || 'Failed to update todo');
+      flyToast(error.message || 'Failed to update todo', 'error');
     }
   });
 
@@ -1255,7 +1288,7 @@ document.addEventListener('DOMContentLoaded', () => {
       await reloadDashboardState();
     } catch (error) {
       console.error('Error deleting todo:', error);
-      alert(error.message || 'Failed to delete todo');
+      flyToast(error.message || 'Failed to delete todo', 'error');
     }
   });
 
