@@ -861,6 +861,14 @@ app.get('/login', isGuest, (req, res) => {
   res.sendFile(path.join(__dirname, 'src', 'login.html'));
 });
 
+app.get('/forgot-password', isGuest, (req, res) => {
+  res.sendFile(path.join(__dirname, 'src', 'forgot-password.html'));
+});
+
+app.get('/create-password', isGuest, (req, res) => {
+  res.sendFile(path.join(__dirname, 'src', 'create-password.html'));
+});
+
 app.get('/logout', (req, res) => {
   req.session.destroy((err) => {
     if (err) {
@@ -900,7 +908,7 @@ app.get('/verify', (req, res) => {
 
 // API: verify code
 app.post('/api/verify', async (req, res) => {
-  const { email, code } = req.body;
+  const { email, code, type } = req.body;
 
   if (!email || !code) {
     return res.status(400).json({ error: 'Email and code are required' });
@@ -933,6 +941,13 @@ app.post('/api/verify', async (req, res) => {
       return res.status(400).json({ error: 'Email does not match the current account email.' });
     }
 
+    // If this verification is part of a password reset flow, do not create a session
+    if (type === 'reset') {
+      // clear verification code so it cannot be reused
+      db.prepare('UPDATE users SET verification_code = NULL, code_expires_at = NULL WHERE id = ?').run(user.id);
+      return res.json({ success: true, redirectTo: '/create-password' });
+    }
+
     let update;
     if (user.pending_email) {
       update = db.prepare('UPDATE users SET email = pending_email, pending_email = NULL, is_verified = 1, verification_code = NULL, code_expires_at = NULL WHERE id = ?');
@@ -957,4 +972,68 @@ app.post('/api/verify', async (req, res) => {
 // host on localhost
 app.listen(PORT, () => {
   console.log(`Running on http://localhost:${PORT}`);
+});
+
+// Forgot password: send OTP to email (does not reveal existence)
+app.post('/api/auth/forgot-password', async (req, res) => {
+  const { email } = req.body;
+
+  if (!email || !validateEmail(email)) {
+    return res.status(400).json({ error: 'Valid email is required' });
+  }
+
+  try {
+    const normalizedEmail = email.toLowerCase().trim();
+    const user = db.prepare('SELECT id FROM users WHERE email = ?').get(normalizedEmail);
+
+    // If no user, respond success to avoid account enumeration
+    if (!user) {
+      return res.json({ success: true });
+    }
+
+    const code = generate6DigitCode();
+    const expiresAt = expiresInMinutes(10);
+
+    db.prepare('UPDATE users SET verification_code = ?, code_expires_at = ? WHERE id = ?')
+      .run(code, expiresAt, user.id);
+
+    try {
+      await sendVerificationCode(normalizedEmail, code);
+    } catch (err) {
+      console.error('Error sending forgot-password email:', err);
+    }
+
+    return res.json({ success: true });
+  } catch (err) {
+    console.error('Forgot password error:', err);
+    return res.status(500).json({ error: 'Failed to process request' });
+  }
+});
+
+// Reset password: update password after verification
+app.post('/api/auth/reset-password', async (req, res) => {
+  const { email, newPassword } = req.body;
+
+  if (!email || !validateEmail(email) || !newPassword) {
+    return res.status(400).json({ error: 'Email and new password are required' });
+  }
+
+  if (!validatePassword(newPassword)) {
+    return res.status(400).json({ error: 'New password must be at least 6 characters long' });
+  }
+
+  try {
+    const normalizedEmail = email.toLowerCase().trim();
+    const user = db.prepare('SELECT id FROM users WHERE email = ?').get(normalizedEmail);
+    if (!user) return res.status(404).json({ error: 'User not found' });
+
+    const hashed = await bcrypt.hash(newPassword, 10);
+    db.prepare('UPDATE users SET password = ?, verification_code = NULL, code_expires_at = NULL, is_verified = 1 WHERE id = ?')
+      .run(hashed, user.id);
+
+    return res.json({ success: true });
+  } catch (err) {
+    console.error('Reset password error:', err);
+    return res.status(500).json({ error: 'Failed to reset password' });
+  }
 });
