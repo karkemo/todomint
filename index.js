@@ -970,7 +970,7 @@ app.post('/api/verify', async (req, res) => {
 });
 
 // host on localhost
-app.listen(PORT, () => {
+app.listen(PORT, '0.0.0.0', () => {
   console.log(`Running on http://localhost:${PORT}`);
 });
 

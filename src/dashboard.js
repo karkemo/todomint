@@ -532,7 +532,7 @@ document.addEventListener('keydown', (e) => {
 async function deleteList(listId) {
   if (!listId) return;
 
-  const confirmed = window.confirm('Are you sure you want to delete this list and its todos?');
+  const confirmed = await showConfirm('Are you sure you want to delete this list and its todos?');
   if (!confirmed) return;
 
   try {
@@ -767,7 +767,9 @@ async function renderCount() {
     const todos = await response.json();
     const action = await getCompletedTodosPreference();
 
-    const importantTodos = todos.filter(isTodoImportant);
+    const importantTodos = todos.filter(
+      (todo) => isTodoImportant(todo) && (action !== 'move' || !isTodoCompleted(todo))
+    );
     const todayTodos = todos.filter((todo) => isTodoDueToday(todo) && (action !== 'move' || !isTodoCompleted(todo)));
     const completedTodos = todos.filter(isTodoCompleted);
 
@@ -876,7 +878,10 @@ function renderHomeLayout() {
           <h1 class="text-3xl font-bold">Today's Todos</h1>
           <p id="show-date" class="font-semibold text-gray-500 dark:text-gray-400">"Saturday, July 25"</p>
         </div>
-        <ul class="w-full flex flex-col gap-3" id="todos-list"></ul>
+        
+        <!-- FIX 1: Max height + scroll for left list -->
+        <ul class="w-full flex flex-col gap-3 max-h-220 overflow-y-auto pr-1" id="todos-list"></ul>
+        
         <button onclick="document.getElementById('add_task_modal').showModal()"
           class="btn btn-primary btn-outline w-full">Add Todo +</button>
       </div>
@@ -912,7 +917,10 @@ function renderHomeLayout() {
 
         <div class="w-full flex flex-col gap-3 p-5 rounded-2xl bg-white dark:bg-[#131f38] border border-gray-200/80 dark:border-slate-800 shadow-sm">
           <p id="selected-day-label" class="text-sm font-semibold text-gray-600 dark:text-gray-400">No Todos For Today</p>
-          <div id="selected-day-todos" class="w-full flex flex-col gap-3"></div>
+          
+          <!-- FIX 2: Replaced max-h-[50%] with fixed max-height & scrolling -->
+          <div id="selected-day-todos" class="w-full flex flex-col gap-3 max-h-98 overflow-y-auto pr-1"></div>
+          
           <button onclick="openAddTaskModal()"
           class="btn btn-primary btn-outline w-full">Add Todo +</button>
         </div>
@@ -928,7 +936,7 @@ function renderTodayLayout() {
         <h1 class="text-3xl font-bold">Today's Focus</h1>
         <p id="show-date" class="font-semibold text-gray-500 dark:text-gray-400">"Saturday, July 25"</p>
       </div>
-      <ul class="w-full flex flex-col gap-3" id="todos-list"></ul>
+      <ul class="w-full flex flex-col gap-3 max-h-240 overflow-y-auto pr-1" id="todos-list"></ul>
       <button onclick="openAddTaskModal()" class="btn btn-primary btn-outline w-full">Add Todo +</button>
     </div>
   `;
@@ -938,7 +946,7 @@ function renderImportantLayout() {
   return /*html*/`
     <div class="w-full max-w-3xl mx-auto flex flex-col gap-6 items-center justify-center">
       <h1 class="text-3xl font-bold">Important Todos</h1>
-      <ul class="w-full flex flex-col gap-3 items-center justify-center" id="important-todos"></ul>
+      <ul class="w-full flex flex-col gap-3 max-h-270 overflow-y-auto pr-1 items-center" id="important-todos"></ul>
     </div>
   `
 }
@@ -947,7 +955,7 @@ function renderCompletedLayout() {
   return /*html*/`
     <div class="w-full max-w-3xl mx-auto flex flex-col gap-6 items-center justify-center">
       <h1 class="text-3xl font-bold">Completed Todos</h1>
-      <ul class="w-full flex flex-col gap-3 items-center justify-center" id="completed-todos"></ul>
+      <ul class="w-full flex flex-col gap-3 max-h-265 overflow-y-auto pr-1 items-center" id="completed-todos"></ul>
     </div>
   `
 }
@@ -956,7 +964,7 @@ function renderAllLayout() {
   return /*html*/`
     <div class="w-full max-w-3xl mx-auto flex flex-col gap-6 items-center justify-center">
       <h1 class="text-3xl font-bold">All Todos</h1>
-      <ul class="w-full flex flex-col gap-3 items-center justify-center" id="all-todos"></ul>
+      <ul class="w-full flex flex-col gap-3 max-h-270 overflow-y-auto pr-1" id="all-todos"></ul>
     </div>
   `
 }
@@ -1006,7 +1014,7 @@ function renderCalendarLayout() {
               <!-- <p class="text-sm text-gray-500 dark:text-gray-400">View tasks for the selected date.</p> -->
             </div>
           </div>
-          <div id="selected-day-todos" class="w-full flex flex-col gap-3"></div>
+          <div id="selected-day-todos" class="w-full flex flex-col gap-3 max-h-240 overflow-y-auto pr-1"></div>
           <button onclick="openAddTaskModal()"
           class="btn btn-primary btn-outline w-full">Add Todo +</button>
         </div>
@@ -1019,7 +1027,7 @@ function renderListLayout() {
   return /*html*/`
     <div class="w-full max-w-3xl mx-auto flex flex-col gap-6 items-center justify-center">
       <h1 id="list-name" class="text-3xl font-bold">List name</h1>
-      <ul class="w-full flex flex-col gap-3 items-center justify-center" id="todos-list-only"></ul>
+      <ul class="w-full flex flex-col gap-3 max-h-250 overflow-y-auto pr-1 items-center" id="todos-list-only"></ul>
       <button onclick="openAddTaskModal()" class="btn btn-primary btn-outline w-full">Add Todo +</button>
     </div>
   `
@@ -1096,7 +1104,7 @@ async function updateTodoDetails(todoId, payload) {
 async function deleteTodoItem(todoId) {
   if (!todoId) return;
 
-  const confirmed = window.confirm('Are you sure you want to delete this todo?');
+  const confirmed = await showConfirm('Are you sure you want to delete this todo?');
   if (!confirmed) return;
 
   try {
@@ -1272,7 +1280,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
     event.preventDefault();
 
-    const confirmed = window.confirm('Are you sure you want to delete this todo?');
+    const confirmed = await showConfirm('Are you sure you want to delete this todo?');
     if (!confirmed) return;
 
     try {

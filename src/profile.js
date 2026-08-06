@@ -70,7 +70,7 @@ document.addEventListener('DOMContentLoaded', () => {
         const data = await response.json();
 
         if (response.ok && data.success) {
-          alert('Your account has been deleted.');
+          flyToast('Your account has been deleted.', 'success');
           window.location.href = '/login'; 
         } else {
           alert(data.error || 'Failed to delete account. Please try again.');

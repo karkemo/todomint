@@ -9,6 +9,8 @@
   <title>Dashboard - Todo</title>
   <script src="/dashboard.js" type="module"></script>
   <script src="/calendar.js"></script>
+  <script src="/show_confirm.js"></script>
+  <script src="/dashboard_view.js"></script>
   <script>
     if (localStorage.getItem('color-theme') === 'dark' || (!('color-theme' in localStorage) && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
       document.documentElement.classList.add('dark');
@@ -28,14 +30,22 @@
 </head>
 
 <body>
-  <div class="w-full h-screen bg-[#faf7f5] dark:bg-[#0f172a] flex flex-col font-audiowide">
+  <div class="w-full h-full min-h-screen bg-[#faf7f5] dark:bg-[#0f172a] flex flex-col font-audiowide">
     <!-- Navbar -->
     <nav
       class="w-[99%] h-fit px-6 py-5 mt-5 mx-3 rounded-2xl flex flex-row items-center justify-between bg-[#efeae6] dark:bg-[#0c1425] z-1000">
-      <a href="/" class="flex flex-row gap-3 items-center cursor-pointer">
-        <img src="/assets/logo.png" alt="logo" class="size-10">
-        <p class="text-2xl font-mono dark:text-white text-black">Todo</p>
-      </a>
+      <div class="flex flex-row items-center justify-center gap-2">
+        <!-- <img src="/assets/right-arrow.svg" alt="arrow" id="arrow" class="cursor-pointer"> -->
+        <div class="bg-gray-200 dark:bg-gray-800 p-2 rounded-2xl cursor-pointer" id="arrow">
+          <svg xmlns="http://www.w3.org/2000/svg" height="24px" viewBox="0 -960 960 960" width="24px" class="fill-black dark:fill-[#e3e3e3]"><path d="M200-120q-33 0-56.5-23.5T120-200v-560q0-33 23.5-56.5T200-840h560q33 0 56.5 23.5T840-760v560q0 33-23.5 56.5T760-120H200Zm120-80v-560H200v560h120Zm80 0h360v-560H400v560Zm-80 0H200h120Z"/></svg>
+        </div>
+        <!-- <button id="arrow" aria-label="Toggle Sidebar" class="cursor-pointer p-2 bg-gray-200 dark:bg-gray-800 rounded-2xl"></button> -->
+  
+        <a href="/" class="flex flex-row gap-3 items-center cursor-pointer">
+          <img src="/assets/logo.png" alt="logo" class="size-10">
+          <p class="text-2xl font-mono dark:text-white text-black">Todo</p>
+        </a>
+      </div>
 
       <div class="gap-5 flex flex-row">
         <button id="theme-toggle" type="button" aria-label="Toggle theme"
@@ -93,7 +103,8 @@
     <div class="w-full h-full bg-transparent flex flex-row pb-8">
       <!-- sidebar -->
       <div
-        class="w-[10%] px-6 py-5 mt-5 mx-3 h-full rounded-2xl flex flex-col gap-6 items-center text-gray-800 dark:text-gray-200 bg-[#efeae6] dark:bg-[#0c1425] z-1000">
+        id="sidebar"
+        class="max-h-280 overflow-y-auto pr-1 w-64 shrink-0 px-6 py-5 mt-5 mx-3 h-full rounded-2xl flex-col gap-6 items-center text-gray-800 dark:text-gray-200 bg-[#efeae6] dark:bg-[#0c1425] z-1000 flex">
         <button onclick="openAddTaskModal()" class="btn btn-primary btn-outline w-full">Add Todo +</button>
         <div class="flex flex-col items-center justify-center gap-2 w-full">
           <p>Navigation</p>
