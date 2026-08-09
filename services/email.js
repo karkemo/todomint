@@ -15,7 +15,7 @@ const transporter = nodemailer.createTransport({
 export async function sendVerificationCode(toEmail, code) {
   try {
     const mailOptions = {
-      from: `"Todo App" <karem.kemo.ragab@gmail.com>`, // إيميلك المعتمد في Brevo
+      from: `"Todo App" <karem.kemo.ragab@gmail.com>`,
       to: toEmail,
       subject: 'Your Verification Code',
       html: `

@@ -16,12 +16,13 @@ const {
   deleteTodo,
   updateTodo
 } = require('../controllers/todoController');
+const { checkListLock } = require('../middleware/checkListLock');
 
 router.get('/', getTodos);
-router.post('/', validate(createTodoSchema), createTodo);
+router.post('/', validate(createTodoSchema), createTodo, checkListLock);
 router.delete('/', deleteAllTodos);
-router.patch('/:id', validate(updateTodoStatusSchema), updateTodoStatus);
-router.patch('/:id/details', validate(updateTodoDetailsSchema), updateTodo);
+router.patch('/:id', validate(updateTodoStatusSchema), updateTodoStatus, checkListLock);
+router.patch('/:id/details', validate(updateTodoDetailsSchema), updateTodo, checkListLock);
 router.delete('/:id', validate(deleteTodoSchema), deleteTodo);
 
 module.exports = router;

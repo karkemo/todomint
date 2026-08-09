@@ -1,5 +1,8 @@
+// index.js
+
 const express = require('express');
-const Database = require('better-sqlite3');
+// const Database = require('better-sqlite3');
+const { createClient } = require('@libsql/client'); // new
 const path = require('path');
 const session = require('express-session');
 const helmet = require('helmet');
@@ -17,8 +20,11 @@ const userRoutes = require('./routes/userRoutes');
 const noCache = require('./middleware/noCache');
 
 const app = express();
-const PORT = 3000;
-const db = new Database('app.db');
+const PORT = process.env.PORT || 3000;
+const db = createClient({
+  url: process.env.TURSO_DATABASE_URL,
+  authToken: process.env.TURSO_AUTH_TOKEN,
+});
 
 app.use(express.urlencoded({ extended: true }));
 app.use(express.json());
@@ -42,83 +48,69 @@ app.use(session({
 app.use(express.static(path.join(__dirname, 'src')));
 app.use('/node_modules', express.static(path.join(__dirname, 'node_modules')));
 
-db.pragma('foreign_keys = ON');
+async function initDb() {
+  try {
+    await db.execute('PRAGMA foreign_keys = ON;');
 
-function ensureColumn(table, column, definition) {
-  const columns = db.prepare(`PRAGMA table_info(${table})`).all();
-  const exists = columns.some((col) => col.name === column);
-  if (!exists) {
-    db.prepare(`ALTER TABLE ${table} ADD COLUMN ${column} ${definition}`).run();
+    await db.execute(`
+      CREATE TABLE IF NOT EXISTS users (
+        id TEXT PRIMARY KEY,
+        name TEXT NOT NULL,
+        email TEXT UNIQUE NOT NULL,
+        password TEXT NOT NULL,
+        is_verified INTEGER DEFAULT 0,
+        verification_code TEXT,
+        code_expires_at DATETIME,
+        completed_todos_action TEXT DEFAULT 'keep',
+        pending_email TEXT,
+        created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+        trial_ends_at TEXT,
+        subscription_status TEXT DEFAULT 'trail',
+        plan TEXT DEFAULT 'free'
+      );
+    `);
+
+    await db.execute(`
+      CREATE TABLE IF NOT EXISTS lists (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        title TEXT NOT NULL,
+        user_id TEXT NOT NULL,
+        FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
+      );
+    `);
+
+    await db.execute(`
+      CREATE TABLE IF NOT EXISTS todos (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        title TEXT NOT NULL,
+        is_completed INTEGER DEFAULT 0,
+        due_date TEXT,
+        created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+        priority TEXT CHECK(priority IN ('low', 'medium', 'high')) DEFAULT 'medium',
+        list_id INTEGER NOT NULL,
+        FOREIGN KEY (list_id) REFERENCES lists(id) ON DELETE CASCADE
+      );
+    `);
+
+    await db.execute(`
+      CREATE TABLE IF NOT EXISTS feedbacks (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        user_id TEXT,
+        type TEXT NOT NULL, -- 'bug', 'feedback', 'feature_request'
+        message TEXT NOT NULL,
+        created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+        FOREIGN KEY (user_id) REFERENCES users(id)
+      );
+    `);
+
+
+    console.log('Turso Database initialized successfully.');
+  } catch (err) {
+    console.error('Failed to initialize Turso DB:', err);
   }
 }
 
-// db.exec(`
-//   CREATE TABLE IF NOT EXISTS users (
-//     id TEXT PRIMARY KEY,
-//     name TEXT NOT NULL,
-//     email TEXT UNIQUE NOT NULL,
-//     password TEXT NOT NULL,
-//     is_verified INTEGER DEFAULT 0,
-//     verification_code TEXT,
-//     code_expires_at DATETIME,
-//     completed_todos_action TEXT DEFAULT 'keep',
-//     created_at DATETIME DEFAULT CURRENT_TIMESTAMP
-//   );
-
-//   CREATE TABLE IF NOT EXISTS lists (
-//     id INTEGER PRIMARY KEY AUTOINCREMENT,
-//     title TEXT NOT NULL,
-//     user_id TEXT NOT NULL,
-//     FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
-//   );
-
-//   CREATE TABLE IF NOT EXISTS todos (
-//     id INTEGER PRIMARY KEY AUTOINCREMENT,
-//     title TEXT NOT NULL,
-//     is_completed INTEGER DEFAULT 0,
-//     due_date TEXT,
-//     created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
-//     priority TEXT CHECK(priority IN ('low', 'medium', 'high')) DEFAULT 'medium',
-//     list_id INTEGER NOT NULL,
-//     FOREIGN KEY (list_id) REFERENCES lists(id) ON DELETE CASCADE
-//   );
-// `);
-
-// ensureColumn('users', 'completed_todos_action', "TEXT DEFAULT 'keep'");
-// ensureColumn('users', 'pending_email', 'TEXT');
-
-db.exec(`
-  CREATE TABLE IF NOT EXISTS users (
-    id TEXT PRIMARY KEY,
-    name TEXT NOT NULL,
-    email TEXT UNIQUE NOT NULL,
-    password TEXT NOT NULL,
-    is_verified INTEGER DEFAULT 0,
-    verification_code TEXT,
-    code_expires_at DATETIME,
-    completed_todos_action TEXT DEFAULT 'keep',
-    pending_email TEXT,
-    created_at DATETIME DEFAULT CURRENT_TIMESTAMP
-  );
-
-  CREATE TABLE IF NOT EXISTS lists (
-    id INTEGER PRIMARY KEY AUTOINCREMENT,
-    title TEXT NOT NULL,
-    user_id TEXT NOT NULL,
-    FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
-  );
-
-  CREATE TABLE IF NOT EXISTS todos (
-    id INTEGER PRIMARY KEY AUTOINCREMENT,
-    title TEXT NOT NULL,
-    is_completed INTEGER DEFAULT 0,
-    due_date TEXT,
-    created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
-    priority TEXT CHECK(priority IN ('low', 'medium', 'high')) DEFAULT 'medium',
-    list_id INTEGER NOT NULL,
-    FOREIGN KEY (list_id) REFERENCES lists(id) ON DELETE CASCADE
-  );
-`);
+initDb();
 
 function generate6DigitCode() {
   return String(Math.floor(100000 + Math.random() * 900000));
@@ -189,10 +181,15 @@ app.get('/report', isAuthenticated, (req, res) => {
   res.sendFile(path.join(__dirname, 'src', 'report.html'));
 });
 
-app.get('/verify', (req, res) => {
+app.get('/verify', async (req, res) => {
   if (req.session && req.session.userId) {
     try {
-      const user = db.prepare('SELECT is_verified FROM users WHERE id = ?').get(req.session.userId);
+      const result = await db.execute({
+        sql: 'SELECT is_verified FROM users WHERE id = ?',
+        args: [req.session.userId]
+      });
+      const user = result.rows[0];
+
       if (user && (user.is_verified === 1 || user.is_verified === '1')) {
         return res.redirect('/dashboard');
       }
@@ -205,18 +202,27 @@ app.get('/verify', (req, res) => {
   res.sendFile(path.join(__dirname, 'src', 'verify.html'));
 });
 
-app.get('/api/users', (req, res) => {
-  const users = db.prepare('SELECT id, name, email FROM users').all();
-  res.json(users);
+app.get('/api/users', async (req, res) => {
+  try {
+    const result = await db.execute('SELECT id, name, email FROM users');
+    res.json(result.rows);
+  } catch (err) {
+    res.status(500).json({ error: 'Database error' });
+  }
 });
 
-app.get('/api/user', (req, res) => {
+app.get('/api/user', async (req, res) => {
   if (!req.session || !req.session.userId) {
     return res.status(401).json({ error: 'Unauthorized' });
   }
 
   try {
-    const user = db.prepare('SELECT id, name, email, completed_todos_action, created_at FROM users WHERE id = ?').get(req.session.userId);
+    const result = await db.execute({
+      sql: 'SELECT id, name, email, completed_todos_action, created_at FROM users WHERE id = ?',
+      args: [req.session.userId]
+    });
+
+    const user = result.rows[0];
 
     if (!user) {
       return res.status(404).json({ error: 'User not found' });

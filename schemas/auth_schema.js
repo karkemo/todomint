@@ -46,7 +46,7 @@ const verifyCodeSchema = z.object({
       .union([z.string(), z.number()])
       .transform((val) => String(val).trim())
       .refine((val) => val.length > 0, { message: 'Verification code is required' }),
-    type: z.string().optional()
+    type: z.string().nullable().optional()
   })
 });
 

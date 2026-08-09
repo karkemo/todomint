@@ -9,8 +9,10 @@ async function loadNavbarUsername() {
     const data = await response.json();
 
     const userNameElement = document.getElementById('username');
-    if (userNameElement) {
+    const fullUserNameElement = document.getElementById('user-name');
+    if (userNameElement && fullUserNameElement) {
       userNameElement.textContent = data.name[0].toUpperCase();
+      fullUserNameElement.textContent = data.name
     }
   } catch (error) {
     console.error('Error loading username:', error);
@@ -654,6 +656,16 @@ async function loadImportantTodos() {
   }
 }
 
+function openSubscriptionModal() {
+  const modal = document.getElementById('subscription-modal');
+  if (modal) modal.classList.remove('hidden');
+}
+
+function closeSubscriptionModal() {
+  const modal = document.getElementById('subscription-modal');
+  if (modal) modal.classList.add('hidden');
+}
+
 // load completed todos only
 async function loadCompletedTodos() {
   const element = document.getElementById('completed-todos');
@@ -882,7 +894,9 @@ function renderHomeLayout() {
         </div>
         
         <!-- FIX 1: Max height + scroll for left list -->
-        <ul class="w-full flex flex-col gap-3 max-h-220 overflow-y-auto pr-1" id="todos-list"></ul>
+        <ul class="w-full flex flex-col gap-3 max-h-220 overflow-y-auto pr-1 items-center justify-center" id="todos-list">
+          <span class="loading loading-spinner loading-xl"></span>
+        </ul>
         
         <button onclick="document.getElementById('add_task_modal').showModal()"
           class="btn btn-primary btn-outline w-full">Add Todo +</button>
@@ -938,7 +952,9 @@ function renderTodayLayout() {
         <h1 class="text-3xl font-bold">Today's Focus</h1>
         <p id="show-date" class="font-semibold text-gray-500 dark:text-gray-400">"Saturday, July 25"</p>
       </div>
-      <ul class="w-full flex flex-col gap-3 max-h-240 overflow-y-auto pr-1" id="todos-list"></ul>
+      <ul class="w-full flex flex-col items-center justify-center gap-3 max-h-240 overflow-y-auto pr-1" id="todos-list">
+        <span class="loading loading-spinner loading-xl"></span>
+      </ul>
       <button onclick="openAddTaskModal()" class="btn btn-primary btn-outline w-full">Add Todo +</button>
     </div>
   `;
@@ -948,7 +964,9 @@ function renderImportantLayout() {
   return /*html*/`
     <div class="w-full max-w-3xl mx-auto flex flex-col gap-6 items-center justify-center">
       <h1 class="text-3xl font-bold">Important Todos</h1>
-      <ul class="w-full flex flex-col gap-3 max-h-270 overflow-y-auto pr-1 items-center" id="important-todos"></ul>
+      <ul class="w-full flex flex-col gap-3 max-h-270 overflow-y-auto pr-1 items-center justify-center" id="important-todos">
+        <span class="loading loading-spinner loading-xl"></span>
+      </ul>
     </div>
   `
 }
@@ -957,7 +975,9 @@ function renderCompletedLayout() {
   return /*html*/`
     <div class="w-full max-w-3xl mx-auto flex flex-col gap-6 items-center justify-center">
       <h1 class="text-3xl font-bold">Completed Todos</h1>
-      <ul class="w-full flex flex-col gap-3 max-h-265 overflow-y-auto pr-1 items-center" id="completed-todos"></ul>
+      <ul class="w-full flex flex-col gap-3 max-h-265 overflow-y-auto pr-1 items-center justify-center" id="completed-todos">
+        <span class="loading loading-spinner loading-xl"></span>
+      </ul>
     </div>
   `
 }
@@ -966,7 +986,9 @@ function renderAllLayout() {
   return /*html*/`
     <div class="w-full max-w-3xl mx-auto flex flex-col gap-6 items-center justify-center">
       <h1 class="text-3xl font-bold">All Todos</h1>
-      <ul class="w-full flex flex-col gap-3 max-h-270 overflow-y-auto pr-1" id="all-todos"></ul>
+      <ul class="w-full flex flex-col gap-3 max-h-270 overflow-y-auto pr-1 items-center justify-center" id="all-todos">
+        <span class="loading loading-spinner loading-xl"></span>
+      </ul>
     </div>
   `
 }
@@ -1028,8 +1050,12 @@ function renderCalendarLayout() {
 function renderListLayout() {
   return /*html*/`
     <div class="w-full max-w-3xl mx-auto flex flex-col gap-6 items-center justify-center">
-      <h1 id="list-name" class="text-3xl font-bold">List name</h1>
-      <ul class="w-full flex flex-col gap-3 max-h-250 overflow-y-auto pr-1 items-center" id="todos-list-only"></ul>
+      <h1 id="list-name" class="text-3xl font-bold">
+        <span class="loading loading-spinner loading-xl"></span>
+      </h1>
+      <ul class="w-full flex flex-col gap-3 max-h-250 overflow-y-auto pr-1 items-center justify-center" id="todos-list-only">
+        <span class="loading loading-spinner loading-xl"></span>
+      </ul>
       <button onclick="openAddTaskModal()" class="btn btn-primary btn-outline w-full">Add Todo +</button>
     </div>
   `

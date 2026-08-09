@@ -14,9 +14,9 @@
   "description": "",
   "dependencies": {
     "@getbrevo/brevo": "^6.0.2",
+    "@libsql/client": "^0.17.4",
     "@tailwindcss/cli": "^4.3.3",
     "bcrypt": "^6.0.0",
-    "better-sqlite3": "^13.0.1",
     "connect-sqlite3": "^0.9.18",
     "crypto": "^1.0.1",
     "daisyui": "^5.7.0",
