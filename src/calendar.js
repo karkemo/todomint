@@ -85,11 +85,11 @@ function initCalendar() {
       const todoElement = typeof window.createTodoElement === 'function'
         ? window.createTodoElement(todo)
         : (() => {
-            const fallback = document.createElement('div');
-            fallback.className = 'rounded-lg border border-gray-200/80 bg-white px-4 py-3 text-sm text-gray-700 dark:border-slate-800 dark:bg-slate-900/50 dark:text-gray-200';
-            fallback.textContent = todo?.title || 'Todo';
-            return fallback;
-          })();
+          const fallback = document.createElement('div');
+          fallback.className = 'rounded-lg border border-gray-200/80 bg-white px-4 py-3 text-sm text-gray-700 dark:border-slate-800 dark:bg-slate-900/50 dark:text-gray-200';
+          fallback.textContent = todo?.title || 'Todo';
+          return fallback;
+        })();
       selectedDayTodos.appendChild(todoElement);
     });
   }
@@ -119,7 +119,10 @@ function initCalendar() {
       const button = document.createElement('button');
       const dateKey = formatDateKey(year, month, day);
       const todosForDate = getTodosForDate(dateKey);
-      const hasTodos = todosForDate.length > 0;
+      // const hasTodos = todosForDate.length > 0;
+      const hasUncheckedTodos = todosForDate.some(todo =>
+        todo?.is_completed !== 1 && todo?.is_completed !== true && todo?.completed !== true
+      );
       const isToday = day === today.getDate() && month === today.getMonth() && year === today.getFullYear();
       const isSelected = dateKey === selectedDateKey;
 
@@ -132,7 +135,7 @@ function initCalendar() {
       button.innerHTML = `
         <div class="flex flex-col items-center justify-center gap-1">
           <span>${day}</span>
-          ${hasTodos ? '<span class="h-1.5 w-1.5 rounded-full bg-current"></span>' : ''}
+          ${hasUncheckedTodos ? '<span class="h-1.5 w-1.5 rounded-full bg-current"></span>' : ''}
         </div>
       `;
 

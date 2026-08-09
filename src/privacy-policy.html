@@ -1,0 +1,119 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Privacy Policy - Todo</title>
+  <link rel="icon" type="image/png" href="/assets/logo.png">
+  <link href="/output.css" rel="stylesheet">
+  <script>
+    if (localStorage.getItem('color-theme') === 'dark' || (!('color-theme' in localStorage) && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
+      document.documentElement.classList.add('dark');
+    } else {
+      document.documentElement.classList.remove('dark');
+    }
+  </script>
+  <style>
+    html.dark {
+      background-color: #0b1120;
+    }
+
+    html {
+      background-color: #faf7f5;
+    }
+  </style>
+</head>
+
+<body
+  class="min-h-screen bg-[#faf7f5] dark:bg-[#0b1120] text-gray-900 dark:text-white transition-colors duration-200 font-sans antialiased selection:bg-blue-500 selection:text-white">
+  <div class="min-h-screen flex flex-col w-full items-center justify-center">
+
+    <main class="flex-1 px-4 py-10 sm:py-16 w-full flex items-center justify-center">
+      <section class="max-w-5xl w-full">
+        <div
+          class="rounded-3xl border border-gray-200 dark:border-gray-800 bg-[#efeae6] dark:bg-[#0f172a] shadow-2xl p-8 sm:p-10 lg:p-12">
+          <a href="/"
+            class="flex items-center gap-2 text-sm font-semibold text-slate-600 hover:text-slate-900 dark:text-slate-400 dark:hover:text-white transition-colors">
+            <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18" />
+            </svg>
+            Back
+          </a>
+          <div class="mb-8">
+            <div class="w-full flex flex-row items-center justify-between">
+              <h1 class="text-3xl sm:text-4xl font-extrabold text-black dark:text-white mb-3">
+                Privacy Policy
+              </h1>
+              <button id="theme-toggle" type="button" aria-label="Toggle theme"
+                class="p-2 rounded-xl bg-gray-200 dark:bg-gray-800 text-gray-800 dark:text-gray-200 hover:opacity-80 transition duration-200 cursor-pointer">
+                <svg id="theme-toggle-light-icon" class="hidden w-5 h-5 fill-current" viewBox="0 0 20 20">
+                  <path
+                    d="M10 2a1 1 0 011 1v1a1 1 0 11-2 0V3a1 1 0 011-1zm4 8a4 4 0 11-8 0 4 4 0 018 0zm-.464 4.95l.707.707a1 1 0 001.414-1.414l-.707-.707a1 1 0 00-1.414 1.414zm2.12-10.607a1 1 0 010 1.414l-.706.707a1 1 0 11-1.414-1.414l.707-.707a1 1 0 011.414 0zM17 11a1 1 0 100-2h-1a1 1 0 100 2h1zm-7 4a1 1 0 011 1v1a1 1 0 11-2 0v-1a1 1 0 011-1zM5.05 6.464A1 1 0 106.465 5.05l-.708-.707a1 1 0 00-1.414 1.414l.707.707zm1.414 8.486l-.707.707a1 1 0 01-1.414-1.414l.707-.707a1 1 0 011.414 1.414zM4 11a1 1 0 100-2H3a1 1 0 100 2h1z">
+                  </path>
+                </svg>
+                <svg id="theme-toggle-dark-icon" class="hidden w-5 h-5 fill-current" viewBox="0 0 20 20">
+                  <path d="M17.293 13.293A8 8 0 016.707 2.707a8.001 8.001 0 1010.586 10.586z"></path>
+                </svg>
+              </button>
+            </div>
+            <p class="text-sm sm:text-base text-gray-600 dark:text-gray-400">
+              Last updated: August 9, 2026
+            </p>
+          </div>
+
+          <div class="space-y-6 text-sm sm:text-base leading-7 text-gray-700 dark:text-gray-300">
+            <section>
+              <h2 class="text-xl font-bold text-black dark:text-white mb-2">1. Information We Collect</h2>
+              <p>
+                We collect information you provide directly to us, such as your name, email address, and account
+                credentials when you create an account or use our services. We also collect usage data needed to keep
+                the app functioning properly and improve your experience.
+              </p>
+            </section>
+
+            <section>
+              <h2 class="text-xl font-bold text-black dark:text-white mb-2">2. How We Use Your Information</h2>
+              <p>
+                We use your information to create and manage your account, provide task management features, send
+                essential service updates, and improve the reliability and quality of Todo.
+              </p>
+            </section>
+
+            <section>
+              <h2 class="text-xl font-bold text-black dark:text-white mb-2">3. Data Security</h2>
+              <p>
+                We take reasonable measures to protect your information from unauthorized access, disclosure,
+                alteration, or destruction. However, no method of transmission over the internet is completely secure.
+              </p>
+            </section>
+
+            <section>
+              <h2 class="text-xl font-bold text-black dark:text-white mb-2">4. Your Choices</h2>
+              <p>
+                You can update your account information, manage notifications, or request account deletion by contacting
+                us through the support channels available in the app.
+              </p>
+            </section>
+
+            <section>
+              <h2 class="text-xl font-bold text-black dark:text-white mb-2">5. Contact Us</h2>
+              <p>
+                If you have questions about this Privacy Policy, please reach out to us through the contact page or the
+                support information provided in your account settings.
+              </p>
+            </section>
+          </div>
+        </div>
+      </section>
+    </main>
+
+    <footer class="py-8 text-center text-gray-600 dark:text-gray-400 text-sm">
+      <p>© 2026 Todo. All rights reserved.</p>
+    </footer>
+  </div>
+
+  <script src="/theme_changer.js"></script>
+</body>
+
+</html>

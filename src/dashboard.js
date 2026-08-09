@@ -874,9 +874,11 @@ function renderHomeLayout() {
     <div class="grid grid-cols-1 lg:grid-cols-2 gap-8 w-full">
       <!-- Section 1: Todos -->
       <div class="w-full flex flex-col items-start justify-start gap-6">
-        <div class="w-fit flex flex-col items-start justify-center gap-1">
-          <h1 class="text-3xl font-bold">Today's Todos</h1>
-          <p id="show-date" class="font-semibold text-gray-500 dark:text-gray-400">"Saturday, July 25"</p>
+        <div class="w-fit flex flex-row items-center justify-center gap-2">
+          <div class="w-fit flex flex-col items-start justify-center gap-1">
+            <h1 class="text-3xl font-bold">Today's Todos</h1>
+            <p id="show-date" class="font-semibold text-gray-500 dark:text-gray-400">"Saturday, July 25"</p>
+          </div>
         </div>
         
         <!-- FIX 1: Max height + scroll for left list -->

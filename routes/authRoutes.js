@@ -1,6 +1,7 @@
 const express = require('express');
 const router = express.Router();
 const { validate } = require('../middleware/validate');
+const { authLimiter } = require('../middleware/rateLimiter');
 const {
   loginSchema,
   registerSchema,
@@ -16,10 +17,10 @@ const {
   resetPassword
 } = require('../controllers/authController');
 
-router.post('/register', validate(registerSchema), register);
-router.post('/login', validate(loginSchema), login);
-router.post('/verify', validate(verifyCodeSchema), verify);
-router.post('/auth/forgot-password', validate(forgotPasswordSchema), forgotPassword);
-router.post('/auth/reset-password', validate(resetPasswordSchema), resetPassword);
+router.post('/register', authLimiter, validate(registerSchema), register);
+router.post('/login', authLimiter, validate(loginSchema), login);
+router.post('/verify', authLimiter, validate(verifyCodeSchema), verify);
+router.post('/auth/forgot-password', authLimiter, validate(forgotPasswordSchema), forgotPassword);
+router.post('/auth/reset-password', authLimiter, validate(resetPasswordSchema), resetPassword);
 
 module.exports = router;
