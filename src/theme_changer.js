@@ -25,5 +25,9 @@ document.addEventListener('DOMContentLoaded', () => {
       document.documentElement.classList.add('dark');
       localStorage.setItem('color-theme', 'dark');
     }
+
+    if (typeof window.refreshTimelineTheme === 'function') {
+      window.refreshTimelineTheme();
+    }
   });
 });
