@@ -19,6 +19,36 @@ async function loadNavbarUsername() {
   }
 }
 
+async function loadRemainingDaysInTrial() {
+  try {
+    const response = await fetch('/api/user/trial');
+
+    if (!response.ok) throw new Error('Failed to fetch remaining days');
+
+    const data = await response.json();
+
+    const remainingElement = document.getElementById('show_remaining_trail');
+    const remainingDaysElement = document.getElementById('remaining_trial');
+    const badge = document.getElementById('pro_badge');
+    if (data.subscriptionStatus === 'active' && data.plan === 'pro') {
+      badge.classList.remove('hidden');
+      return;
+    }
+    if (remainingElement && remainingDaysElement && badge) {
+      remainingElement.classList.remove('hidden');
+      remainingElement.classList.add('flex');
+
+      const endDate = new Date(data.trialEndsAt);
+      const now = new Date();
+      const diffInMs = endDate - now;
+      const remainingDays = Math.max(0, Math.ceil(diffInMs / (1000 * 60 * 60 * 24)));
+      remainingDaysElement.textContent = remainingDays;
+    }
+  } catch (error) {
+    console.error(error)
+  }
+}
+
 function getTodayDateString() {
   const today = new Date();
   const year = today.getFullYear();
@@ -216,6 +246,10 @@ async function loadDashboardLists() {
 async function loadUserLists(selectedListId = null) {
   const selectElement = document.getElementById('task-list');
   if (!selectElement) return;
+
+  if (selectedListId === null && getCurrentView() === 'list') {
+    selectedListId = getCurrentListID();
+  }
 
   try {
     const response = await fetch('/api/lists');
@@ -1329,6 +1363,7 @@ document.addEventListener('DOMContentLoaded', () => {
   });
 
   loadNavbarUsername();
+  loadRemainingDaysInTrial();
   loadUserLists();
   loadDashboardLists();
   renderDashboard();

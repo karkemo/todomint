@@ -62,6 +62,23 @@
       align-items: center !important;
       justify-content: center !important;
     }
+
+    .glow-purple {
+      transition: box-shadow 0.3s ease, border-color 0.3s ease;
+    }
+
+    .glow-purple {
+      box-shadow: 0 0 25px rgba(168, 85, 247, 0.35);
+    }
+
+    .glow-purple:hover {
+      border-color: #d8b4fe;
+    }
+
+    html.dark .glow-purple:hover {
+      border-color: #c084fc;
+      box-shadow: 0 0 25px rgba(192, 132, 252, 0.25);
+    }
   </style>
 </head>
 
@@ -120,7 +137,7 @@
               <span class="loading loading-spinner loading-xs"></span>
             </span>
           </a>
-          <a href="/dashboard?view=home" onclick="event.preventDefault(); navigateTo('important');"
+          <a href="/dashboard?view=important" onclick="event.preventDefault(); navigateTo('important');"
             class="btn btn-warning w-full flex items-center justify-between flex-row sidebar-btn" title="Important">
             <div class="flex flex-row items-center justify-center gap-2">
               <svg xmlns="http://www.w3.org/2000/svg" height="24px" viewBox="0 -960 960 960" width="24px" fill="#e3e3e3"
@@ -189,6 +206,22 @@
 
       <!-- bottom of sidebar -->
       <div class="w-full flex flex-col items-center justify-center gap-2">
+
+        <div onclick="event.preventDefault();" id="show_remaining_trail"
+          class="hidden h-fit gap-2 glow-purple mb-2 cursor-pointer dark:bg-[#0f172a] bg-[#efeae6] border dark:border-gray-800 border-gray-200 p-6 rounded-2xl text-left transition duration-300 w-full flex-col">
+          <div class="flex flex-row gap-1">
+            <p>Trial ends in </p>
+            <span id="remaining_trial">
+              <span class="loading loading-spinner loading-xs"></span>
+            </span>
+            <p> Days</p>
+          </div>
+          <div onclick="event.preventDefault();"
+            class="btn btn-accent w-full flex items-center justify-center rounded-2xl" title="Completed">
+            <p class="text-center">Upgrade Now</p>
+          </div>
+        </div>
+
         <div class="flex flex-row items-center justify-between w-full sidebar-footer">
           <div class="flex items-center gap-3 cursor-pointer group">
             <div class="dropdown dropdown-right dropdown-end">
@@ -262,9 +295,12 @@
                 </li>
               </ul>
             </div>
-            <span class="text-sm font-semibold text-gray-800 dark:text-gray-200 truncate sidebar-text" id="user-name">
-              <span class="loading loading-spinner loading-xs"></span>
-            </span>
+            <div class="flex flex-col items-start justify-center">
+              <span class="text-sm font-semibold text-gray-800 dark:text-gray-200 truncate sidebar-text" id="user-name">
+                <span class="loading loading-spinner loading-xs"></span>
+              </span>
+              <span class="badge badge-success badge-xs text-white font-bold mt-0.5 hidden" id="pro_badge">Pro</span>
+            </div>
           </div>
           <button id="theme-toggle" type="button" aria-label="Toggle theme"
             class="p-2 rounded-xl bg-gray-200 dark:bg-gray-800 text-gray-800 dark:text-gray-200 hover:opacity-80 transition duration-200 cursor-pointer shrink-0">
@@ -290,7 +326,9 @@
   <script src="/theme_changer.js"></script>
 </body>
 
+
 <!-- Modals -->
+
 
 <!-- Add todo Modal -->
 <dialog id="add_task_modal"

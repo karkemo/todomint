@@ -118,6 +118,18 @@
 
     document.addEventListener('DOMContentLoaded', () => {
       const form = document.querySelector('form[action="/register"]');
+
+      const formatValidationError = (data) => {
+        if (!data) return 'Registration failed';
+        if (data.details && Array.isArray(data.details) && data.details.length > 0) {
+          return data.details
+            .map((issue) => issue.message || `${issue.path?.join('.') || 'field'} is invalid`)
+            .join(' • ');
+        }
+        if (data.error) return data.error;
+        return 'Registration failed';
+      };
+
       form.addEventListener('submit', async (e) => {
         e.preventDefault();
         const name = document.getElementById('name').value.trim();
@@ -130,9 +142,19 @@
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({ name, email, password })
           });
-          const data = await res.json();
+
+          const content = await res.text();
+          let data;
+          try {
+            data = content ? JSON.parse(content) : {};
+          } catch (parseError) {
+            console.error('Invalid JSON response from /api/register:', parseError, content);
+            flyToast('Server returned invalid response', 'error');
+            return;
+          }
+
           if (!res.ok) {
-            flyToast(data.error || 'Registration failed', 'error');
+            flyToast(formatValidationError(data), 'error');
             return;
           }
 
@@ -143,11 +165,10 @@
 
           window.location = '/dashboard';
         } catch (err) {
-          console.error(err);
-          flyToast('Network error', 'error');
+          console.error('Register request failed:', err);
         }
-      });
-    });
+      })
+    })
   </script>
 </body>
 
