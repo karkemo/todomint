@@ -86,6 +86,7 @@ async function initDb() {
         title TEXT NOT NULL,
         is_completed INTEGER DEFAULT 0,
         due_date TEXT,
+        due_time TEXT,
         created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
         priority TEXT CHECK(priority IN ('low', 'medium', 'high')) DEFAULT 'medium',
         list_id INTEGER NOT NULL,

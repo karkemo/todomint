@@ -18,6 +18,7 @@ const createTodoSchema = z.object({
       .refine((val) => !isNaN(val) && val > 0, { message: 'Invalid list ID' }),
     priority: z.enum(['low', 'medium', 'high']).optional().default('medium'),
     due_date: z.string().nullable().optional(),
+    due_time: z.string(),
     is_completed: z.union([z.boolean(), z.number()]).optional()
   })
 });

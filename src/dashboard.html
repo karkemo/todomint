@@ -341,7 +341,6 @@
   <div
     class="w-full p-6 bg-white dark:bg-[#131f38] text-gray-800 dark:text-gray-100 rounded-2xl shadow-2xl border border-gray-200/80 dark:border-slate-800 font-sans">
 
-
     <!-- Modal Header -->
     <div class="flex items-center justify-between pb-4 border-b border-gray-100 dark:border-slate-800 mb-5">
       <h3 class="text-xl font-bold font-audiowide">Add Todo</h3>
@@ -355,10 +354,8 @@
       </form>
     </div>
 
-
     <!-- Task Form -->
     <form id="add-task-form" class="flex flex-col gap-4" action="/api/todos" method="POST">
-
 
       <!-- Task Title Input -->
       <div class="flex flex-col gap-1.5">
@@ -367,18 +364,25 @@
           class="w-full px-3.5 py-2.5 rounded-xl bg-gray-50 dark:bg-[#0c1425] border border-gray-200 dark:border-slate-700 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 transition-all placeholder:text-gray-400" />
       </div>
 
+      <!-- Date & Time Grid -->
+      <div class="grid grid-cols-2 gap-3">
+        <!-- Date Input (required) -->
+        <div class="flex flex-col gap-1.5">
+          <label for="task-date" class="text-xs font-semibold text-gray-500 dark:text-gray-400">Due Date</label>
+          <input type="date" id="task-date" required name="due_date"
+            class="w-full px-3.5 py-2.5 rounded-xl bg-gray-50 dark:bg-[#0c1425] border border-gray-200 dark:border-slate-700 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 transition-all text-gray-800 dark:text-gray-200 scheme-light dark:scheme-dark" />
+        </div>
 
-      <!-- Date Input -->
-      <div class="flex flex-col gap-1.5">
-        <label for="task-date" class="text-xs font-semibold text-gray-500 dark:text-gray-400">Due Date</label>
-        <input type="date" id="task-date" required name="due_date"
-          class="w-full px-3.5 py-2.5 rounded-xl bg-gray-50 dark:bg-[#0c1425] border border-gray-200 dark:border-slate-700 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 transition-all text-gray-800 dark:text-gray-200 scheme-light dark:scheme-dark" />
+        <!-- Time Input (Not Required) -->
+        <div class="flex flex-col gap-1.5">
+          <label for="task-time" class="text-xs font-semibold text-gray-500 dark:text-gray-400">Due Time</label>
+          <input type="time" id="task-time" name="due_time" required
+            class="w-full px-3.5 py-2.5 rounded-xl bg-gray-50 dark:bg-[#0c1425] border border-gray-200 dark:border-slate-700 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 transition-all text-gray-800 dark:text-gray-200 scheme-light dark:scheme-dark" />
+        </div>
       </div>
-
 
       <!-- Priority & List Grid -->
       <div class="grid grid-cols-2 gap-3">
-
 
         <!-- Priority Select -->
         <div class="flex flex-col gap-1.5">
@@ -391,7 +395,6 @@
           </select>
         </div>
 
-
         <!-- List Select -->
         <div class="flex flex-col gap-1.5">
           <label for="task-list" class="text-xs font-semibold text-gray-500 dark:text-gray-400">List</label>
@@ -401,7 +404,6 @@
           </select>
         </div>
       </div>
-
 
       <!-- Modal Actions -->
       <div class="flex items-center justify-end gap-3 mt-4 pt-3 border-t border-gray-100 dark:border-slate-800">
@@ -414,7 +416,6 @@
           Save Task
         </button>
       </div>
-
 
     </form>
   </div>

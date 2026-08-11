@@ -101,7 +101,7 @@ function initLiveDashboardTimeline(tasks = []) {
       text.setAttribute('font-size', '12');
       text.setAttribute('font-weight', '600');
       text.setAttribute('text-anchor', 'middle');
-      text.textContent = isDelayed ? `${task.title} ⚠️` : task.title;
+      text.textContent = task.title;
 
       const title = document.createElementNS('http://www.w3.org/2000/svg', 'title');
       title.textContent = `${task.title} (${task.time}) - Status: ${statusText}`;
@@ -157,16 +157,29 @@ function initLiveDashboardTimeline(tasks = []) {
   }, 1000);
 }
 
-// async function loadTimeLineTodos() {
-//   try {
-//     const response = await fetch('/api/todos');
-//     if (!response.ok) throw new Error('Failed to fetch todos');
+async function loadTimeLineTodos() {
+  try {
+    const response = await fetch('/api/todos');
+    if (!response.ok) throw new Error('Failed to fetch todos');
 
-//     const todos = await response.json();
-//   } catch (error) {
-    
-//   }
-// }
+    const todos = await response.json();
+    const action = await getCompletedTodosPreference();
+    const todosForToday = todos.filter((todo) => isTodoDueToday(todo) && shouldShowTodoInActiveViews(todo, action));
+
+    const todos_to_show = todosForToday
+      .filter((todo) => Boolean(todo.due_time))
+      .map((todo) => ({
+        title: todo.title,
+        time: todo.due_time,
+        completed: isTodoCompleted(todo)
+      }));
+
+    initLiveDashboardTimeline(todos_to_show);
+    dispatchTodosLoaded(todos);
+  } catch (error) {
+    console.error('Error loading timeline todos:', error);
+  }
+}
 
 
 /**
@@ -659,12 +672,14 @@ async function handleAddTodoSubmit(event) {
   const form = event.currentTarget;
   const titleInput = document.getElementById('task-title');
   const dueDateInput = document.getElementById('task-date');
+  const dueTimeInput = document.getElementById('task-time');
   const priorityInput = document.getElementById('task-priority');
   const listInput = document.getElementById('task-list');
   const modal = document.getElementById('add_task_modal');
 
   const title = titleInput?.value.trim();
   const dueDate = dueDateInput?.value || null;
+  const dueTime = dueTimeInput?.value || null;
   const priority = priorityInput?.value?.toLowerCase() || 'medium';
   const listId = listInput?.value;
 
@@ -679,6 +694,7 @@ async function handleAddTodoSubmit(event) {
       body: JSON.stringify({
         title,
         due_date: dueDate,
+        due_time: dueTime,
         priority,
         list_id: Number(listId),
         is_completed: 0
@@ -697,9 +713,9 @@ async function handleAddTodoSubmit(event) {
     await loadDashboardLists();
     await loadListTodos();
     await renderCount();
+    await loadTimeLineTodos();
   } catch (error) {
     console.error('Error creating todo:', error);
-    // alert(error.message || 'Failed to create todo');
     flyToast(error.message || 'Failed to create todo', 'error');
   }
 }
@@ -1245,6 +1261,16 @@ async function renderDashboard() {
     window.initCalendar();
   }
 
+  // The home layout's #timeline is just an empty placeholder div - rebuild
+  // the actual theme markup (arc/hand/overlay) and repopulate it whenever
+  // this view is (re)rendered, e.g. after a checkbox toggle wipes it out.
+  if (document.getElementById('timeline')) {
+    const theme = localStorage.getItem('color-theme');
+    renderTimelineMarkup(theme);
+    setTimelineLockState(__timelineIsProCache);
+    await loadTimeLineTodos();
+  }
+
   updateShowDate();
   await loadDashboardTodos();
   await renderCount();
@@ -1472,6 +1498,7 @@ async function handleRenameTodoSubmit(event) {
     await loadDashboardTodos();
     await loadListTodos();
     await renderDashboard();
+    await loadTimeLineTodos();
   } catch (error) {
     console.error('Error renaming todo:', error);
     // alert(error.message || 'Failed to rename todo');
@@ -1708,9 +1735,5 @@ document.addEventListener('DOMContentLoaded', () => {
   renderDashboard();
   renderCount();
   dayMonth();
-  initLiveDashboardTimeline([
-    { title: "Morning Code", time: "09:00", completed: true },
-    { title: "Team Meeting", time: "13:30", completed: true },
-    { title: "Deploy Update", time: "18:00", completed: false }
-  ])
+  loadTimeLineTodos();
 });
