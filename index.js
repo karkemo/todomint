@@ -9,6 +9,7 @@ const helmet = require('helmet');
 require('dotenv').config();
 const SQLiteStore = require('connect-sqlite3')(session);
 const fs = require('fs');
+const serverless = require('serverless-http');
 
 const { isAuthenticated, isGuest } = require('./middleware/auth');
 
@@ -26,7 +27,18 @@ fs.mkdirSync('./data/data', { recursive: true });
 fs.mkdirSync('./data/sessions', { recursive: true });
 
 const app = express();
-const PORT = process.env.PORT || 3000;
+// const PORT = process.env.PORT || 3000;
+
+// IF ENV IS PRODUCTION
+if (process.env.NODE_ENV === 'production') {
+  module.exports = serverless(app);
+} else {
+  const PORT = process.env.PORT || 3000;
+  app.listen(PORT, () => {
+    console.log(`Server running on http://localhost:${PORT}`);
+  });
+}
+
 const db = createClient({
   url: 'file:./data/data/app.db', // all data
   syncUrl: process.env.TURSO_DATABASE_URL,
