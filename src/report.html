@@ -1,64 +1,196 @@
 <!DOCTYPE html>
 <html lang="en" class="dark">
+
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Submit Feedback & Bug Report</title>
+  <title>Report - Todo</title>
   <link href="/output.css" rel="stylesheet">
+  <link rel="icon" type="image/png" href="/assets/logo.png">
+  <script>
+    if (localStorage.getItem('color-theme') === 'dark' || (!('color-theme' in localStorage) && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
+      document.documentElement.classList.add('dark');
+    } else {
+      document.documentElement.classList.remove('dark');
+    }
+  </script>
 </head>
-<body class="bg-gray-50 dark:bg-[#0c1425] text-gray-900 dark:text-gray-100 min-h-screen flex flex-col items-center justify-center p-4 sm:p-6">
 
-  <main class="w-full max-w-2xl bg-white dark:bg-[#131f38] border border-gray-200 dark:border-slate-800 rounded-3xl p-6 sm:p-10 shadow-xl relative">
+<body
+  class="bg-gray-50 dark:bg-[#0c1425] text-gray-900 dark:text-gray-100 min-h-screen flex flex-col items-center justify-center p-4 sm:p-6 transition-colors duration-200">
+
+  <main
+    class="w-full max-w-2xl bg-white dark:bg-[#131f38] border border-gray-200 dark:border-slate-800 rounded-3xl p-6 sm:p-10 shadow-2xl relative">
     <!-- Top Bar Navigation -->
-    <div class="flex items-center justify-between mb-8 pb-4 border-b border-gray-100 dark:border-slate-800">
-      <a href="/dashboard" class="btn btn-ghost btn-sm gap-2 text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white">
-        <svg xmlns="http://www.w3.org/2000/svg" class="size-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+    <div class="flex items-center justify-between mb-8 pb-4 border-b border-gray-200 dark:border-slate-800">
+      <a href="/dashboard"
+        class="flex items-center gap-2 text-sm font-semibold text-slate-600 hover:text-slate-900 dark:text-slate-400 dark:hover:text-white transition-colors">
+        <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
           <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18" />
         </svg>
         Back to Dashboard
       </a>
-      <span class="text-xs font-semibold uppercase tracking-wider text-gray-400">Developer Support</span>
+      <span class="text-xs font-semibold uppercase tracking-wider text-gray-500 dark:text-gray-400">Developer
+        Support</span>
     </div>
 
     <!-- Title Header -->
     <div class="mb-8">
-      <h1 class="text-3xl font-bold tracking-tight">Send Feedback or Report an Issue</h1>
-      <p class="text-sm text-gray-500 dark:text-gray-400 mt-2">
-        Have a feature idea or encountered a bug? Send your thoughts directly to the developer.
+      <div class="flex flex-row items-center justify-between w-full">
+        <h1 class="text-3xl font-bold tracking-tight text-gray-900 dark:text-white">Contact Support</h1>
+        <button id="theme-toggle" type="button" aria-label="Toggle theme"
+          class="p-2 rounded-xl bg-gray-200 dark:bg-gray-800 text-gray-800 dark:text-gray-200 hover:opacity-80 transition duration-200 cursor-pointer">
+          <svg id="theme-toggle-light-icon" class="hidden w-5 h-5 fill-current" viewBox="0 0 20 20">
+            <path
+              d="M10 2a1 1 0 011 1v1a1 1 0 11-2 0V3a1 1 0 011-1zm4 8a4 4 0 11-8 0 4 4 0 018 0zm-.464 4.95l.707.707a1 1 0 001.414-1.414l-.707-.707a1 1 0 00-1.414 1.414zm2.12-10.607a1 1 0 010 1.414l-.706.707a1 1 0 11-1.414-1.414l.707-.707a1 1 0 011.414 0zM17 11a1 1 0 100-2h-1a1 1 0 100 2h1zm-7 4a1 1 0 011 1v1a1 1 0 11-2 0v-1a1 1 0 011-1zM5.05 6.464A1 1 0 106.465 5.05l-.708-.707a1 1 0 00-1.414 1.414l.707-.707zm1.414 8.486l-.707.707a1 1 0 01-1.414-1.414l.707-.707a1 1 0 011.414 1.414zM4 11a1 1 0 100-2H3a1 1 0 100 2h1z">
+            </path>
+          </svg>
+          <svg id="theme-toggle-dark-icon" class="hidden w-5 h-5 fill-current" viewBox="0 0 20 20">
+            <path d="M17.293 13.293A8 8 0 016.707 2.707a8.001 8.001 0 1010.586 10.586z"></path>
+          </svg>
+        </button>
+      </div>
+      <p class="text-sm text-gray-600 dark:text-gray-400 mt-2">
+        How can we help you today? Have a feature idea or encountered a bug? Send your thoughts directly to the
+        developer.
       </p>
     </div>
 
     <!-- Feedback Form -->
-    <form id="report-page-form" class="flex flex-col gap-6">
+    <form id="report-page-form" class="flex flex-col gap-6" onsubmit="">
+
+      <!-- Report Category Cards -->
       <div class="flex flex-col gap-2">
-        <label for="report-type" class="text-xs font-semibold uppercase tracking-wider text-gray-600 dark:text-gray-400">Report Category</label>
-        <select id="report-type" required class="w-full px-4 py-3 rounded-xl bg-gray-100 dark:bg-[#0c1425] border border-gray-200 dark:border-slate-700 text-sm font-medium focus:outline-none focus:ring-2 focus:ring-blue-500 text-gray-800 dark:text-gray-200 cursor-pointer">
-          <option value="bug">🐛 Bug Report</option>
-          <option value="suggestion">💡 Feature Suggestion</option>
-          <option value="feedback">💬 General Feedback</option>
-        </select>
+        <label class="text-xs font-semibold uppercase tracking-wider text-gray-600 dark:text-gray-400">Report
+          Category</label>
+        <input type="hidden" id="report-type" name="report-type" value="bug" required>
+        <div class="grid grid-cols-1 sm:grid-cols-3 gap-3" id="category-cards">
+
+          <!-- Bug Card -->
+          <div data-value="bug"
+            class="category-card relative cursor-pointer p-4 rounded-2xl bg-gray-50 dark:bg-[#0c1425] border-2 border-indigo-500 transition-all duration-200 flex flex-col gap-3">
+            <div class="flex items-center justify-between">
+              <div class="w-9 h-9 rounded-xl bg-gray-200 dark:bg-slate-800/80 flex items-center justify-center text-lg">
+                🐛</div>
+              <div
+                class="check-badge w-5 h-5 rounded-full bg-indigo-500 flex items-center justify-center text-black dark:text-white text-xs">
+                ✓</div>
+            </div>
+            <div>
+              <h3 class="font-semibold text-sm text-gray-900 dark:text-white">Report a Bug</h3>
+              <p class="text-xs text-gray-500 dark:text-gray-400 mt-1">Found an issue? Let us know so we can fix it.</p>
+            </div>
+          </div>
+
+          <!-- Feedback Card -->
+          <div data-value="feedback"
+            class="category-card relative cursor-pointer p-4 rounded-2xl bg-gray-50 dark:bg-[#0c1425] border-2 border-gray-200 dark:border-slate-800 transition-all duration-200 flex flex-col gap-3">
+            <div class="flex items-center justify-between">
+              <div class="w-9 h-9 rounded-xl bg-gray-200 dark:bg-slate-800/80 flex items-center justify-center text-lg">
+                💬</div>
+              <div
+                class="check-badge w-5 h-5 rounded-full bg-indigo-500 hidden items-center justify-center text-black dark:text-white text-xs">
+                ✓</div>
+            </div>
+            <div>
+              <h3 class="font-semibold text-sm text-gray-900 dark:text-white">Give Feedback</h3>
+              <p class="text-xs text-gray-500 dark:text-gray-400 mt-1">Share your thoughts on how we can improve.</p>
+            </div>
+          </div>
+
+          <!-- Suggestion Card -->
+          <div data-value="suggestion"
+            class="category-card relative cursor-pointer p-4 rounded-2xl bg-gray-50 dark:bg-[#0c1425] border-2 border-gray-200 dark:border-slate-800 transition-all duration-200 flex flex-col gap-3">
+            <div class="flex items-center justify-between">
+              <div class="w-9 h-9 rounded-xl bg-gray-200 dark:bg-slate-800/80 flex items-center justify-center text-lg">
+                💡</div>
+              <div
+                class="check-badge w-5 h-5 rounded-full bg-indigo-500 hidden items-center justify-center text-black dark:text-white text-xs">
+                ✓</div>
+            </div>
+            <div>
+              <h3 class="font-semibold text-sm text-gray-900 dark:text-white">Make a Suggestion</h3>
+              <p class="text-xs text-gray-500 dark:text-gray-400 mt-1">Have an idea for a new feature? We're listening.
+              </p>
+            </div>
+          </div>
+
+        </div>
       </div>
 
-      <div class="flex flex-col gap-2">
-        <label for="report-title" class="text-xs font-semibold uppercase tracking-wider text-gray-600 dark:text-gray-400">Title</label>
-        <input type="text" id="report-title" placeholder="Brief summary of the issue or feature" required maxlength="100" class="w-full px-4 py-3 rounded-xl bg-gray-100 dark:bg-[#0c1425] border border-gray-200 dark:border-slate-700 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500" />
-      </div>
+      <!-- Input Fields Inner Box -->
+      <div
+        class="bg-gray-50 dark:bg-[#0c1425] border border-gray-200 dark:border-slate-800 rounded-2xl p-5 sm:p-6 flex flex-col gap-5">
+        <div class="flex flex-col gap-2">
+          <label for="report-email"
+            class="text-xs font-semibold uppercase tracking-wider text-gray-600 dark:text-gray-400">Email</label>
+          <input type="email" id="report-email" placeholder="Enter your email" required
+            maxlength="100"
+            class="w-full px-4 py-3 rounded-xl bg-white dark:bg-[#131f38] border border-gray-300 dark:border-slate-700/60 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 text-gray-900 dark:text-white placeholder-gray-400 dark:placeholder-gray-500" />
+        </div>
 
-      <div class="flex flex-col gap-2">
-        <label for="report-description" class="text-xs font-semibold uppercase tracking-wider text-gray-600 dark:text-gray-400">Detailed Description</label>
-        <textarea id="report-description" rows="6" placeholder="Provide step-by-step reproduction steps for bugs, or detailed ideas for feature suggestions..." required class="w-full px-4 py-3 rounded-xl bg-gray-100 dark:bg-[#0c1425] border border-gray-200 dark:border-slate-700 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 resize-none"></textarea>
+        <div class="flex flex-col gap-2">
+          <label for="report-title"
+            class="text-xs font-semibold uppercase tracking-wider text-gray-600 dark:text-gray-400">Title</label>
+          <input type="text" id="report-title" placeholder="Brief summary of the issue or feature" required
+            maxlength="100"
+            class="w-full px-4 py-3 rounded-xl bg-white dark:bg-[#131f38] border border-gray-300 dark:border-slate-700/60 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 text-gray-900 dark:text-white placeholder-gray-400 dark:placeholder-gray-500" />
+        </div>
+
+        <div class="flex flex-col gap-2">
+          <label for="report-description"
+            class="text-xs font-semibold uppercase tracking-wider text-gray-600 dark:text-gray-400">Detailed
+            Description</label>
+          <textarea id="report-description" rows="5"
+            placeholder="Provide step-by-step reproduction steps for bugs, or detailed ideas for feature suggestions..."
+            required
+            class="w-full px-4 py-3 rounded-xl bg-white dark:bg-[#131f38] border border-gray-300 dark:border-slate-700/60 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 resize-none text-gray-900 dark:text-white placeholder-gray-400 dark:placeholder-gray-500"></textarea>
+        </div>
+
+        <!-- Submit Button Area -->
+        <div class="flex items-center justify-end gap-3 pt-2">
+          <a href="/dashboard"
+            class="btn btn-ghost text-sm text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white">Cancel</a>
+          <button type="submit" id="submit-btn"
+            class="btn bg-indigo-600 hover:bg-indigo-700 text-white border-0 px-6 rounded-xl flex items-center gap-2 shadow-lg shadow-indigo-600/20">
+            Send Message
+            <svg xmlns="http://www.w3.org/2000/svg" class="size-4" fill="none" viewBox="0 0 24 24"
+              stroke="currentColor">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14 5l7 7m0 0l-7 7m7-7H3" />
+            </svg>
+          </button>
+        </div>
       </div>
 
       <!-- Error / Notification Box -->
       <div id="form-feedback" class="hidden p-4 rounded-xl text-sm font-medium"></div>
 
-      <div class="flex items-center justify-end gap-3 mt-4 pt-4 border-t border-gray-100 dark:border-slate-800">
-        <a href="/dashboard" class="btn btn-ghost">Cancel</a>
-        <button type="submit" id="submit-btn" class="btn btn-primary px-8">Submit Report</button>
-      </div>
     </form>
   </main>
 
+  <!-- Script for managing card selection state with light/dark support -->
+  <script>
+    document.addEventListener('DOMContentLoaded', () => {
+      const cards = document.querySelectorAll('.category-card');
+      const hiddenInput = document.getElementById('report-type');
+
+      cards.forEach(card => {
+        card.addEventListener('click', () => {
+          cards.forEach(c => {
+            c.classList.remove('border-indigo-500');
+            c.classList.add('border-gray-200', 'dark:border-slate-800');
+            c.querySelector('.check-badge').classList.add('hidden');
+          });
+          card.classList.remove('border-gray-200', 'dark:border-slate-800');
+          card.classList.add('border-indigo-500');
+          card.querySelector('.check-badge').classList.remove('hidden');
+          hiddenInput.value = card.getAttribute('data-value');
+        });
+      });
+    });
+  </script>
   <script src="/report.js" type="module"></script>
+  <script src="/theme_changer.js"></script>
 </body>
+
 </html>

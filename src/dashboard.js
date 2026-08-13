@@ -361,7 +361,7 @@ async function loadRemainingDaysInTrial() {
 
     const data = await response.json();
 
-    const remainingElement = document.getElementById('show_remaining_trail');
+    const remainingElement = document.getElementById('show_remaining_trial');
     const remainingDaysElement = document.getElementById('remaining_trial');
     const badge = document.getElementById('pro_badge');
     const upgradeBtn = document.getElementById('upgrade-btn');

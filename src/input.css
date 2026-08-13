@@ -1,9 +1,25 @@
 @import "tailwindcss";
 @plugin "daisyui";
-@import url('https://fonts.googleapis.com/css2?family=Audiowide&display=swap');
+
+@font-face {
+  font-family: 'Audiowide';
+  src: url('./fonts/Audiowide.woff2') format('woff2');
+  font-weight: 400;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: 'Cursive';
+  src: url('./fonts/CedarvilleCursive.woff2') format('woff2');
+  font-weight: 400;
+  font-style: normal;
+  font-display: swap;
+}
 
 @theme {
-  --font-audiowide: 'Audiowide', cursive;
+  --font-audiowide: 'Audiowide', sans-serif;
+  --font-cursive: 'Cursive', sans-serif;
 }
 
 @custom-variant dark (&:where(.dark, .dark *));

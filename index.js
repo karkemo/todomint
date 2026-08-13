@@ -8,6 +8,7 @@ const session = require('express-session');
 const helmet = require('helmet');
 require('dotenv').config();
 const SQLiteStore = require('connect-sqlite3')(session);
+const fs = require('fs');
 
 const { isAuthenticated, isGuest } = require('./middleware/auth');
 
@@ -16,14 +17,21 @@ const listRoutes = require('./routes/listRoutes');
 const settingsRoutes = require('./routes/settingsRoutes');
 const authRoutes = require('./routes/authRoutes');
 const userRoutes = require('./routes/userRoutes');
+const reportRoutes = require('./routes/reportRoutes');
 
 const noCache = require('./middleware/noCache');
+
+// create folders if not found
+fs.mkdirSync('./data/data', { recursive: true });
+fs.mkdirSync('./data/sessions', { recursive: true });
 
 const app = express();
 const PORT = process.env.PORT || 3000;
 const db = createClient({
-  url: process.env.TURSO_DATABASE_URL,
+  url: 'file:./data/data/app.db', // all data
+  syncUrl: process.env.TURSO_DATABASE_URL,
   authToken: process.env.TURSO_AUTH_TOKEN,
+  syncInterval: 60
 });
 
 app.use(express.urlencoded({ extended: true }));
@@ -34,7 +42,7 @@ app.use(helmet({
 }));
 
 app.use(session({
-  store: new SQLiteStore({ db: 'app.db', dir: './' }),
+  store: new SQLiteStore({ db: 'sessions.db', dir: './data/sessions' }), // session data
   secret: process.env.SESSION_SECRET,
   resave: false,
   saveUninitialized: false,
@@ -51,7 +59,15 @@ app.use('/node_modules', express.static(path.join(__dirname, 'node_modules')));
 
 async function initDb() {
   try {
-    await db.execute('PRAGMA foreign_keys = ON;');
+
+    const timeout = new Promise((_, reject) =>
+      setTimeout(() => reject(new Error('Turso connection timeout')), 5000)
+    );
+
+    await Promise.race([
+      db.execute('PRAGMA foreign_keys = ON;'),
+      timeout
+    ]);
 
     await db.execute(`
       CREATE TABLE IF NOT EXISTS users (
@@ -95,11 +111,13 @@ async function initDb() {
     `);
 
     await db.execute(`
-      CREATE TABLE IF NOT EXISTS feedbacks (
+      CREATE TABLE IF NOT EXISTS reports (
         id INTEGER PRIMARY KEY AUTOINCREMENT,
         user_id TEXT,
-        type TEXT NOT NULL, -- 'bug', 'feedback', 'feature_request'
-        message TEXT NOT NULL,
+        email TEXT NOT NULL,
+        type TEXT NOT NULL, -- 'bug', 'feedback', 'feature_request',
+        title TEXT NOT NULL,
+        description TEXT NOT NULL,
         created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
         FOREIGN KEY (user_id) REFERENCES users(id)
       );
@@ -127,6 +145,7 @@ app.use('/api', userRoutes);
 app.use('/api/settings', isAuthenticated, settingsRoutes);
 app.use('/api/todos', isAuthenticated, todoRoutes);
 app.use('/api/lists', isAuthenticated, listRoutes);
+app.use('/api/reports', isAuthenticated, reportRoutes);
 
 // HTML Page Routes
 app.get('/', (req, res) => {
@@ -159,6 +178,14 @@ app.get('/privacy', (req, res) => {
 
 app.get('/terms', (req, res) => {
   res.sendFile(path.join(__dirname, 'src', 'terms-of-service.html'));
+})
+
+app.get('/contact', (req, res) => {
+  res.sendFile(path.join(__dirname, 'src', 'contact.html'));
+})
+
+app.get('/help', (req, res) => {
+  res.sendFile(path.join(__dirname, 'src', 'help.html'))
 })
 
 app.get('/logout', (req, res) => {

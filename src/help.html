@@ -1,0 +1,137 @@
+<!DOCTYPE html>
+<html lang="en" class="dark">
+
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Help & FAQ - Todo</title>
+  <link href="/output.css" rel="stylesheet">
+  <link rel="icon" type="image/png" href="/assets/logo.png">
+  <script>
+    if (localStorage.getItem('color-theme') === 'dark' || (!('color-theme' in localStorage) && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
+      document.documentElement.classList.add('dark');
+    } else {
+      document.documentElement.classList.remove('dark');
+    }
+  </script>
+</head>
+
+<body class="bg-gray-50 dark:bg-[#0c1425] text-gray-900 dark:text-gray-100 min-h-screen flex flex-col items-center justify-center p-4 sm:p-6 transition-colors duration-200">
+
+  <main class="w-full max-w-2xl bg-white dark:bg-[#131f38] border border-gray-200 dark:border-slate-800 rounded-3xl p-6 sm:p-10 shadow-2xl relative">
+    <!-- Top Bar Navigation -->
+    <div class="flex items-center justify-between mb-8 pb-4 border-b border-gray-200 dark:border-slate-800">
+      <button onclick="history.back()"
+        class="flex items-center gap-2 text-sm font-semibold text-slate-600 hover:text-slate-900 dark:text-slate-400 dark:hover:text-white transition-colors cursor-pointer">
+        <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18" />
+        </svg>
+        Back
+      </button>
+      <button id="theme-toggle" type="button" aria-label="Toggle theme"
+        class="p-2.5 rounded-xl bg-white dark:bg-slate-800/80 border border-slate-200 dark:border-slate-700/60 shadow-sm text-slate-600 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-800 transition-all cursor-pointer">
+        <svg id="theme-toggle-light-icon" class="hidden w-5 h-5 fill-current" viewBox="0 0 20 20">
+          <path
+            d="M10 2a1 1 0 011 1v1a1 1 0 11-2 0V3a1 1 0 011-1zm4 8a4 4 0 11-8 0 4 4 0 018 0zm-.464 4.95l.707.707a1 1 0 001.414-1.414l-.707-.707a1 1 0 00-1.414 1.414zm2.12-10.607a1 1 0 010 1.414l-.706.707a1 1 0 11-1.414-1.414l.707-.707a1 1 0 011.414 0zM17 11a1 1 0 100-2h-1a1 1 0 100 2h1zm-7 4a1 1 0 011 1v1a1 1 0 11-2 0v-1a1 1 0 011-1zM5.05 6.464A1 1 0 106.465 5.05l-.708-.707a1 1 0 00-1.414 1.414l.707.707zm1.414 8.486l-.707.707a1 1 0 01-1.414-1.414l.707-.707a1 1 0 011.414 1.414zM4 11a1 1 0 100-2H3a1 1 0 100 2h1z">
+          </path>
+        </svg>
+        <svg id="theme-toggle-dark-icon" class="hidden w-5 h-5 fill-current" viewBox="0 0 20 20">
+          <path d="M17.293 13.293A8 8 0 016.707 2.707a8.001 8.001 0 1010.586 10.586z"></path>
+        </svg>
+      </button>
+    </div>
+
+    <!-- Title Header -->
+    <div class="mb-8">
+      <h1 class="text-3xl font-bold tracking-tight text-gray-900 dark:text-white">Help Center & FAQ</h1>
+      <p class="text-sm text-gray-600 dark:text-gray-400 mt-2">
+        Find quick answers to common questions about managing your tasks and using the Todo app.
+      </p>
+    </div>
+
+    <!-- FAQ Accordion List -->
+    <div class="flex flex-col gap-4" id="faq-list">
+      
+      <!-- FAQ Item 1 -->
+      <div class="faq-item bg-gray-50 dark:bg-[#0c1425] border border-gray-200 dark:border-slate-800 rounded-2xl overflow-hidden transition-all duration-200">
+        <button class="faq-question w-full p-4 sm:p-5 text-left flex items-center justify-between font-semibold text-sm text-gray-900 dark:text-white cursor-pointer">
+          <span>How do I create and manage my tasks?</span>
+          <svg class="w-5 h-5 text-gray-500 transform transition-transform duration-200" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
+          </svg>
+        </button>
+        <div class="faq-answer hidden px-4 pb-5 sm:px-5 text-xs sm:text-sm text-gray-600 dark:text-gray-400 leading-relaxed mb-4">
+          You can easily add new tasks directly from your dashboard by typing your task name and clicking the add button. You can also check them off as completed or delete them whenever needed.
+        </div>
+      </div>
+
+      <!-- FAQ Item 2 -->
+      <div class="faq-item bg-gray-50 dark:bg-[#0c1425] border border-gray-200 dark:border-slate-800 rounded-2xl overflow-hidden transition-all duration-200">
+        <button class="faq-question w-full p-4 sm:p-5 text-left flex items-center justify-between font-semibold text-sm text-gray-900 dark:text-white cursor-pointer">
+          <span>How can I switch between Dark Mode and Light Mode?</span>
+          <svg class="w-5 h-5 text-gray-500 transform transition-transform duration-200" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
+          </svg>
+        </button>
+        <div class="faq-answer hidden px-4 pb-5 sm:px-5 text-xs sm:text-sm text-gray-600 dark:text-gray-400 leading-relaxed mb-4">
+          You can toggle between themes at any time by clicking the sun/moon button located at the top right corner of any page. Your preference is automatically saved.
+        </div>
+      </div>
+
+      <!-- FAQ Item 3 -->
+      <div class="faq-item bg-gray-50 dark:bg-[#0c1425] border border-gray-200 dark:border-slate-800 rounded-2xl overflow-hidden transition-all duration-200">
+        <button class="faq-question w-full p-4 sm:p-5 text-left flex items-center justify-between font-semibold text-sm text-gray-900 dark:text-white cursor-pointer">
+          <span>What should I do if I encounter a bug or have a suggestion?</span>
+          <svg class="w-5 h-5 text-gray-500 transform transition-transform duration-200" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
+          </svg>
+        </button>
+        <div class="faq-answer hidden px-4 pb-5 sm:px-5 text-xs sm:text-sm text-gray-600 dark:text-gray-400 leading-relaxed mb-4">
+          We would love to hear from you! You can head over to our <a href="/report" class="text-indigo-600 dark:text-indigo-400 font-medium underline">Report Support</a> page to submit bug reports or share feature ideas.
+        </div>
+      </div>
+
+      <!-- FAQ Item 4 -->
+      <div class="faq-item bg-gray-50 dark:bg-[#0c1425] border border-gray-200 dark:border-slate-800 rounded-2xl overflow-hidden transition-all duration-200">
+        <button class="faq-question w-full p-4 sm:p-5 text-left flex items-center justify-between font-semibold text-sm text-gray-900 dark:text-white cursor-pointer">
+          <span>How can I contact the developer directly?</span>
+          <svg class="w-5 h-5 text-gray-500 transform transition-transform duration-200" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
+          </svg>
+        </button>
+        <div class="faq-answer hidden px-4 pb-5 sm:px-5 text-xs sm:text-sm text-gray-600 dark:text-gray-400 leading-relaxed mb-4">
+          You can check our <a href="/contact" class="text-indigo-600 dark:text-indigo-400 font-medium underline">Contact Page</a> or send an email directly to <a href="mailto:karem.kemo.ragab@gmail.com" class="text-indigo-600 dark:text-indigo-400 font-medium underline">karem.kemo.ragab@gmail.com</a>.
+        </div>
+      </div>
+
+    </div>
+
+    <!-- Bottom Help CTA -->
+    <div class="mt-8 pt-6 text-center">
+      <p class="text-xs text-gray-500 dark:text-gray-400">
+        Still have questions? <a href="/contact" class="font-medium text-indigo-600 dark:text-indigo-400 underline">Get in touch with us</a>
+      </p>
+    </div>
+  </main>
+
+  <!-- Script for Accordion & Theme Management -->
+  <script>
+    document.addEventListener('DOMContentLoaded', () => {
+      const faqQuestions = document.querySelectorAll('.faq-question');
+
+      faqQuestions.forEach(question => {
+        question.addEventListener('click', () => {
+          const answer = question.nextElementSibling;
+          const icon = question.querySelector('svg');
+          
+          // Toggle current answer
+          answer.classList.toggle('hidden');
+          icon.classList.toggle('rotate-180');
+        });
+      });
+    });
+  </script>
+  <script src="/theme_changer.js"></script>
+</body>
+
+</html>
