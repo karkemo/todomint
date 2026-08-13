@@ -19,6 +19,7 @@
     "@tailwindcss/cli": "^4.3.3",
     "bcrypt": "^6.0.0",
     "connect-sqlite3": "^0.9.18",
+    "cookie-session": "^2.1.1",
     "crypto": "^1.0.1",
     "daisyui": "^5.7.0",
     "dotenv": "^17.4.2",
