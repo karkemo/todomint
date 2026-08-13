@@ -11,12 +11,14 @@ const {
   updateName,
   updateEmail,
   updatePassword,
-  updateCompletedAction
+  updateCompletedAction,
+  updatePreferredFont
 } = require('../controllers/settingsController');
 
 router.post('/name', validate(updateNameSchema), updateName);
 router.post('/email', validate(updateEmailSchema), updateEmail);
 router.post('/password', validate(updatePasswordSchema), updatePassword);
 router.patch('/completed-action', validate(updateCompletedActionSchema), updateCompletedAction);
+router.patch('/font', updatePreferredFont);
 
 module.exports = router;

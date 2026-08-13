@@ -6,6 +6,7 @@
     --font-sans: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue",
       "Noto Sans", Arial, sans-serif, "Apple Color Emoji", "Segoe UI Emoji",
       "Segoe UI Symbol", "Noto Color Emoji";
+    --font-serif: ui-serif, Georgia, Cambria, "Times New Roman", Times, serif;
     --font-mono: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono",
       "Courier New", monospace;
     --color-red-50: oklch(97.1% 0.013 17.38);
@@ -1239,6 +1240,17 @@
       backface-visibility: visible;
     }
   }
+  .sr-only {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    padding: 0;
+    margin: -1px;
+    overflow: hidden;
+    clip-path: inset(50%);
+    white-space: nowrap;
+    border-width: 0;
+  }
   @layer daisyui.l1.l2.l3 {
     .avatar {
       position: relative;
@@ -1340,6 +1352,74 @@
   }
   @layer daisyui.l1.l2 {
     .checkbox:disabled {
+      cursor: not-allowed;
+      opacity: 20%;
+    }
+  }
+  @layer daisyui.l1.l2.l3 {
+    .radio {
+      position: relative;
+      display: inline-block;
+      flex-shrink: 0;
+      cursor: pointer;
+      appearance: none;
+      border-radius: calc(infinity * 1px);
+      padding: 0.25rem;
+      vertical-align: middle;
+      border: var(--border) solid var(--input-color, currentColor);
+    }
+    @supports (color: color-mix(in lab, red, red)) {
+      .radio {
+        border: var(--border) solid var(--input-color, color-mix(in srgb, currentColor 20%, #0000));
+      }
+    }
+    .radio {
+      box-shadow: 0 1px oklch(0% 0 0 / calc(var(--depth) * 0.1)) inset;
+      --size: calc(var(--size-selector, 0.25rem) * 6);
+      width: var(--size);
+      height: var(--size);
+      color: var(--input-color, currentColor);
+    }
+    .radio:before {
+      display: block;
+      width: 100%;
+      height: 100%;
+      border-radius: calc(infinity * 1px);
+      --tw-content: "";
+      content: var(--tw-content);
+      background-size: auto, calc(var(--noise) * 100%);
+      background-image: none, var(--fx-noise);
+    }
+    .radio:focus-visible {
+      outline: 2px solid currentColor;
+    }
+    .radio:checked, .radio[aria-checked="true"] {
+      border-color: currentcolor;
+      background-color: var(--color-base-100);
+      @media (prefers-reduced-motion: no-preference) {
+        animation: radio 0.2s ease-out;
+      }
+      &:before {
+        background-color: currentcolor;
+        box-shadow: 0 -1px oklch(0% 0 0 / calc(var(--depth) * 0.1)) inset, 0 8px 0 -4px oklch(100% 0 0 / calc(var(--depth) * 0.1)) inset, 0 1px oklch(0% 0 0 / calc(var(--depth) * 0.1));
+      }
+      @media (forced-colors: active) {
+        &:before {
+          outline-style: var(--tw-outline-style);
+          outline-width: 1px;
+          outline-offset: calc(1px * -1);
+        }
+      }
+      @media print {
+        &:before {
+          outline: 0.25rem solid;
+          outline-offset: -1rem;
+        }
+      }
+    }
+  }
+  @layer daisyui.l1.l2 {
+    .radio:disabled {
       cursor: not-allowed;
       opacity: 20%;
     }
@@ -1455,6 +1535,9 @@
   .-top-24 {
     top: calc(var(--spacing) * -24);
   }
+  .top-2 {
+    top: calc(var(--spacing) * 2);
+  }
   .-right-12 {
     right: calc(var(--spacing) * -12);
   }
@@ -1466,6 +1549,9 @@
   }
   .-left-24 {
     left: calc(var(--spacing) * -24);
+  }
+  .left-2 {
+    left: calc(var(--spacing) * 2);
   }
   .z-10 {
     z-index: 10;
@@ -1757,6 +1843,9 @@
   .h-1\.5 {
     height: calc(var(--spacing) * 1.5);
   }
+  .h-3 {
+    height: calc(var(--spacing) * 3);
+  }
   .h-4 {
     height: calc(var(--spacing) * 4);
   }
@@ -1845,6 +1934,9 @@
   }
   .w-1\.5 {
     width: calc(var(--spacing) * 1.5);
+  }
+  .w-3 {
+    width: calc(var(--spacing) * 3);
   }
   .w-4 {
     width: calc(var(--spacing) * 4);
@@ -2004,6 +2096,9 @@
   }
   .grid-cols-2 {
     grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+  .grid-cols-3 {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
   }
   .grid-cols-7 {
     grid-template-columns: repeat(7, minmax(0, 1fr));
@@ -2587,6 +2682,9 @@
   .font-sans {
     font-family: var(--font-sans);
   }
+  .font-serif {
+    font-family: var(--font-serif);
+  }
   .text-2xl {
     font-size: var(--text-2xl);
     line-height: var(--tw-leading, var(--text-2xl--line-height));
@@ -2793,6 +2891,9 @@
   }
   .uppercase {
     text-transform: uppercase;
+  }
+  .italic {
+    font-style: italic;
   }
   .line-through {
     text-decoration-line: line-through;
@@ -3052,6 +3153,9 @@
       opacity: 100%;
     }
   }
+  .peer-checked\:flex:is(:where(.peer):checked ~ *) {
+    display: flex;
+  }
   .selection\:bg-blue-500 ::selection {
     background-color: var(--color-blue-500);
   }
@@ -3100,6 +3204,9 @@
   @media (hover: hover) {
     .hover\:border-blue-300:hover {
       border-color: var(--color-blue-300);
+    }
+    .hover\:border-blue-400:hover {
+      border-color: var(--color-blue-400);
     }
     .hover\:bg-amber-100:hover {
       background-color: var(--color-amber-100);
@@ -3209,6 +3316,15 @@
   }
   .active\:scale-\[0\.99\]:active {
     scale: 0.99;
+  }
+  .has-\[\:checked\]\:border-blue-600:has(:is(:checked)) {
+    border-color: var(--color-blue-600);
+  }
+  .has-\[\:checked\]\:bg-blue-50\/30:has(:is(:checked)) {
+    background-color: color-mix(in srgb, oklch(97% 0.014 254.604) 30%, transparent);
+    @supports (color: color-mix(in lab, red, red)) {
+      background-color: color-mix(in oklab, var(--color-blue-50) 30%, transparent);
+    }
   }
   @media (width >= 40rem) {
     .sm\:-ml-16 {
@@ -3742,6 +3858,15 @@
   .dark\:focus\:border-blue-500:where(.dark, .dark *):focus {
     border-color: var(--color-blue-500);
   }
+  .dark\:has-\[\:checked\]\:border-blue-500:where(.dark, .dark *):has(:is(:checked)) {
+    border-color: var(--color-blue-500);
+  }
+  .dark\:has-\[\:checked\]\:bg-blue-950\/20:where(.dark, .dark *):has(:is(:checked)) {
+    background-color: color-mix(in srgb, oklch(28.2% 0.091 267.935) 20%, transparent);
+    @supports (color: color-mix(in lab, red, red)) {
+      background-color: color-mix(in oklab, var(--color-blue-950) 20%, transparent);
+    }
+  }
 }
 @font-face {
   font-family: 'Audiowide';
@@ -3757,12 +3882,16 @@
   font-style: normal;
   font-display: swap;
 }
-html::-webkit-scrollbar, body::-webkit-scrollbar {
-  display: none;
+:root {
+  --user-font: sans-serif;
 }
 html, body {
+  font-family: var(--user-font);
   -ms-overflow-style: none;
   scrollbar-width: none;
+}
+html::-webkit-scrollbar, body::-webkit-scrollbar {
+  display: none;
 }
 @layer base {
   :where(:root),:root:has(input.theme-controller[value=light]:checked),[data-theme=light] {

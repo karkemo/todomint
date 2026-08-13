@@ -79,6 +79,7 @@ async function initDb() {
         verification_code TEXT,
         code_expires_at DATETIME,
         completed_todos_action TEXT DEFAULT 'keep',
+        preferred_font TEXT DEFAULT 'sans-serif',
         pending_email TEXT,
         created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
         trial_ends_at TEXT,
@@ -247,7 +248,7 @@ app.get('/api/user', async (req, res) => {
 
   try {
     const result = await db.execute({
-      sql: 'SELECT id, name, email, completed_todos_action, created_at FROM users WHERE id = ?',
+      sql: 'SELECT id, name, email, completed_todos_action, preferred_font, created_at FROM users WHERE id = ?',
       args: [req.session.userId]
     });
 

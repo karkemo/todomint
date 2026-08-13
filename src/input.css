@@ -24,14 +24,19 @@
 
 @custom-variant dark (&:where(.dark, .dark *));
 
+:root {
+  --user-font: sans-serif;
+}
+
 /* Hide scrollbar for the main browser window only */
+html,
+body {
+  font-family: var(--user-font);
+  -ms-overflow-style: none;  /* IE and Edge */
+  scrollbar-width: none;  /* Firefox */
+}
+
 html::-webkit-scrollbar,
 body::-webkit-scrollbar {
   display: none;
-}
-
-html,
-body {
-  -ms-overflow-style: none;  /* IE and Edge */
-  scrollbar-width: none;  /* Firefox */
 }

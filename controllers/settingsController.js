@@ -148,9 +148,30 @@ const updateCompletedAction = async (req, res) => {
   }
 };
 
+// NEW
+const updatePreferredFont = async (req, res) => {
+  const { font } = req.body;
+  const allowedFonts = ['sans-serif', 'audiowide', 'cursive'];
+  if (!font || !allowedFonts.includes(font)) {
+    return res.status(400).json({ error: 'Invalid font selection' });
+  }
+
+  try {
+    await db.execute({
+      sql: 'UPDATE users SET preferred_font = ? WHERE id = ?',
+      args: [font, req.session.userId]
+    });
+    return res.json({ success: true, font });
+  } catch (err) {
+    console.error('Preferred font update error:', err);
+    return res.status(500).json({ error: 'Failed to save font preference' });
+  }
+};
+
 module.exports = {
   updateName,
   updateEmail,
   updatePassword,
-  updateCompletedAction
+  updateCompletedAction,
+  updatePreferredFont
 };

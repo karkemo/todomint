@@ -1,4 +1,20 @@
+// settings.js
+
 import flyToast from '/node_modules/fly-toast/index.js';
+
+// خريطة الخطوط المطابقة للتعريفات في ملف الـ CSS
+const fontMap = {
+  'sans-serif': 'sans-serif',
+  'audiowide': "'Audiowide', sans-serif",
+  'cursive': "'Cursive', sans-serif"
+};
+
+// دالة تحديث الخط عبر متغير الـ CSS الفريد --user-font
+function applyFontLocally(fontKey) {
+  const fontValue = fontMap[fontKey] || fontMap['sans-serif'];
+  localStorage.setItem('preferred-font', fontKey);
+  document.documentElement.style.setProperty('--user-font', fontValue);
+}
 
 document.addEventListener('DOMContentLoaded', () => {
   const clearTodosBtn = document.getElementById('clear-todos-btn');
@@ -9,6 +25,81 @@ document.addEventListener('DOMContentLoaded', () => {
   const passwordForm = document.querySelector('#password-modal form');
   const completedSelect = document.getElementById('completed-todos-action');
   const completedMessage = document.getElementById('completed-action-message');
+  const fontRadios = document.querySelectorAll('input[name="preferred_font"]');
+  const fontMessage = document.getElementById('font-action-message');
+
+  // تحديد الـ Radio المختار فوراً من الـ LocalStorage
+  const savedFont = localStorage.getItem('preferred-font') || 'sans-serif';
+  fontRadios.forEach(radio => {
+    if (radio.value === savedFont) {
+      radio.checked = true;
+    }
+  });
+
+  async function refreshPreferredFont() {
+    if (!fontRadios.length) return;
+    try {
+      const response = await fetch('/api/user');
+      const data = await response.json();
+      if (response.ok && data.preferred_font) {
+        fontRadios.forEach(radio => {
+          if (radio.value === data.preferred_font) {
+            radio.checked = true;
+          }
+        });
+        // مزامنة الخط المحلي مع داتابيز السيرفر
+        applyFontLocally(data.preferred_font);
+      }
+    } catch (error) {
+      console.error('Failed to load font preference:', error);
+    }
+  }
+
+  // عند تغيير الخط من قبل المستخدم
+  fontRadios.forEach(radio => {
+    radio.addEventListener('change', async (e) => {
+      const selectedFont = e.target.value;
+      
+      // 1. تطبيق الخط فوراً عبر متغير الـ CSS
+      applyFontLocally(selectedFont);
+
+      if (fontMessage) fontMessage.textContent = 'Saving...';
+
+      try {
+        // 2. حفظ الخط في الباك إند
+        const response = await fetch('/api/settings/font', {
+          method: 'PATCH',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ font: selectedFont })
+        });
+
+        const result = await response.json();
+
+        if (!response.ok) {
+          if (fontMessage) {
+            fontMessage.textContent = result.error || 'Failed to save.';
+            fontMessage.className = 'text-xs text-red-500';
+          }
+          flyToast(result.error || 'Failed to save font preference.', 'error');
+          return;
+        }
+
+        if (fontMessage) {
+          fontMessage.textContent = 'Saved!';
+          fontMessage.className = 'text-xs text-emerald-500';
+          setTimeout(() => { fontMessage.textContent = ''; }, 3000);
+        }
+
+        flyToast('Font updated successfully!', 'success');
+      } catch (error) {
+        console.error('Error saving font preference:', error);
+        if (fontMessage) {
+          fontMessage.textContent = 'Network error.';
+          fontMessage.className = 'text-xs text-red-500';
+        }
+      }
+    });
+  });
 
   async function refreshCompletedAction() {
     if (!completedSelect) return;
@@ -87,7 +178,7 @@ document.addEventListener('DOMContentLoaded', () => {
         console.error('Name update error:', error);
         flyToast('Network error while updating name.', 'error');
       }
-    })
+    });
   }
 
   if (emailForm) {
@@ -156,7 +247,6 @@ document.addEventListener('DOMContentLoaded', () => {
 
   if (clearTodosBtn && clearTodosBtnText) {
     clearTodosBtn.addEventListener('click', async () => {
-      // const confirmed = confirm('Are you sure you want to delete all todos? This action cannot be undone.'); 
       const confirmed = await showConfirm('Are you sure you want to delete all todos? This action cannot be undone.', 'Delete All Todos?');
       if (!confirmed) return;
 
@@ -167,7 +257,7 @@ document.addEventListener('DOMContentLoaded', () => {
         const response = await fetch('/api/todos', {
           method: 'DELETE',
           headers: { 'Content-Type': 'application/json' }
-        })
+        });
 
         const data = await response.json();
 
@@ -186,7 +276,7 @@ document.addEventListener('DOMContentLoaded', () => {
         clearTodosBtn.disabled = false;
         clearTodosBtnText.innerText = 'Clear Todos';
       }
-    })
+    });
   }
 
   if (deleteBtn) {
@@ -222,4 +312,5 @@ document.addEventListener('DOMContentLoaded', () => {
   }
 
   refreshCompletedAction();
+  refreshPreferredFont();
 });
