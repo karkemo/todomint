@@ -327,8 +327,11 @@ if (process.env.NODE_ENV === 'production') {
 }
 
 const db = createClient({
-  url: process.env.NODE_ENV === 'production' ? process.env.TURSO_DATABASE_URL : 'file:./data/data/app.db',
-  syncUrl: process.env.TURSO_DATABASE_URL,
+  // url: process.env.NODE_ENV === 'production' ? process.env.TURSO_DATABASE_URL : 'file:./data/data/app.db',
+  // syncUrl: process.env.TURSO_DATABASE_URL,
+  url: process.env.NODE_ENV === 'production' 
+    ? process.env.TURSO_DATABASE_URL 
+    : 'file:./data/data/app.db',
   authToken: process.env.TURSO_AUTH_TOKEN,
   syncInterval: 60
 });
