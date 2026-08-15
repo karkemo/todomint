@@ -8,7 +8,7 @@ const session = require('express-session');
 const helmet = require('helmet');
 require('dotenv').config();
 const SQLiteStore = require('connect-sqlite3')(session);
-const fs = require('fs');
+// const fs = require('fs');
 const serverless = require('serverless-http');
 
 const { isAuthenticated, isGuest } = require('./middleware/auth');
@@ -22,16 +22,55 @@ const reportRoutes = require('./routes/reportRoutes');
 
 const noCache = require('./middleware/noCache');
 
+const { Store } = require('express-session');
+
 // create folders if not found
-fs.mkdirSync('./data/data', { recursive: true });
-fs.mkdirSync('./data/sessions', { recursive: true });
+// fs.mkdirSync('./data/data', { recursive: true });
+// fs.mkdirSync('./data/sessions', { recursive: true });
+
+class TursoStore extends Store {
+    constructor(db) {
+        super();
+        this.db = db;
+    }
+
+    async get(sid, cb) {
+        try {
+            const res = await this.db.execute({ 
+                sql: 'SELECT sess FROM sessions WHERE sid = ? AND expire > ?', 
+                args: [sid, new Date().toISOString()] 
+            });
+            if (res.rows.length === 0) return cb(null, null);
+            cb(null, JSON.parse(res.rows[0].sess));
+        } catch (err) { cb(err); }
+    }
+
+    async set(sid, sess, cb) {
+        try {
+            const expire = sess.cookie.expires || new Date(Date.now() + 86400000);
+            await this.db.execute({
+                sql: 'INSERT OR REPLACE INTO sessions (sid, sess, expire) VALUES (?, ?, ?)',
+                args: [sid, JSON.stringify(sess), new Date(expire).toISOString()]
+            });
+            cb();
+        } catch (err) { cb(err); }
+    }
+
+    async destroy(sid, cb) {
+        try {
+            await this.db.execute({ sql: 'DELETE FROM sessions WHERE sid = ?', args: [sid] });
+            cb();
+        } catch (err) { cb(err); }
+    }
+}
+
 
 const app = express();
 const PORT = process.env.PORT || 3000;
 
 const db = createClient({
-  url: 'file:./data/data/app.db', // all data
-  syncUrl: process.env.TURSO_DATABASE_URL,
+  // url: 'file:./data/data/app.db', // all data
+  url: process.env.TURSO_DATABASE_URL,
   authToken: process.env.TURSO_AUTH_TOKEN,
   syncInterval: 60
 });
@@ -44,7 +83,7 @@ app.use(helmet({
 }));
 
 app.use(session({
-  store: new SQLiteStore({ db: 'sessions.db', dir: './data/sessions' }), // session data
+  store: new TursoStore(db), // session data
   secret: process.env.SESSION_SECRET,
   resave: false,
   saveUninitialized: false,
@@ -126,6 +165,13 @@ async function initDb() {
       );
     `);
 
+    await db.execute(`
+      CREATE TABLE IF NOT EXISTS sessions (
+        sid TEXT PRIMARY KEY,
+        sess TEXT NOT NULL,
+        expire DATETIME NOT NULL
+      );
+    `);
 
     console.log('Turso Database initialized successfully.');
   } catch (err) {
@@ -266,6 +312,15 @@ app.get('/api/user', async (req, res) => {
   }
 });
 
-app.listen(PORT, '0.0.0.0', () => {
-  console.log(`Running on http://localhost:${PORT}`);
-});
+// app.listen(PORT, '0.0.0.0', () => {
+//   console.log(`Running on http://localhost:${PORT}`);
+// });
+
+
+if (process.env.NODE_ENV !== 'production') {
+  app.listen(PORT, '0.0.0.0', () => {
+    console.log(`Running on http://localhost:${PORT}`);
+  });
+}
+
+module.exports = serverless(app);
