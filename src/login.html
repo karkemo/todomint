@@ -130,12 +130,12 @@
           }
 
           if (data.requireVerification) {
-            window.location = '/verify?email=' + encodeURIComponent(email);
+            window.location.href = '/verify?email=' + encodeURIComponent(email);
             return;
           }
 
           // logged in
-          window.location = '/dashboard';
+          window.location.href = '/dashboard';
         } catch (err) {
           console.error(err);
           flyToast('Network error', 'error');
