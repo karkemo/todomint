@@ -1,4 +1,4 @@
-import flyToast from '/external/index.js';
+import flyToast from './external/index.js';
 
 async function loadNavbarUsername() {
   try {
