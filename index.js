@@ -72,7 +72,7 @@ const db = createClient({
   // url: 'file:./data/data/app.db', // all data
   url: process.env.TURSO_DATABASE_URL,
   authToken: process.env.TURSO_AUTH_TOKEN,
-  syncInterval: 60
+  // syncInterval: 60
 });
 
 app.use(express.urlencoded({ extended: true }));
