@@ -1,15 +1,13 @@
 // settings.js
 
-import flyToast from '/node_modules/fly-toast/index.js';
+// import flyToast from '/node_modules/fly-toast/index.js';
 
-// خريطة الخطوط المطابقة للتعريفات في ملف الـ CSS
 const fontMap = {
   'sans-serif': 'sans-serif',
   'audiowide': "'Audiowide', sans-serif",
   'cursive': "'Cursive', sans-serif"
 };
 
-// دالة تحديث الخط عبر متغير الـ CSS الفريد --user-font
 function applyFontLocally(fontKey) {
   const fontValue = fontMap[fontKey] || fontMap['sans-serif'];
   localStorage.setItem('preferred-font', fontKey);
@@ -28,7 +26,6 @@ document.addEventListener('DOMContentLoaded', () => {
   const fontRadios = document.querySelectorAll('input[name="preferred_font"]');
   const fontMessage = document.getElementById('font-action-message');
 
-  // تحديد الـ Radio المختار فوراً من الـ LocalStorage
   const savedFont = localStorage.getItem('preferred-font') || 'sans-serif';
   fontRadios.forEach(radio => {
     if (radio.value === savedFont) {
@@ -47,7 +44,6 @@ document.addEventListener('DOMContentLoaded', () => {
             radio.checked = true;
           }
         });
-        // مزامنة الخط المحلي مع داتابيز السيرفر
         applyFontLocally(data.preferred_font);
       }
     } catch (error) {
@@ -55,18 +51,15 @@ document.addEventListener('DOMContentLoaded', () => {
     }
   }
 
-  // عند تغيير الخط من قبل المستخدم
   fontRadios.forEach(radio => {
     radio.addEventListener('change', async (e) => {
       const selectedFont = e.target.value;
       
-      // 1. تطبيق الخط فوراً عبر متغير الـ CSS
       applyFontLocally(selectedFont);
 
       if (fontMessage) fontMessage.textContent = 'Saving...';
 
       try {
-        // 2. حفظ الخط في الباك إند
         const response = await fetch('/api/settings/font', {
           method: 'PATCH',
           headers: { 'Content-Type': 'application/json' },

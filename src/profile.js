@@ -1,4 +1,4 @@
-import flyToast from '/node_modules/fly-toast/index.js';
+// import flyToast from '/node_modules/fly-toast/index.js';
 
 async function loadAvatar() {
   try {

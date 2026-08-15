@@ -7,6 +7,7 @@
   <title>Profile - Todo</title>
   <link rel="icon" type="image/png" href="/assets/logo.png">
   <script src="/profile.js" defer type="module"></script>
+  <script src="/components/fly-toast.js"></script>
   <script>
     if (localStorage.getItem('color-theme') === 'dark' || (!('color-theme' in localStorage) && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
       document.documentElement.classList.add('dark');
