@@ -84,7 +84,7 @@ app.use(helmet({
 
 app.use(session({
   store: new TursoStore(db), // session data
-  secret: process.env.SESSION_SECRET,
+  secret: process.env.SESSION_SECRET || 'my-super-secret-key-12345',
   resave: false,
   saveUninitialized: false,
   cookie: {
