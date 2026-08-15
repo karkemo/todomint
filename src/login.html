@@ -108,10 +108,10 @@
 
   <script src="/theme_changer.js"></script>
   <script type="module">
-    import flyToast from '/node_modules/fly-toast/index.js';
+    import flyToast from '/external/index.js';
 
     document.addEventListener('DOMContentLoaded', () => {
-      const form = document.querySelector('form[action="/login"]');
+      const form = document.querySelector('form[action="/api/login"]');
       form.addEventListener('submit', async (e) => {
         e.preventDefault();
         const email = document.getElementById('email').value.trim();
