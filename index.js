@@ -9,7 +9,7 @@ const helmet = require('helmet');
 // require('dotenv').config();
 const SQLiteStore = require('connect-sqlite3')(session);
 // const fs = require('fs');
-const serverless = require('serverless-http');
+// const serverless = require('serverless-http');
 
 const { isAuthenticated, isGuest } = require('./middleware/auth');
 
@@ -68,12 +68,12 @@ class TursoStore extends Store {
 const app = express();
 const PORT = process.env.PORT || 3000;
 
-const db = createClient({
-  // url: 'file:./data/data/app.db', // all data
-  url: process.env.TURSO_DATABASE_URL,
-  authToken: process.env.TURSO_AUTH_TOKEN,
-  // syncInterval: 60
-});
+// const db = createClient({
+//   // url: 'file:./data/data/app.db', // all data
+//   url: process.env.TURSO_DATABASE_URL,
+//   authToken: process.env.TURSO_AUTH_TOKEN,
+//   // syncInterval: 60
+// });
 
 app.use(express.urlencoded({ extended: true }));
 app.use(express.json());
@@ -317,10 +317,11 @@ app.get('/api/user', async (req, res) => {
 // });
 
 
-if (process.env.NODE_ENV !== 'production') {
-  app.listen(PORT, '0.0.0.0', () => {
-    console.log(`Running on http://localhost:${PORT}`);
-  });
-}
+// if (process.env.NODE_ENV !== 'production') {
+//   app.listen(PORT, '0.0.0.0', () => {
+//     console.log(`Running on http://localhost:${PORT}`);
+//   });
+// }
 
-module.exports = serverless(app);
+// module.exports = serverless(app);
+module.exports = app;
