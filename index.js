@@ -6,7 +6,7 @@ const { createClient } = require('@libsql/client'); // new
 const path = require('path');
 const session = require('express-session');
 const helmet = require('helmet');
-require('dotenv').config();
+// require('dotenv').config();
 const SQLiteStore = require('connect-sqlite3')(session);
 // const fs = require('fs');
 const serverless = require('serverless-http');
@@ -83,7 +83,7 @@ app.use(helmet({
 }));
 
 app.use(session({
-  store: new TursoStore(db), // session data
+  // store: new TursoStore(db), // session data
   secret: process.env.SESSION_SECRET || 'my-super-secret-key-12345',
   resave: false,
   saveUninitialized: false,
