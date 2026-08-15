@@ -15,14 +15,14 @@ const globalConfig = {
  * Configure global defaults for all flyToast calls.
  * @param {Object} options - Global configuration options.
  */
-export function setDefaults(options = {}) {
+function setDefaults(options = {}) {
   Object.assign(globalConfig, options);
 }
 
 /**
  * Displays a customizable, accessible, zero-dependency toast notification.
  */
-export default function flyToast(message, type = 'info', time, options = {}) {
+function flyToast(message, type = 'info', time, options = {}) {
   const mergedOptions = { ...globalConfig, ...options };
   const finalTime = (typeof time === 'number' && time > 0) ? time : mergedOptions.duration;
   const durationInMs = finalTime * 1000;
