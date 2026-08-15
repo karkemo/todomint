@@ -259,3 +259,8 @@ export default function flyToast(message, type = 'info', time, options = {}) {
 
   return dismiss;
 }
+
+
+// new
+window.flyToast = flyToast;
+window.setDefaults = setDefaults;
