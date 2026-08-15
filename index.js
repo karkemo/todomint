@@ -68,12 +68,12 @@ class TursoStore extends Store {
 const app = express();
 const PORT = process.env.PORT || 3000;
 
-// const db = createClient({
-//   // url: 'file:./data/data/app.db', // all data
-//   url: process.env.TURSO_DATABASE_URL,
-//   authToken: process.env.TURSO_AUTH_TOKEN,
-//   // syncInterval: 60
-// });
+const db = createClient({
+  // url: 'file:./data/data/app.db', // all data
+  url: process.env.TURSO_DATABASE_URL,
+  authToken: process.env.TURSO_AUTH_TOKEN,
+  // syncInterval: 60
+});
 
 app.use(express.urlencoded({ extended: true }));
 app.use(express.json());
@@ -83,7 +83,7 @@ app.use(helmet({
 }));
 
 app.use(session({
-  // store: new TursoStore(db), // session data
+  store: new TursoStore(db), // session data
   secret: process.env.SESSION_SECRET || 'my-super-secret-key-12345',
   resave: false,
   saveUninitialized: false,
