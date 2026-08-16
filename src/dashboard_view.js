@@ -4,6 +4,10 @@ document.addEventListener('DOMContentLoaded', () => {
   const mainContent = document.getElementById('main-content');
   const showRemainingTrial = document.getElementById('show_remaining_trial');
   const trialTextContainer = document.getElementById('trial-text-container');
+  
+  // Logo elements
+  const logoWithText = document.getElementById('full_logo');
+  const logoIcon = document.getElementById('icon_only');
 
   if (!sidebar) return;
 
@@ -13,6 +17,15 @@ document.addEventListener('DOMContentLoaded', () => {
   // Updates layout based on screen width
   function syncLayout() {
     const isCollapsed = sidebar.classList.contains('is-collapsed');
+
+    // Toggle Logos based on sidebar state
+    if (isCollapsed) {
+      if (logoWithText) logoWithText.classList.add('hidden');
+      if (logoIcon) logoIcon.classList.remove('hidden');
+    } else {
+      if (logoWithText) logoWithText.classList.remove('hidden');
+      if (logoIcon) logoIcon.classList.add('hidden');
+    }
 
     if (mdMediaQuery.matches && !isCollapsed) {
       // Mobile screen & expanded: Expand sidebar to full width & hide main content

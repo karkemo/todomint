@@ -317,11 +317,11 @@ app.get('/api/user', async (req, res) => {
 // });
 
 
-// if (process.env.NODE_ENV !== 'production') {
-//   app.listen(PORT, '0.0.0.0', () => {
-//     console.log(`Running on http://localhost:${PORT}`);
-//   });
-// }
+if (process.env.NODE_ENV !== 'production') {
+  app.listen(PORT, '0.0.0.0', () => {
+    console.log(`Running on http://localhost:${PORT}`);
+  });
+}
 
 // module.exports = serverless(app);
 module.exports = app;
