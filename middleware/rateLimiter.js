@@ -1,4 +1,3 @@
-// middleware/rateLimiter.js
 const rateLimit = require('express-rate-limit');
 
 // Strict limiter for authentication attempts

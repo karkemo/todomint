@@ -10,30 +10,12 @@ const getLists = async (req, res) => {
   try {
     const userId = req.session.userId;
 
-    const userResult = await db.execute({
-      sql: 'SELECT trial_ends_at, subscription_status, plan FROM users WHERE id = ?',
-      args: [userId]
-    });
-    const user = userResult.rows[0];
-
     const listsResult = await db.execute({
       sql: 'SELECT * FROM lists WHERE user_id = ? ORDER BY id ASC',
       args: [userId]
     });
 
-    const now = new Date();
-    const trialEnd = user?.trial_ends_at ? new Date(user.trial_ends_at) : null;
-    const isTrialExpired = trialEnd ? now > trialEnd : false;
-    const isPro = user?.subscription_status === 'active' || user?.plan === 'pro';
-
-    const listsWithLockStatus = listsResult.rows.map((list, index) => {
-      const isLocked = isTrialExpired && !isPro && index >= 3;
-      return {
-        ...list,
-      };
-    });
-
-    res.json(listsWithLockStatus);
+    res.json(listsResult.rows);
   } catch (err) {
     console.error('Error fetching lists:', err);
     res.status(500).json({ error: 'Database error' });
@@ -42,18 +24,29 @@ const getLists = async (req, res) => {
 
 const createList = async (req, res) => {
   try {
-    const userId = req.session.userId;
-    const { title } = req.body;
+    const userId = req.session?.userId;
+    const title = typeof req.body?.title === 'string' ? req.body.title.trim() : '';
+
+    if (!userId) {
+      return res.status(401).json({ error: 'Unauthorized' });
+    }
+
+    if (!title) {
+      return res.status(400).json({ error: 'List title is required' });
+    }
 
     const result = await db.execute({
       sql: 'INSERT INTO lists (title, user_id) VALUES (?, ?)',
       args: [title, userId]
     });
 
-    res.status(201).json({ id: Number(result.lastInsertRowid), title });
+    return res.status(201).json({ id: Number(result.lastInsertRowid), title });
   } catch (err) {
     console.error('Error creating list:', err);
-    res.status(500).json({ error: 'Failed to create list' });
+    return res.status(500).json({
+      error: 'Failed to create list',
+      details: process.env.NODE_ENV === 'production' ? undefined : err.message
+    });
   }
 };
 

@@ -1,26 +1,3 @@
-// const { z } = require('zod');
-
-// const reportSchema = z.object({
-//   body: z.object({
-//     type: z.enum(['bug', 'feedback', 'suggestion'], {
-//       errorMap: () => ({ message: 'Invalid report type' })
-//     }),
-//     email: z
-//       .string({ required_error: 'Email is required' })
-//       .trim()
-//       .toLowerCase()
-//       .email('Invalid email address'),
-//     title: z
-//       .string({ required_error: 'Title is required' })
-//       .trim(),
-//     description: z
-//       .string({ required_error: 'Description is required' })
-//       .trim()
-//   })
-// })
-
-// module.exports = { reportSchema };
-
 const { z } = require('zod');
 
 const reportSchema = z.object({

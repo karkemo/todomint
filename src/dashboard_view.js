@@ -4,6 +4,7 @@ document.addEventListener('DOMContentLoaded', () => {
   const mainContent = document.getElementById('main-content');
   const showRemainingTrial = document.getElementById('show_remaining_trial');
   const trialTextContainer = document.getElementById('trial-text-container');
+  const text = document.getElementById('buymeacoffee');
   
   // Logo elements
   const logoWithText = document.getElementById('full_logo');
@@ -22,9 +23,11 @@ document.addEventListener('DOMContentLoaded', () => {
     if (isCollapsed) {
       if (logoWithText) logoWithText.classList.add('hidden');
       if (logoIcon) logoIcon.classList.remove('hidden');
+      if (text) text.classList.add('hidden');
     } else {
       if (logoWithText) logoWithText.classList.remove('hidden');
       if (logoIcon) logoIcon.classList.add('hidden');
+      if (text) text.classList.remove('hidden');
     }
 
     if (mdMediaQuery.matches && !isCollapsed) {

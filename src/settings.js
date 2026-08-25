@@ -1,7 +1,3 @@
-// settings.js
-
-// import flyToast from '/node_modules/fly-toast/index.js';
-
 const fontMap = {
   'sans-serif': 'sans-serif',
   'audiowide': "'Audiowide', sans-serif",

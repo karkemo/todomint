@@ -1,5 +1,3 @@
-// import flyToast from '/node_modules/fly-toast/index.js';
-
 async function loadAvatar() {
   try {
     const response = await fetch('/api/user/name');

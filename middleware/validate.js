@@ -1,4 +1,3 @@
-// middleware/validate.js
 const { ZodError } = require('zod');
 
 const validate = (schema) => async (req, res, next) => {

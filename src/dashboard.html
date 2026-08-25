@@ -85,8 +85,7 @@
 
 <body>
   <!-- Cleaned Layout Wrapper -->
-  <div
-    class="w-full h-screen bg-[#faf7f5] dark:bg-[#0f172a] flex flex-row gap-3 p-4 box-border overflow-hidden">
+  <div class="w-full h-screen bg-[#faf7f5] dark:bg-[#0f172a] flex flex-row gap-3 p-4 box-border overflow-hidden">
     <!-- sidebar -->
     <div id="sidebar"
       class="overflow-y-auto w-64 shrink-0 px-6 py-5 h-full rounded-2xl flex flex-col items-center justify-between gap-6 text-gray-800 dark:text-gray-200 bg-[#efeae6] dark:bg-[#0c1425] z-50 transition-all duration-300">
@@ -209,25 +208,12 @@
       <!-- bottom of sidebar -->
       <div class="w-full flex flex-col items-center justify-center gap-2">
 
-        <div onclick="event.preventDefault();" id="show_remaining_trial"
-          class="hidden h-fit gap-2 glow-purple mb-2 cursor-pointer dark:bg-[#0f172a] bg-[#efeae6] border dark:border-gray-800 border-gray-200 p-6 rounded-2xl text-left transition duration-300 w-full flex-col">
-          <div id="trial-text-container" class="flex flex-row gap-1">
-            <p>Trial ends in</p>
-            <span id="remaining_trial">
-              <span class="loading loading-spinner loading-xs"></span>
-            </span>
-            <p> Days</p>
-          </div>
-          <div onclick="event.preventDefault();"
-            class="btn btn-accent w-full flex items-center justify-center rounded-2xl" title="Completed">
-            <p class="text-center">Upgrade Now</p>
-          </div>
-        </div>
-
-        <div onclick="event.preventDefault();" id="upgrade-btn"
-          class="btn btn-accent w-full hidden items-center justify-center rounded-2xl" title="Completed">
-          <p class="text-center">Upgrade Now</p>
-        </div>
+        <a href="https://buymeacoffee.com/karem_amr" target="_blank" rel="noopener noreferrer"
+          class="btn btn-accent w-full rounded-2xl flex flex-row items-center justify-center gap-2 mb-2"
+          title="buy me a coffee">
+          <img src="/assets/coffee.png" alt="" class="size-5">
+          <span class="font-bold text-black" id="buymeacoffee">Buy me a coffee</span>
+        </a>
 
         <div class="flex flex-row items-center justify-between w-full sidebar-footer">
           <div class="flex items-center gap-3 cursor-pointer group">
@@ -290,7 +276,7 @@
                 </li>
 
                 <div class="my-1 border-t border-slate-100 dark:border-slate-800"></div>
-                
+
                 <li>
                   <a href="/logout"
                     class="flex items-center gap-2 px-3 py-2.5 font-medium rounded-xl text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-950/40 transition-colors">
@@ -308,7 +294,6 @@
               <span class="text-sm font-semibold text-gray-800 dark:text-gray-200 truncate sidebar-text" id="user-name">
                 <span class="loading loading-spinner loading-xs"></span>
               </span>
-              <span class="badge badge-success badge-xs text-white font-bold mt-0.5 hidden" id="pro_badge">Pro</span>
             </div>
           </div>
           <button id="theme-toggle" type="button" aria-label="Toggle theme"
@@ -337,9 +322,7 @@
   <script src="/logo-theme.js"></script>
 </body>
 
-
 <!-- Modals -->
-
 
 <!-- Add todo Modal -->
 <dialog id="add_task_modal"
@@ -434,10 +417,9 @@
   <div
     class="w-full p-6 bg-white dark:bg-[#131f38] text-gray-800 dark:text-gray-100 rounded-2xl shadow-2xl border border-gray-200/80 dark:border-slate-800 font-sans">
 
-
     <!-- Modal Header -->
     <div class="flex items-center justify-between pb-4 border-b border-gray-100 dark:border-slate-800 mb-5">
-      <h3 class="text-xl font-bold font-audiowide">New List</h3>
+      <h3 class="text-xl font-bold">New List</h3>
       <form method="dialog">
         <button
           class="text-gray-400 hover:text-gray-600 dark:hover:text-gray-200 transition-colors cursor-pointer p-1 rounded-lg hover:bg-gray-100 dark:hover:bg-slate-800">
@@ -448,10 +430,8 @@
       </form>
     </div>
 
-
     <!-- List Form -->
     <form id="add-list-form" class="flex flex-col gap-4">
-
 
       <!-- List Title Input -->
       <div class="flex flex-col gap-1.5">
@@ -459,7 +439,6 @@
         <input type="text" id="list-title" name="title" required placeholder="Enter List name..."
           class="w-full px-3.5 py-2.5 rounded-xl bg-gray-50 dark:bg-[#0c1425] border border-gray-200 dark:border-slate-700 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 transition-all placeholder:text-gray-400" />
       </div>
-
 
       <!-- Modal Actions -->
       <div class="flex items-center justify-end gap-3 mt-4 pt-3 border-t border-gray-100 dark:border-slate-800">
@@ -473,7 +452,6 @@
         </button>
       </div>
 
-
     </form>
   </div>
 </dialog>
@@ -484,7 +462,6 @@
   class="m-auto backdrop:bg-black/60 p-0 rounded-2xl bg-transparent border-0 max-w-md w-[90%] outline-none">
   <div
     class="w-full p-6 bg-white dark:bg-[#131f38] text-gray-800 dark:text-gray-100 rounded-2xl shadow-2xl border border-gray-200/80 dark:border-slate-800 font-sans">
-
 
     <!-- Modal Header -->
     <div class="flex items-center justify-between pb-4 border-b border-gray-100 dark:border-slate-800 mb-5">
@@ -499,14 +476,11 @@
       </form>
     </div>
 
-
     <!-- List Form -->
     <form id="rename-list-form" class="flex flex-col gap-4">
 
-
       <!-- Hidden Input for List ID -->
       <input type="hidden" id="rename-list-id" name="id" />
-
 
       <!-- List Title Input -->
       <div class="flex flex-col gap-1.5">
@@ -514,7 +488,6 @@
         <input type="text" id="list-title-edit" name="title" required placeholder="Enter new list title..."
           class="w-full px-3.5 py-2.5 rounded-xl bg-gray-50 dark:bg-[#0c1425] border border-gray-200 dark:border-slate-700 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 transition-all placeholder:text-gray-400" />
       </div>
-
 
       <!-- Modal Actions -->
       <div class="flex items-center justify-end gap-3 mt-4 pt-3 border-t border-gray-100 dark:border-slate-800">
@@ -528,11 +501,9 @@
         </button>
       </div>
 
-
     </form>
   </div>
 </dialog>
-
 
 <!-- list button context menu -->
 <div id="list-menu"
@@ -558,13 +529,11 @@
   </button>
 </div>
 
-
 <!-- rename todo modal -->
 <dialog id="rename_todo_modal"
   class="m-auto backdrop:bg-black/60 p-0 rounded-2xl bg-transparent border-0 max-w-md w-[90%] outline-none">
   <div
     class="w-full p-6 bg-white dark:bg-[#131f38] text-gray-800 dark:text-gray-100 rounded-2xl shadow-2xl border border-gray-200/80 dark:border-slate-800 font-sans">
-
 
     <!-- Modal Header -->
     <div class="flex items-center justify-between pb-4 border-b border-gray-100 dark:border-slate-800 mb-5">
@@ -579,14 +548,11 @@
       </form>
     </div>
 
-
     <!-- List Form -->
     <form id="rename-todo-form" class="flex flex-col gap-4">
 
-
       <!-- Hidden Input for List ID -->
       <input type="hidden" id="rename-todo-id" name="id" />
-
 
       <!-- List Title Input -->
       <div class="flex flex-col gap-1.5">
@@ -594,7 +560,6 @@
         <input type="text" id="todo-title-edit" name="title" required placeholder="Enter new Todo title..."
           class="w-full px-3.5 py-2.5 rounded-xl bg-gray-50 dark:bg-[#0c1425] border border-gray-200 dark:border-slate-700 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 transition-all placeholder:text-gray-400" />
       </div>
-
 
       <!-- Modal Actions -->
       <div class="flex items-center justify-end gap-3 mt-4 pt-3 border-t border-gray-100 dark:border-slate-800">
@@ -608,11 +573,9 @@
         </button>
       </div>
 
-
     </form>
   </div>
 </dialog>
-
 
 <!-- todo button context menu -->
 <div id="todo-menu"
@@ -646,7 +609,6 @@
       </svg>
     </div>
 
-
     <!-- Submenu Content -->
     <ul tabindex="0"
       class="dropdown-content menu z-2000 mr-2 p-1.5 shadow-2xl bg-white dark:bg-[#131f38] border border-gray-200 dark:border-slate-800 rounded-xl w-44 gap-1 before:absolute before:-right-3 before:top-0 before:h-full before:w-4 before:content-['']">
@@ -674,9 +636,7 @@
     </ul>
   </div>
 
-
   <div class="my-1 border-t border-gray-100 dark:border-slate-800"></div>
-
 
   <!-- Delete Button -->
   <button id="delete-todo-btn" type="button"
@@ -689,30 +649,5 @@
     Delete Todo
   </button>
 </div>
-
-
-<!-- Subscription / 14-Day Trial Modal -->
-<div id="subscription-modal" class="modal-overlay hidden">
-  <div class="subscription-card">
-    <button type="button" class="close-modal-btn" id="close-sub-modal">&times;</button>
-    <div class="trial-badge">✨ تجربة مجانية لمدة 14 يومًا</div>
-    <h2>افتح جميع القوائم والميزات الاحترافية</h2>
-    <p>احصل على وصول لا محدود لجميع القوائم المتقدمة لتنظيم مهامك بكفاءة أعلى.</p>
-
-
-    <ul class="sub-features">
-      <li>✓ إنشاء قوائم مخصصة غير محدودة</li>
-      <li>✓ تحليلات وإحصائيات متقدمة للمهام</li>
-      <li>✓ مزامنة سريعة وتخصيص كامل</li>
-    </ul>
-
-
-    <button type="button" class="cta-subscribe-btn" id="start-trial-btn">
-      ابدأ التجربة المجانية الآن
-    </button>
-  </div>
-</div>
-
-
 
 </html>

@@ -1,5 +1,3 @@
-// font_sync.js
-
 const fontMap = {
   'sans-serif': 'sans-serif',
   'audiowide': "'Audiowide', sans-serif",

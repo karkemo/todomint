@@ -1,5 +1,3 @@
-// import flyToast from './external/index.js';
-
 async function loadNavbarUsername() {
   try {
     const response = await fetch('/api/user/name');
@@ -117,7 +115,7 @@ function initLiveDashboardTimeline(tasks = []) {
   // 2. Real-Time Clock & Hand Animation (Runs every second)
   const updatePointerAndClock = () => {
     const now = new Date();
-    
+
     // Convert current time including seconds to precise decimal hours
     const currentDecimalHour = now.getHours() + (now.getMinutes() / 60) + (now.getSeconds() / 3600);
     const pos = getCoordinates(currentDecimalHour);
@@ -133,11 +131,11 @@ function initLiveDashboardTimeline(tasks = []) {
 
     // Live digital clock display with seconds
     if (timeText) {
-      timeText.textContent = `Current Time: ${now.toLocaleTimeString([], { 
-        hour: '2-digit', 
-        minute: '2-digit', 
+      timeText.textContent = `Current Time: ${now.toLocaleTimeString([], {
+        hour: '2-digit',
+        minute: '2-digit',
         second: '2-digit',
-        hour12: true 
+        hour12: true
       })}`;
     }
 
@@ -151,7 +149,7 @@ function initLiveDashboardTimeline(tasks = []) {
   // Set interval to update hand position & clock text every 1000ms (1s)
   window.timelineClockInterval = setInterval(() => {
     const currentHour = updatePointerAndClock();
-    
+
     // Re-check overdue status at the top of every second
     renderTasks(currentHour);
   }, 1000);
@@ -181,34 +179,7 @@ async function loadTimeLineTodos() {
   }
 }
 
-
-/**
- * Toggles the timeline component lock state.
- * @param {boolean} isPro - Set to true to unlock, false to heavily blur/lock.
- */
-let __timelineIsProCache = false;
 let __timelineTasksCache = [];
-
-function setTimelineLockState(isPro) {
-  __timelineIsProCache = isPro;
-
-  const content = document.getElementById('timeline-content');
-  const overlay = document.getElementById('timeline-overlay');
-
-  if (!content || !overlay) return;
-
-  const lockedClasses = ['blur-2xl', 'opacity-10', 'select-none', 'pointer-events-none'];
-
-  if (isPro) {
-    // UNLOCKED STATE
-    content.classList.remove(...lockedClasses);
-    overlay.classList.add('hidden');
-  } else {
-    // LOCKED STATE
-    content.classList.add(...lockedClasses);
-    overlay.classList.remove('hidden');
-  }
-}
 
 /**
  * Builds and injects the theme-appropriate timeline markup (dark or light)
@@ -220,116 +191,97 @@ function renderTimelineMarkup(theme) {
   if (!timeline_parent) return;
 
   const timeline_dark_element = `
-      <div class="relative bg-[#0f172a] border border-gray-800 rounded-2xl p-6 w-full mt-6 flex flex-col items-center overflow-hidden">
-        <!-- Content Wrapper with HEAVY Blur (blur-2xl) and Low Opacity (opacity-10) -->
-        <div id="timeline-content" class="w-full flex flex-col items-center blur-2xl opacity-10 select-none pointer-events-none transition-all duration-300">
-          <div class="w-full flex justify-between items-center mb-2">
-            <h3 class="text-sm font-semibold text-gray-300">24 Hour Task Timeline</h3>
-            <span id="current-time-text" class="text-xs font-mono text-purple-400">00:00</span>
-          </div>
-
-          <div class="relative w-full max-w-4xl aspect-2/1">
-            <svg viewBox="0 0 800 400" class="w-full h-full overflow-visible">
-              <path d="M 100 350 A 300 250 0 0 1 700 350" fill="none" stroke="#1e293b" stroke-width="8" stroke-dasharray="6 6" />
-              <path d="M 100 350 A 300 250 0 0 1 700 350" fill="none" stroke="#6366f1" stroke-width="3" opacity="0.5" />
-              <line x1="80" y1="350" x2="720" y2="350" stroke="#334155" stroke-width="2" />
-              <text x="90" y="380" fill="#64748b" font-size="14" font-weight="bold" text-anchor="middle">00:00</text>
-              <text x="400" y="60" fill="#64748b" font-size="14" font-weight="bold" text-anchor="middle">12:00 (Midday)</text>
-              <text x="710" y="380" fill="#64748b" font-size="14" font-weight="bold" text-anchor="middle">24:00</text>
-              <line id="time-hand" x1="400" y1="350" x2="400" y2="100" stroke="#a855f7" stroke-width="3" stroke-linecap="round" />
-              <circle cx="400" cy="350" r="7" fill="#a855f7" />
-              <g id="timeline-tasks"></g>
-            </svg>
-          </div>
+    <div class="relative bg-[#0f172a] border border-gray-800 rounded-2xl p-6 w-full mt-6 flex flex-col items-center overflow-hidden">
+      <div id="timeline-content" class="w-full flex flex-col items-center">
+        <div class="w-full flex justify-between items-center mb-2">
+          <h3 class="text-sm font-semibold text-gray-300">24 Hour Task Timeline</h3>
+          <span id="current-time-text" class="text-xs font-mono text-purple-400">00:00</span>
         </div>
 
-        <!-- Darker Overlay with backdrop-blur-xl -->
-        <div id="timeline-overlay" class="absolute inset-0 z-10 flex flex-col items-center justify-center bg-[#0f172a]/85 backdrop-blur-xl">
-          <div class="flex flex-col items-center gap-3 p-5 rounded-2xl bg-[#0f172a] border border-purple-500/30 shadow-2xl shadow-purple-500/10">
+        <div class="relative w-full max-w-4xl aspect-2/1">
+          <svg viewBox="0 0 800 400" class="w-full h-full overflow-visible">
+            <path d="M 100 350 A 300 250 0 0 1 700 350" fill="none" stroke="#1e293b" stroke-width="8" stroke-dasharray="6 6" />
+            <path d="M 100 350 A 300 250 0 0 1 700 350" fill="none" stroke="#6366f1" stroke-width="3" opacity="0.5" />
+            <line x1="80" y1="350" x2="720" y2="350" stroke="#334155" stroke-width="2" />
+
+            <!-- Left Marker (12:00 AM - Midnight) -->
+            <g>
+              <image href="/assets/midnight_white.png" x="34" y="365" width="20" height="20" />
+              <text x="96" y="380" fill="#64748b" font-size="14" font-weight="bold" text-anchor="middle">12:00 AM</text>
+            </g>
+
+            <!-- Center Marker (12:00 PM - Midday Sun) -->
+            <g>
+              <image href="/assets/sun.png" x="350" y="40" width="20" height="20" />
+              <text x="410" y="55" fill="#64748b" font-size="14" font-weight="bold" text-anchor="middle">12:00 PM</text>
+            </g>
+
+            <!-- Right Marker (12:00 AM - moon) -->
+            <g>
+              <image href="/assets/moon_white.png" x="725" y="365" width="20" height="20" />
+              <text x="675" y="380" fill="#64748b" font-size="14" font-weight="bold" text-anchor="middle">12:00 AM</text>
+            </g>
             
-            <div class="p-3.5 bg-purple-500/10 border border-purple-500/20 rounded-xl text-purple-400">
-              <svg xmlns="http://www.w3.org/2000/svg" class="w-8 h-8" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                <rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect>
-                <path d="M7 11V7a5 5 0 0 1 10 0v4"></path>
-              </svg>
-            </div>
-
-            <div class="text-center">
-              <p class="text-sm font-bold text-white">Pro Feature</p>
-              <p class="text-xs text-gray-400 mt-0.5">Upgrade your plan to unlock 24-Hour Timeline</p>
-            </div>
-
-            <button class="btn btn-primary btn-sm rounded-xl px-4 mt-1 text-xs">
-              Upgrade Now
-            </button>
-          </div>
+            <line id="time-hand" x1="400" y1="350" x2="400" y2="100" stroke="#a855f7" stroke-width="3" stroke-linecap="round" />
+            <circle cx="400" cy="350" r="7" fill="#a855f7" />
+            <g id="timeline-tasks"></g>
+          </svg>
         </div>
       </div>
-    `;
+    </div>
+  `;
 
   const timeline_light_element = `
-      <div class="relative bg-white border border-slate-200 rounded-2xl p-6 w-full mt-6 flex flex-col items-center overflow-hidden shadow-sm">
-        <!-- Subtle Ambient Glows -->
-        <div class="absolute -top-24 -left-24 w-72 h-72 bg-purple-200/40 rounded-full blur-3xl pointer-events-none"></div>
-        <div class="absolute -bottom-24 -right-24 w-72 h-72 bg-indigo-200/40 rounded-full blur-3xl pointer-events-none"></div>
+    <div class="relative bg-white border border-slate-200 rounded-2xl p-6 w-full mt-6 flex flex-col items-center overflow-hidden shadow-sm">
+      <!-- Subtle Ambient Glows -->
+      <div class="absolute -top-24 -left-24 w-72 h-72 bg-purple-200/40 rounded-full blur-3xl pointer-events-none"></div>
+      <div class="absolute -bottom-24 -right-24 w-72 h-72 bg-indigo-200/40 rounded-full blur-3xl pointer-events-none"></div>
 
-        <!-- Content Wrapper (Matching JS and dark mode classes exactly) -->
-        <div id="timeline-content" class="w-full flex flex-col items-center blur-2xl opacity-10 select-none pointer-events-none transition-all duration-300">
-          <div class="w-full flex justify-between items-center mb-2">
-            <h3 class="text-sm font-bold text-slate-800 tracking-wide">24 Hour Task Timeline</h3>
-            <span id="current-time-text" class="text-xs font-mono text-purple-700 font-semibold">00:00</span>
-          </div>
-
-          <div class="relative w-full max-w-4xl aspect-2/1">
-            <svg viewBox="0 0 800 400" class="w-full h-full overflow-visible">
-              <!-- Dashed Half-Circle Arc -->
-              <path d="M 100 350 A 300 250 0 0 1 700 350" fill="none" stroke="#94a3b8" stroke-width="8" stroke-dasharray="6 6" />
-              
-              <!-- Progress Arc Line -->
-              <path id="progress-arc" d="M 100 350 A 300 250 0 0 1 700 350" fill="none" stroke="#4f46e5" stroke-width="3" opacity="0.9" pathLength="50" stroke-dasharray="50 100" />
-              
-              <!-- Baseline Divider -->
-              <line x1="80" y1="350" x2="720" y2="350" stroke="#64748b" stroke-width="2" />
-              
-              <!-- Hour Markers Text -->
-              <text x="90" y="380" fill="#334155" font-size="14" font-weight="bold" text-anchor="middle">00:00</text>
-              <text x="400" y="60" fill="#334155" font-size="14" font-weight="bold" text-anchor="middle">12:00 (Midday)</text>
-              <text x="710" y="380" fill="#334155" font-size="14" font-weight="bold" text-anchor="middle">24:00</text>
-              
-              <!-- Time Hand Line & Center Node -->
-              <line id="time-hand" x1="400" y1="350" x2="400" y2="100" stroke="#7c3aed" stroke-width="3" stroke-linecap="round" />
-              <circle cx="400" cy="350" r="7" fill="#7c3aed" />
-
-              <g id="timeline-tasks"></g>
-            </svg>
-          </div>
+      <div id="timeline-content" class="w-full flex flex-col items-center">
+        <div class="w-full flex justify-between items-center mb-2">
+          <h3 class="text-sm font-bold text-slate-800 tracking-wide">24 Hour Task Timeline</h3>
+          <span id="current-time-text" class="text-xs font-mono text-purple-700 font-semibold">00:00</span>
         </div>
 
-        <!-- Light Mode Glass Overlay Modal -->
-        <div id="timeline-overlay" class="absolute inset-0 z-10 flex flex-col items-center justify-center bg-white/40 backdrop-blur-md">
-          <div class="flex flex-col items-center gap-3.5 p-6 rounded-2xl bg-white border border-slate-200 shadow-2xl shadow-purple-950/10 max-w-sm w-full mx-4 transition-all">
-            <!-- Lock Icon Badge -->
-            <div class="relative p-3.5 bg-purple-50 border border-purple-200 rounded-2xl text-purple-700 shadow-xs">
-              <svg xmlns="http://www.w3.org/2000/svg" class="w-7 h-7" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                <rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect>
-                <path d="M7 11V7a5 5 0 0 1 10 0v4"></path>
-              </svg>
-            </div>
+        <div class="relative w-full max-w-4xl aspect-2/1">
+          <svg viewBox="0 0 800 400" class="w-full h-full overflow-visible">
+            <!-- Dashed Half-Circle Arc -->
+            <path d="M 100 350 A 300 250 0 0 1 700 350" fill="none" stroke="#94a3b8" stroke-width="8" stroke-dasharray="6 6" />
+            
+            <!-- Progress Arc Line -->
+            <path id="progress-arc" d="M 100 350 A 300 250 0 0 1 700 350" fill="none" stroke="#4f46e5" stroke-width="3" opacity="0.9" pathLength="50" stroke-dasharray="50 100" />
+            
+            <!-- Baseline Divider -->
+            <line x1="80" y1="350" x2="720" y2="350" stroke="#64748b" stroke-width="2" />
+            
+            <!-- Left Marker (12:00 AM - Midnight) -->
+            <g>
+              <image href="/assets/midnight.png" x="34" y="365" width="20" height="20" />
+              <text x="96" y="380" fill="#334155" font-size="14" font-weight="bold" text-anchor="middle">12:00 AM</text>
+            </g>
 
-            <!-- Typography -->
-            <div class="text-center">
-              <h4 class="text-base font-bold text-slate-900 tracking-tight">Pro Feature</h4>
-              <p class="text-xs text-slate-600 mt-1 leading-relaxed">Upgrade your plan to unlock the full 24-Hour Timeline overview.</p>
-            </div>
+            <!-- Center Marker (12:00 PM - Midday Sun) -->
+            <g>
+              <image href="/assets/sun.png" x="350" y="40" width="20" height="20" />
+              <text x="410" y="55" fill="#334155" font-size="14" font-weight="bold" text-anchor="middle">12:00 PM</text>
+            </g>
 
-            <!-- CTA Button -->
-            <button class="w-full mt-1 py-2.5 px-5 bg-linear-to-r from-purple-600 to-indigo-600 hover:from-purple-700 hover:to-indigo-700 text-white font-semibold text-xs rounded-xl shadow-md shadow-purple-500/25 transition-all duration-200 active:scale-95">
-              Upgrade Now
-            </button>
-          </div>
+            <!-- Right Marker (12:00 AM - moon) -->
+            <g>
+              <image href="/assets/moon.png" x="725" y="365" width="20" height="20" />
+              <text x="675" y="380" fill="#334155" font-size="14" font-weight="bold" text-anchor="middle">12:00 AM</text>
+            </g>
+            
+            <!-- Time Hand Line & Center Node -->
+            <line id="time-hand" x1="400" y1="350" x2="400" y2="100" stroke="#7c3aed" stroke-width="3" stroke-linecap="round" />
+            <circle cx="400" cy="350" r="7" fill="#7c3aed" />
+
+            <g id="timeline-tasks"></g>
+          </svg>
         </div>
       </div>
-    `;
+    </div>
+  `;
 
   timeline_parent.innerHTML = theme === 'light' ? timeline_light_element : timeline_dark_element;
 }
@@ -341,60 +293,8 @@ function renderTimelineMarkup(theme) {
  */
 function refreshTimelineTheme() {
   const theme = localStorage.getItem('color-theme');
-
-  // Rebuild the theme-specific markup (backgrounds, arc colors, overlay, etc.)
   renderTimelineMarkup(theme);
-
-  // Re-apply whatever lock/unlock state we last determined from the trial API,
-  // since innerHTML replacement above wiped out the previous overlay state.
-  setTimelineLockState(__timelineIsProCache);
-
-  // Re-draw task nodes and restart the clock/hand interval on the fresh SVG.
   initLiveDashboardTimeline(__timelineTasksCache);
-}
-
-async function loadRemainingDaysInTrial() {
-  try {
-    const response = await fetch('/api/user/trial');
-
-    if (!response.ok) throw new Error('Failed to fetch remaining days');
-
-    const data = await response.json();
-
-    const remainingElement = document.getElementById('show_remaining_trial');
-    const remainingDaysElement = document.getElementById('remaining_trial');
-    const badge = document.getElementById('pro_badge');
-    const upgradeBtn = document.getElementById('upgrade-btn');
-
-    const theme = localStorage.getItem('color-theme');
-
-    renderTimelineMarkup(theme);
-
-    if (!remainingElement && !remainingDaysElement && !badge && !upgradeBtn) return;
-
-    if (data.subscriptionStatus === 'active' && data.plan === 'pro') { // if user is subscribed
-      badge.classList.remove('hidden');
-      setTimelineLockState(true);
-      return;
-    }
-    else if (data.subscriptionStatus === 'trial' && data.plan === 'free') { // if user in a free trial
-      setTimelineLockState(true);
-      remainingElement.classList.remove('hidden');
-      remainingElement.classList.add('flex');
-
-      const endDate = new Date(data.trialEndsAt);
-      const now = new Date();
-      const diffInMs = endDate - now;
-      const remainingDays = Math.max(0, Math.ceil(diffInMs / (1000 * 60 * 60 * 24)));
-      remainingDaysElement.textContent = remainingDays;
-      return;
-    } else { // if user is not subscribed
-      upgradeBtn.classList.remove('hidden');
-      upgradeBtn.classList.add('flex');
-    }
-  } catch (error) {
-    console.error(error)
-  }
 }
 
 function getTodayDateString() {
@@ -643,14 +543,31 @@ async function addList(event) {
   try {
     const response = await fetch('/api/lists', {
       method: 'POST',
+      credentials: 'same-origin',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ title: listName })
     });
 
-    const data = await response.json().catch(() => ({}));
+    const responseText = await response.text();
+    let data = {};
+
+    if (responseText) {
+      try {
+        data = JSON.parse(responseText);
+      } catch (parseError) {
+        console.error('Invalid response from list creation API:', parseError);
+      }
+    }
 
     if (!response.ok) {
-      throw new Error(data.error || 'Failed to create list');
+      const details = Array.isArray(data.details)
+        ? data.details.map((detail) => detail.message).join(', ')
+        : data.details;
+      throw new Error([data.error, details].filter(Boolean).join(': ') || `Failed to create list (${response.status})`);
+    }
+
+    if (!data.id) {
+      throw new Error('List was created but the server returned no list ID');
     }
 
     form.reset();
@@ -661,7 +578,6 @@ async function addList(event) {
     await renderCount();
   } catch (error) {
     console.error('Error creating list:', error);
-    // alert(error.message || 'Failed to create list');
     flyToast(error.message || 'Failed to create list', 'error');
   }
 }
@@ -944,7 +860,6 @@ async function deleteList(listId) {
     await renderCount();
   } catch (error) {
     console.error('Error deleting list:', error);
-    // alert(error.message || 'Failed to delete list');
     flyToast(error.message || 'Failed to delete list', 'error');
   }
 }
@@ -991,7 +906,6 @@ async function handleRenameListSubmit(event) {
     await renderDashboard();
   } catch (error) {
     console.error('Error renaming list:', error);
-    // alert(error.message || 'Failed to rename list');
     flyToast(error.message || 'Failed to rename list', 'error');
   }
 }
@@ -1267,7 +1181,6 @@ async function renderDashboard() {
   if (document.getElementById('timeline')) {
     const theme = localStorage.getItem('color-theme');
     renderTimelineMarkup(theme);
-    setTimelineLockState(__timelineIsProCache);
     await loadTimeLineTodos();
   }
 
@@ -1433,7 +1346,6 @@ function renderCalendarLayout() {
           <div class="flex items-center justify-between gap-2">
             <div>
               <p id="selected-day-label" class="text-lg font-semibold text-gray-800 dark:text-gray-100">No Todos For Today</p>
-              <!-- <p class="text-sm text-gray-500 dark:text-gray-400">View tasks for the selected date.</p> -->
             </div>
           </div>
           <div id="selected-day-todos" class="w-full flex flex-col gap-3 max-h-240 overflow-y-auto pr-1"></div>
@@ -1501,7 +1413,6 @@ async function handleRenameTodoSubmit(event) {
     await loadTimeLineTodos();
   } catch (error) {
     console.error('Error renaming todo:', error);
-    // alert(error.message || 'Failed to rename todo');
     flyToast(error.message || 'Failed to rename todo', 'error');
   }
 }
@@ -1729,7 +1640,6 @@ document.addEventListener('DOMContentLoaded', () => {
   });
 
   loadNavbarUsername();
-  loadRemainingDaysInTrial();
   loadUserLists();
   loadDashboardLists();
   renderDashboard();

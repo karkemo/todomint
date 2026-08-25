@@ -10,7 +10,6 @@ const {
 } = { ...require('../controllers/userController') };
 
 router.get('/user/name', isAuthenticated, getUserName);
-router.get('/user/trial', isAuthenticated, getUserPlan);
 router.delete('/user', isAuthenticated, deleteUser);
 router.get('/user', getCurrentUser);
 router.get('/users', getAllUsers);

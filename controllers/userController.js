@@ -25,29 +25,6 @@ const getUserName = async (req, res) => {
   }
 };
 
-const getUserPlan = async (req, res) => {
-  try {
-    const userId = req.session.userId;
-    const result = await db.execute({
-      sql: 'SELECT trial_ends_at, subscription_status, plan FROM users WHERE id = ?',
-      args: [userId]
-    });
-    const user = result.rows[0];
-
-    if (!user) {
-      return res.status(404).json({ error: 'user not found' });
-    }
-    res.json({
-      trialEndsAt: user.trial_ends_at,
-      subscriptionStatus: user.subscription_status,
-      plan: user.plan
-    });
-  } catch (error) {
-    console.error(error);
-    res.status(500).json({ error: "Error while trying to fetch user's plan" });
-  }
-}
-
 const deleteUser = async (req, res) => {
   try {
     const userId = req.session.userId;
@@ -96,7 +73,7 @@ const getCurrentUser = async (req, res) => {
 
   try {
     const result = await db.execute({
-      sql: 'SELECT id, name, email, completed_todos_action, created_at, plan, trial_ends_at, subscription_status FROM users WHERE id = ?',
+      sql: 'SELECT id, name, email, completed_todos_action, created_at FROM users WHERE id = ?',
       args: [req.session.userId]
     });
     const user = result.rows[0];
@@ -113,7 +90,6 @@ const getCurrentUser = async (req, res) => {
 
 module.exports = {
   getUserName,
-  getUserPlan,
   deleteUser,
   getAllUsers,
   getCurrentUser

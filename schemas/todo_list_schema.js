@@ -1,4 +1,3 @@
-// schemas/todo_list_schema.js
 const { z } = require('zod');
 
 // Reusable parameter schema for any route that ends in /:id

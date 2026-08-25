@@ -12,14 +12,10 @@ const {
   deleteList,
   updateList
 } = require('../controllers/listController');
-const { 
-  checkListLock,
-  checkCreateListLock
-} = require('../middleware/checkListLock');
 
 router.get('/', getLists);
-router.post('/', validate(createListSchema), createList, checkCreateListLock);
-router.patch('/:id', validate(updateListSchema), updateList, checkListLock);
+router.post('/', validate(createListSchema), createList);
+router.patch('/:id', validate(updateListSchema), updateList);
 router.delete('/:id', validate(deleteListSchema), deleteList);
 
 module.exports = router

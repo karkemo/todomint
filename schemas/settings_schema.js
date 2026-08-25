@@ -1,4 +1,3 @@
-// schemas/settings_schema.js
 const { z } = require('zod');
 
 const updateNameSchema = z.object({
