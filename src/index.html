@@ -45,25 +45,29 @@
 <body>
   <div class="w-full h-full bg-[#faf7f5] dark:bg-[#0f172a] flex flex-col">
     <!-- Navbar -->
-    <nav
-      class="w-[99%] h-fit px-6 py-5 mt-5 mx-3 rounded-2xl flex flex-row items-center justify-between bg-[#efeae6] dark:bg-[#0c1425] z-1000">
-      <img src="/assets/logo_icon_with_text_beside.png" alt="logo" class="h-10 w-auto" id="full_logo">
-      <div class="gap-5 flex flex-row">
-        <button id="theme-toggle" type="button" aria-label="Toggle theme"
-          class="p-2 rounded-xl bg-gray-200 dark:bg-gray-800 text-gray-800 dark:text-gray-200 hover:opacity-80 transition duration-200 cursor-pointer">
-          <svg id="theme-toggle-light-icon" class="hidden w-5 h-5 fill-current" viewBox="0 0 20 20">
-            <path
-              d="M10 2a1 1 0 011 1v1a1 1 0 11-2 0V3a1 1 0 011-1zm4 8a4 4 0 11-8 0 4 4 0 018 0zm-.464 4.95l.707.707a1 1 0 001.414-1.414l-.707-.707a1 1 0 00-1.414 1.414zm2.12-10.607a1 1 0 010 1.414l-.706.707a1 1 0 11-1.414-1.414l.707-.707a1 1 0 011.414 0zM17 11a1 1 0 100-2h-1a1 1 0 100 2h1zm-7 4a1 1 0 011 1v1a1 1 0 11-2 0v-1a1 1 0 011-1zM5.05 6.464A1 1 0 106.465 5.05l-.708-.707a1 1 0 00-1.414 1.414l.707.707zm1.414 8.486l-.707.707a1 1 0 01-1.414-1.414l.707-.707a1 1 0 011.414 1.414zM4 11a1 1 0 100-2H3a1 1 0 100 2h1z">
-            </path>
-          </svg>
-          <svg id="theme-toggle-dark-icon" class="hidden w-5 h-5 fill-current" viewBox="0 0 20 20">
-            <path d="M17.293 13.293A8 8 0 016.707 2.707a8.001 8.001 0 1010.586 10.586z"></path>
-          </svg>
-        </button>
-        <a href="/register" class="btn btn-primary">Register</a>
-        <a href="/login" class="btn btn-outline btn-info">Sign In</a>
-      </div>
-    </nav>
+    <div class="w-full px-3 mt-5"> <!-- Navbar Container -->
+      <nav
+        class="w-full h-fit px-6 py-5 rounded-2xl flex flex-row items-center justify-between bg-[#efeae6] dark:bg-[#0c1425] z-50">
+        <img src="/assets/logo_icon_with_text_beside.png" alt="logo" class="h-10 w-auto" id="full_logo">
+        <div class="gap-5 flex flex-row items-center">
+          <button id="theme-toggle" type="button" aria-label="Toggle theme"
+            class="p-2 rounded-xl bg-gray-200 dark:bg-gray-800 text-gray-800 dark:text-gray-200 hover:opacity-80 transition duration-200 cursor-pointer">
+            <svg id="theme-toggle-light-icon" class="hidden w-5 h-5 fill-current" viewBox="0 0 20 20">
+              <path
+                d="M10 2a1 1 0 011 1v1a1 1 0 11-2 0V3a1 1 0 011-1zm4 8a4 4 0 11-8 0 4 4 0 018 0zm-.464 4.95l.707.707a1 1 0 001.414-1.414l-.707-.707a1 1 0 00-1.414 1.414zm2.12-10.607a1 1 0 010 1.414l-.706.707a1 1 0 11-1.414-1.414l.707-.707a1 1 0 011.414 0zM17 11a1 1 0 100-2h-1a1 1 0 100 2h1zm-7 4a1 1 0 011 1v1a1 1 0 11-2 0v-1a1 1 0 011-1zM5.05 6.464A1 1 0 106.465 5.05l-.708-.707a1 1 0 00-1.414 1.414l.707.707zm1.414 8.486l-.707.707a1 1 0 01-1.414-1.414l.707-.707a1 1 0 011.414 1.414zM4 11a1 1 0 100-2H3a1 1 0 100 2h1z">
+              </path>
+            </svg>
+            <svg id="theme-toggle-dark-icon" class="hidden w-5 h-5 fill-current" viewBox="0 0 20 20">
+              <path d="M17.293 13.293A8 8 0 016.707 2.707a8.001 8.001 0 1010.586 10.586z"></path>
+            </svg>
+          </button>
+          <div class="flex flex-col sm:flex-row items-center justify-center w-fit gap-1 sm:gap-2">
+            <a href="/register" class="btn btn-primary">Register</a>
+            <a href="/login" class="btn btn-outline btn-info">Sign In</a>
+          </div>
+        </div>
+      </nav>
+    </div>
     <!-- Body -->
     <div class="w-full h-fit bg-transparent flex flex-col items-center justify-center">
 
@@ -170,15 +174,24 @@
         <div class="max-w-6xl mx-auto px-6 flex flex-col sm:flex-row justify-between items-center gap-4">
           <p>© 2026 Todo. All rights reserved.</p>
           <div class="flex gap-6">
-            <a href="/privacy" class="dark:hover:text-gray-300 hover:text-gray-800 transition">Privacy Policy</a>
-            <a href="/terms" class="dark:hover:text-gray-300 hover:text-gray-800 transition">Terms of
-              Service</a>
-            <a href="/contact" class="dark:hover:text-gray-300 hover:text-gray-800 transition">Contact</a>
+            <div class="flex flex-col sm:flex-row items-center justify-center gap-2 w-fit">
+              <a href="/privacy" class="dark:hover:text-gray-300 hover:text-gray-800 transition underline">Privacy
+                Policy</a>
+              <a href="/terms" class="dark:hover:text-gray-300 hover:text-gray-800 transition underline">Terms of
+                Service</a>
+              <a href="/contact" class="dark:hover:text-gray-300 hover:text-gray-800 transition underline">Contact</a>
+            </div>
             <a href="https://buymeacoffee.com/karem_amr" target="_blank" rel="noopener noreferrer"
               class="dark:hover:text-gray-300 hover:text-gray-800 transition flex flex-row items-center justify-center gap-2"
               title="buy me a coffee">
-              <img src="/assets/coffee.png" alt="" class="size-5">
-              <span class="font-bold text-black" id="buymeacoffee">Buy me a coffee</span>
+              <!-- <img src="/assets/coffee.png" alt="" class="size-5"> -->
+              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512"
+                class="size-5 text-black dark:text-white fill-current stroke-current">
+                <path
+                  d="M109.39 0.08C111.75 0.08 114.12 0.08 116.48 0.08C117.56 1.14 119.33 1.33 120.65 2.11C123.37 3.69 125.66 6.24 127.77 8.53C145.71 28.06 153.67 56.94 138.85 80.61C131.7 92.03 113.12 103.75 110.13 115.05C107.2 126.2 113.56 136.33 120.3 144.6C123.24 148.21 126.48 150.73 127.75 155.45C130.14 164.31 122.42 173.9 113.39 173.87C103.56 173.85 97.04 164.3 91.83 157.15C75.91 135.3 74.79 109.16 91.36 87.38C98.21 78.38 113.65 70.13 115.93 58.68C117.69 49.84 114.96 41.32 109.62 34.16C104.59 27.42 96.03 21.54 98.29 11.96C99.27 7.79 101.87 4.2 105.58 2.04C106.8 1.33 108.5 1.13 109.39 0.08ZM205.21 0.08C207.57 0.08 209.93 0.08 212.29 0.08C213.56 1.51 216.4 2.05 218.06 3.32C221.35 5.84 224.1 9.27 226.78 12.41C243.01 31.51 247.79 58.59 234.62 80.54C226.42 94.2 208.49 101.78 205.29 118.07C203.54 126.97 209.49 137.23 215.17 143.69C218.66 147.65 222.15 150.65 223.55 155.93C225.82 164.56 217.93 173.86 209.24 173.9C199.49 173.93 192.94 164.6 187.8 157.48C171.85 135.38 170.52 110.86 186.35 88.38C193.59 78.1 209.01 71.26 211.79 58.2C213.62 49.57 210.25 40.18 204.79 33.46C198.78 26.06 190.21 18.93 195.24 8.41C197.99 2.65 201.85 3.4 205.21 0.08ZM300.69 0.08C303.16 0.08 305.62 0.08 308.09 0.08C309.19 1.46 312.05 1.98 313.61 3.17C316.61 5.45 319.3 8.58 321.69 11.48C338.19 31.58 343.97 56.34 330.71 79.85C323.49 92.67 303.66 103.28 301.23 116.68C299.43 126.6 304.5 135.44 310.34 142.99C313.25 146.75 317.67 149.71 318.92 154.54C321.28 163.74 314.69 174.12 304.63 173.9C294.61 173.68 288.09 163.81 282.8 156.49C267.72 135.64 266.53 110.63 281.33 89.38C289.32 77.89 305.05 71.02 307.79 56.36C309.62 46.63 303.7 37.34 297.85 30.17C292.86 24.06 287.35 19.03 290.14 10.26C292.59 2.57 298.03 3.46 300.69 0.08ZM404.9 511.92C274.14 511.92 143.39 511.92 12.63 511.92C10.58 509.4 5.98 509.43 3.18 504.36C-2.77 493.61 5.56 482.07 17.07 481.91C36.38 481.64 55.73 481.91 75.05 481.91C79.07 481.91 95.12 482.86 97.66 481.37C51.38 452.64 16.73 407.22 5.2 353.71C0.83 333.43 1.09 312.66 1.09 292C1.09 275.79 1.09 259.58 1.09 243.38C1.09 235.6 0.65 226.83 8.32 222.26C14.67 218.48 23.53 220 30.63 220C46.68 220 62.73 220 78.79 220C138.79 220 198.8 220 258.81 220C294.5 220 330.19 220 365.88 220C375.08 220 384.27 220 393.47 220C398.87 220 404.37 219.44 409.17 222.31C418.23 227.74 414.94 237.14 416.4 245.71C423.89 247.65 432.92 245.74 440.69 246.45C453.64 247.64 466.18 252.01 476.97 259.25C521.31 288.98 522.18 357.45 476.61 386.63C461.15 396.54 444.88 399.5 426.67 399.5C419.34 399.5 412.02 399.5 404.69 399.5C402.56 399.5 398.14 398.66 396.31 399.78C394.23 401.07 391 408.94 389.63 411.37C384.9 419.85 378.86 428.07 372.69 435.57C356.88 454.8 339.83 467.12 319.89 481.37C322.54 483.16 337.1 481.91 341.1 481.91C360.11 481.91 379.13 481.91 398.14 481.91C409.95 481.91 420.96 490.55 414.82 503.39C411.83 509.63 406.81 509.36 404.9 511.92ZM385.88 250.09C267.77 250.09 149.66 250.09 31.55 250.09C29.78 261.58 31.28 278.1 31.28 290.13C31.28 309.85 30.55 330.19 35.18 349.48C42.79 381.19 59.52 410.14 83.24 432.72C152.03 498.18 265.36 497.38 334.23 432.66C354.12 413.97 368.39 390.75 377.8 365.39C386.81 341.1 386.07 314.74 386.07 289.2C386.07 276.7 387.49 262.37 385.88 250.09ZM408.46 368.69C412.13 370.62 423.91 369.27 428.54 369.27C445.8 369.27 462.98 364.01 472.79 348.65C490.9 320.29 474.19 279.56 439.29 276.89C432.31 276.36 423.47 274.75 416.63 276.57C415.39 279.88 416.23 284.72 416.23 288.26C416.23 296.83 416.32 305.41 416.23 313.98C416.03 332.87 412.81 350.46 408.46 368.69Z"
+                  fill-rule="evenodd" stroke-width="0.25" stroke-linejoin="round" />
+              </svg>
+              <span class="font-bold text-black dark:text-white" id="buymeacoffee">Buy me a coffee</span>
             </a>
           </div>
         </div>

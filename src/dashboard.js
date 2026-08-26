@@ -6,10 +6,12 @@ async function loadNavbarUsername() {
 
     const data = await response.json();
 
-    const userNameElement = document.getElementById('username');
+    const userNameElements = document.querySelectorAll('.username-display');
     const fullUserNameElement = document.getElementById('user-name');
-    if (userNameElement && fullUserNameElement) {
-      userNameElement.textContent = data.name[0].toUpperCase();
+    if (userNameElements.length && fullUserNameElement) {
+      userNameElements.forEach((el) => {
+        el.textContent = data.name[0].toUpperCase();
+      });
       fullUserNameElement.textContent = data.name
     }
   } catch (error) {

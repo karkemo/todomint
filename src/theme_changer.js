@@ -1,23 +1,22 @@
 document.addEventListener('DOMContentLoaded', () => {
-  const themeToggleBtn = document.getElementById('theme-toggle');
-  const darkIcon = document.getElementById('theme-toggle-dark-icon');
-  const lightIcon = document.getElementById('theme-toggle-light-icon');
+  const themeToggleBtns = document.querySelectorAll('.theme-toggle-btn');
+  const darkIcons = document.querySelectorAll('.theme-toggle-dark-icon');
+  const lightIcons = document.querySelectorAll('.theme-toggle-light-icon');
 
-  if (!themeToggleBtn || !darkIcon || !lightIcon) {
+  if (!themeToggleBtns.length || !darkIcons.length || !lightIcons.length) {
     console.error("Theme toggle elements not found!");
     return;
   }
 
-  if (document.documentElement.classList.contains('dark')) {
-    lightIcon.classList.remove('hidden');
-  } else {
-    darkIcon.classList.remove('hidden');
+  function syncIcons() {
+    const isDark = document.documentElement.classList.contains('dark');
+    darkIcons.forEach((icon) => icon.classList.toggle('hidden', isDark));
+    lightIcons.forEach((icon) => icon.classList.toggle('hidden', !isDark));
   }
 
-  themeToggleBtn.addEventListener('click', function () {
-    darkIcon.classList.toggle('hidden');
-    lightIcon.classList.toggle('hidden');
+  syncIcons();
 
+  function handleToggle() {
     if (document.documentElement.classList.contains('dark')) {
       document.documentElement.classList.remove('dark');
       localStorage.setItem('color-theme', 'light');
@@ -26,8 +25,12 @@ document.addEventListener('DOMContentLoaded', () => {
       localStorage.setItem('color-theme', 'dark');
     }
 
+    syncIcons();
+
     if (typeof window.refreshTimelineTheme === 'function') {
       window.refreshTimelineTheme();
     }
-  });
+  }
+
+  themeToggleBtns.forEach((btn) => btn.addEventListener('click', handleToggle));
 });

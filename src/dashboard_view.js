@@ -1,5 +1,8 @@
 document.addEventListener('DOMContentLoaded', () => {
+  // bars
   const sidebar = document.getElementById('sidebar');
+  const bottomBar = document.getElementById('bottom-bar');
+
   const arrow = document.getElementById('arrow');
   const mainContent = document.getElementById('main-content');
   const showRemainingTrial = document.getElementById('show_remaining_trial');
@@ -13,11 +16,28 @@ document.addEventListener('DOMContentLoaded', () => {
   if (!sidebar) return;
 
   const lgMediaQuery = window.matchMedia('(max-width: 1023px)');
-  const mdMediaQuery = window.matchMedia('(max-width: 767px)');
+  // Must match the layout wrapper's own "sm:flex-row" breakpoint (640px).
+  // Below this, the wrapper is flex-col (stacked); at/above it, flex-row
+  // (side-by-side). The bottom bar can only be shown safely while the
+  // wrapper is still in column mode, or it ends up squeezed into the
+  // same row as #main-content.
+  const mdMediaQuery = window.matchMedia('(max-width: 639px)');
 
   // Updates layout based on screen width
   function syncLayout() {
     const isCollapsed = sidebar.classList.contains('is-collapsed');
+
+    if (mdMediaQuery.matches) {
+      // Mobile: hide sidebar, show bottom bar
+      // (inline style used because sidebar's static 'flex' class can otherwise
+      // beat the toggled 'hidden' class depending on Tailwind's compiled order)
+      sidebar.style.display = 'none';
+      bottomBar.style.display = 'flex';
+    } else {
+      // Tablet & Desktop: show sidebar, hide bottom bar
+      sidebar.style.display = 'flex';
+      bottomBar.style.display = 'none';
+    }
 
     // Toggle Logos based on sidebar state
     if (isCollapsed) {
@@ -30,28 +50,8 @@ document.addEventListener('DOMContentLoaded', () => {
       if (text) text.classList.remove('hidden');
     }
 
-    if (mdMediaQuery.matches && !isCollapsed) {
-      // Mobile screen & expanded: Expand sidebar to full width & hide main content
-      sidebar.classList.add('w-full');
-      if (mainContent) mainContent.classList.add('hidden');
-    } else {
-      // Tablet & Desktop screen or collapsed: Keep normal layout
-      sidebar.classList.remove('w-full');
-      if (mainContent) mainContent.classList.remove('hidden');
-    }
-
-    // Handle trial card vs standalone green button when sidebar is collapsed
-    if (showRemainingTrial) {
-      if (isCollapsed) {
-        // Hide text and remove outer container box (glow, background, border, padding)
-        if (trialTextContainer) trialTextContainer.classList.add('hidden');
-        showRemainingTrial.classList.remove('glow-purple', 'dark:bg-[#0f172a]', 'bg-[#efeae6]', 'border', 'dark:border-gray-800', 'border-gray-200', 'p-6', 'rounded-2xl', 'mb-2');
-      } else {
-        // Show text and restore outer container box styling
-        if (trialTextContainer) trialTextContainer.classList.remove('hidden');
-        showRemainingTrial.classList.add('glow-purple', 'dark:bg-[#0f172a]', 'bg-[#efeae6]', 'border', 'dark:border-gray-800', 'border-gray-200', 'p-6', 'rounded-2xl', 'mb-2');
-      }
-    }
+    if (mainContent) mainContent.classList.remove('hidden');
+    sidebar.classList.remove('w-full');
   }
 
   function handleScreenChange() {
