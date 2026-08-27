@@ -87,8 +87,11 @@ app.use(session({
 }));
 
 app.use(express.static(path.join(__dirname, 'src')));
-app.use(express.static('public', {
-  maxAge: '1d'
+app.use(express.static(path.join(__dirname, 'public'), {
+  maxAge: '1d',
+  setHeaders: (res, path) => {
+    res.setHeader('Access-Control-Allow-Origin', '*');
+  }
 }));
 app.use('/node_modules', express.static(path.join(__dirname, 'node_modules')));
 
