@@ -5,3 +5,4 @@ app.db
 .vscode
 data/
 tests/
+src/assets/non-reachable/
