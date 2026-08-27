@@ -5,7 +5,7 @@ A modern fullstack task management application designed to boost productivity wi
 ---
 
 ## 📸 Screenshots 
-![TodoMint Dashboard](./src/assets/non-reachable/Animation.gif)
+![TodoMint Dashboard](./src/assets/demo/Animation.gif)
 
 ---
 
