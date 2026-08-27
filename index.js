@@ -18,6 +18,8 @@ const noCache = require('./middleware/noCache');
 
 const { Store } = require('express-session');
 
+const compression = require('compression');
+
 class TursoStore extends Store {
   constructor(db) {
     super();
@@ -63,6 +65,7 @@ const db = createClient({
   authToken: process.env.TURSO_AUTH_TOKEN,
 });
 
+app.use(compression());
 app.use(express.urlencoded({ extended: true }));
 app.use(express.json());
 app.set('trust proxy', 1);
@@ -84,6 +87,9 @@ app.use(session({
 }));
 
 app.use(express.static(path.join(__dirname, 'src')));
+app.use(express.static('public', {
+  maxAge: '1d'
+}));
 app.use('/node_modules', express.static(path.join(__dirname, 'node_modules')));
 
 async function initDb() {
