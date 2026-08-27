@@ -1,7 +1,7 @@
 document.addEventListener('DOMContentLoaded', () => {
   const icon_only = document.getElementById('icon_only');
   const full_logo = document.getElementById('full_logo');
-  const themeToggleBtn = document.getElementById('theme-toggle');
+  const themeToggleBtn = document.querySelector('.theme-toggle-btn');
 
   function updateLogos() {
     const isDark = document.documentElement.classList.contains('dark') || localStorage.getItem('color-theme') === 'dark';

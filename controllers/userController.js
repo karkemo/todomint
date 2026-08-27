@@ -56,16 +56,6 @@ const deleteUser = async (req, res) => {
   }
 };
 
-const getAllUsers = async (req, res) => {
-  try {
-    const result = await db.execute('SELECT id, name, email FROM users');
-    res.json(result.rows);
-  } catch (err) {
-    console.error('Error fetching users:', err);
-    res.status(500).json({ error: 'Failed to fetch users' });
-  }
-};
-
 const getCurrentUser = async (req, res) => {
   if (!req.session || !req.session.userId) {
     return res.status(401).json({ error: 'Unauthorized' });
@@ -91,6 +81,5 @@ const getCurrentUser = async (req, res) => {
 module.exports = {
   getUserName,
   deleteUser,
-  getAllUsers,
   getCurrentUser
 };

@@ -26,7 +26,7 @@
 </head>
 
 <body
-  class="font-audiowide bg-[#faf7f5] dark:bg-[#0b1120] text-gray-900 dark:text-white min-h-screen flex flex-col justify-between antialiased selection:bg-blue-500 selection:text-white transition-colors duration-200">
+  class="bg-[#faf7f5] dark:bg-[#0b1120] text-gray-900 dark:text-white min-h-screen flex flex-col justify-between antialiased selection:bg-blue-500 selection:text-white transition-colors duration-200">
 
   <main class="grow flex items-center justify-center px-4 py-8">
     <div
@@ -39,14 +39,14 @@
         <a href="/" class="tracking-wider hover:opacity-80 transition">
           <img src="/assets/logo_icon_with_text_beside.png" alt="Logo" class="h-10 w-auto" id="full_logo">
         </a>
-        <button id="theme-toggle" type="button" aria-label="Toggle theme"
-          class="p-2 rounded-xl bg-gray-200 dark:bg-gray-800 text-gray-800 dark:text-gray-200 hover:opacity-80 transition duration-200 cursor-pointer">
-          <svg id="theme-toggle-light-icon" class="hidden w-5 h-5 fill-current" viewBox="0 0 20 20">
+        <button type="button" aria-label="Toggle theme"
+          class="theme-toggle-btn p-2 rounded-xl bg-gray-200 dark:bg-gray-800 text-gray-800 dark:text-gray-200 hover:opacity-80 transition duration-200 cursor-pointer">
+          <svg class="theme-toggle-light-icon hidden w-5 h-5 fill-current" viewBox="0 0 20 20">
             <path
               d="M10 2a1 1 0 011 1v1a1 1 0 11-2 0V3a1 1 0 011-1zm4 8a4 4 0 11-8 0 4 4 0 018 0zm-.464 4.95l.707.707a1 1 0 001.414-1.414l-.707-.707a1 1 0 00-1.414 1.414zm2.12-10.607a1 1 0 010 1.414l-.706.707a1 1 0 11-1.414-1.414l.707-.707a1 1 0 011.414 0zM17 11a1 1 0 100-2h-1a1 1 0 100 2h1zm-7 4a1 1 0 011 1v1a1 1 0 11-2 0v-1a1 1 0 011-1zM5.05 6.464A1 1 0 106.465 5.05l-.708-.707a1 1 0 00-1.414 1.414l.707.707zm1.414 8.486l-.707.707a1 1 0 01-1.414-1.414l.707-.707a1 1 0 011.414 1.414zM4 11a1 1 0 100-2H3a1 1 0 100 2h1z">
             </path>
           </svg>
-          <svg id="theme-toggle-dark-icon" class="hidden w-5 h-5 fill-current" viewBox="0 0 20 20">
+          <svg class="theme-toggle-dark-icon hidden w-5 h-5 fill-current" viewBox="0 0 20 20">
             <path d="M17.293 13.293A8 8 0 016.707 2.707a8.001 8.001 0 1010.586 10.586z"></path>
           </svg>
         </button>
@@ -101,7 +101,7 @@
   </main>
 
   <footer class="py-6 text-center text-gray-600 dark:text-gray-400 text-xs">
-    © 2026 Todo. All rights reserved.
+    © 2026 TodoMint. All rights reserved.
   </footer>
 
   <script src="/theme_changer.js"></script>

@@ -173,6 +173,7 @@ function expiresInMinutes(minutes) {
   return new Date(Date.now() + minutes * 60 * 1000).toISOString();
 }
 
+// api routes
 app.use('/api', authRoutes);
 app.use('/api', userRoutes);
 app.use('/api/settings', isAuthenticated, settingsRoutes);
@@ -264,36 +265,9 @@ app.get('/verify', async (req, res) => {
   res.sendFile(path.join(__dirname, 'src', 'verify.html'));
 });
 
-app.get('/api/users', async (req, res) => {
-  try {
-    const result = await db.execute('SELECT id, name, email FROM users');
-    res.json(result.rows);
-  } catch (err) {
-    res.status(500).json({ error: 'Database error' });
-  }
-});
-
-app.get('/api/user', async (req, res) => {
-  if (!req.session || !req.session.userId) {
-    return res.status(401).json({ error: 'Unauthorized' });
-  }
-
-  try {
-    const result = await db.execute({
-      sql: 'SELECT id, name, email, completed_todos_action, preferred_font, created_at FROM users WHERE id = ?',
-      args: [req.session.userId]
-    });
-
-    const user = result.rows[0];
-
-    if (!user) {
-      return res.status(404).json({ error: 'User not found' });
-    }
-
-    res.json(user);
-  } catch (err) {
-    res.status(500).json({ error: 'Database error' });
-  }
+// not found route
+app.use((req, res, next) => {
+  res.sendFile(path.join(__dirname, 'src', 'page-not-found.html'))
 });
 
 const dbReady = initDb();
