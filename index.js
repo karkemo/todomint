@@ -276,6 +276,16 @@ app.use((req, res, next) => {
   res.sendFile(path.join(__dirname, 'src', 'page-not-found.html'))
 });
 
+// robots
+app.get('/robots.txt', (req, res) => {
+  res.sendFile(path.join(__dirname, 'public', 'robots.txt'));
+});
+
+// sitemap
+app.get('/sitemap.xml', (req, res) => {
+  res.sendFile(path.join(__dirname, 'public', 'sitemap.xml'));
+});
+
 const dbReady = initDb();
 
 if (process.env.NODE_ENV !== 'production') {
