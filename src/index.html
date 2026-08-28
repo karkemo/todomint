@@ -36,7 +36,16 @@
   <meta name="twitter:title" content="TodoMint - Smart Task Manager & 24-Hour Visual Timeline" />
   <meta name="twitter:description" content="Plan your daily workflow with an interactive 24-hour visual timeline." />
   <meta name="twitter:image" content="https://todomint.vercel.app/assets/og-image.png?v=1" />
-  <meta property="twitter:site_name" content="TodoMint" />
+
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "WebSite",
+    "name": "TodoMint",
+    "alternateName": ["TodoMint App", "Todo Mint"],
+    "url": "https://todomint.vercel.app/"
+  }
+  </script>
 
   <script>
     if (localStorage.getItem('color-theme') === 'dark' || (!('color-theme' in localStorage) && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
