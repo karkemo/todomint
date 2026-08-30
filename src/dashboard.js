@@ -532,6 +532,64 @@ async function loadUserLists(selectedListId = null) {
   }
 }
 
+async function loadUserListsForMobile() {
+  // load count of static lists
+  try {
+    const response = await fetch('/api/todos');
+    if (!response.ok) return;
+
+    const todos = await response.json();
+    const action = await getCompletedTodosPreference();
+
+    const todayTodos = todos.filter((todo) => isTodoDueToday(todo) && (action !== 'move' || !isTodoCompleted(todo)));
+    const completedTodos = todos.filter(isTodoCompleted);
+
+    const todayCount = document.getElementById('today-count-lists');
+    if (todayCount) {
+      todayCount.textContent = `(${todayTodos.length})`;
+    }
+
+    const allCount = document.getElementById('todos-count-lists');
+    if (allCount) {
+      allCount.textContent = `(${todos.length})`;
+    }
+
+  } catch (error) {
+    console.error('Error in renderCount:', error);
+  }
+  // load lists
+  const listsContainer = document.getElementById('lists-two');
+  if (!listsContainer) return;
+
+  try {
+    const [listsResponse, todosResponse] = await Promise.all([
+      fetch('/api/lists'),
+      fetch('/api/todos')
+    ]);
+
+    if (!listsResponse.ok) throw new Error('Failed to load lists');
+    if (!todosResponse.ok) throw new Error('Failed to load todos');
+
+    const lists = await listsResponse.json();
+    const todos = await todosResponse.json();
+    const action = await getCompletedTodosPreference();
+    listsContainer.innerHTML = '';
+
+    if (lists.length === 0) {
+      listsContainer.innerHTML = '<p class="text-sm text-gray-500">No lists yet</p>';
+      return;
+    }
+
+    lists.forEach((list) => {
+      const listElement = createListElement(list, todos, action);
+      listsContainer.appendChild(listElement);
+    });
+  } catch (error) {
+    console.error('Error loading lists:', error);
+    listsContainer.innerHTML = '<p class="text-red-500 py-2">Failed to load lists.</p>';
+  }
+}
+
 async function addList(event) {
   event.preventDefault();
 
@@ -657,7 +715,7 @@ function createTodoElement(todo) {
       ${isHighPriority ? '<span class="text-xs text-red-600 dark:text-red-400 bg-red-100 dark:bg-red-950/50 px-2.5 py-1 rounded-md font-semibold">High Priority</span>' : ''}
       ${isMediumPriority ? '<span class="text-xs text-amber-700 dark:text-amber-400 bg-amber-100 dark:bg-amber-950/50 px-2.5 py-1 rounded-md font-semibold">Medium Priority</span>' : ''}
       ${isLowPriority ? '<span class="text-xs text-blue-700 dark:text-blue-400 bg-blue-100 dark:bg-blue-950/50 px-2.5 py-1 rounded-md font-semibold">Low Priority</span>' : ''}
-      <button id="delete-btn-${todo.id}" data-id="${todo.id}" class="delete-btn opacity-0 group-hover:opacity-100 text-gray-400 hover:text-red-500 transition-opacity p-1 cursor-pointer">
+      <button id="delete-btn-${todo.id}" data-id="${todo.id}" class="delete-btn text-gray-400 hover:text-red-500 transition-colors p-1 cursor-pointer">
         <svg xmlns="http://www.w3.org/2000/svg" class="size-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
           <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
         </svg>
@@ -1166,6 +1224,10 @@ async function renderDashboard() {
       main.innerHTML = renderListLayout();
       await loadListTodos();
       break;
+    case 'lists':
+      main.innerHTML = renderMobileListsLayout();
+      await loadUserListsForMobile();
+      break;
     default:
       main.innerHTML = renderHomeLayout();
       break;
@@ -1369,6 +1431,64 @@ function renderListLayout() {
         <span class="loading loading-spinner loading-xl"></span>
       </ul>
       <button onclick="openAddTaskModal()" class="btn btn-primary btn-outline w-full">Add Todo +</button>
+    </div>
+  `
+}
+
+function renderMobileListsLayout() {
+  return /*html*/`
+    <div class="flex flex-col items-center justify-center gap-2 w-full">
+      <p class="text-2xl text-gray-500 dark:text-gray-400 font-semibold self-center px-2">My Lists</p>
+      <div class="w-full flex flex-col items-center justify-center gap-2  border-b pb-4 mb-2 border-gray-300/40 dark:border-gray-700/40">
+        <a href="/dashboard?view=today" onclick="event.preventDefault(); navigateTo('today');"
+          class="btn btn-primary w-full flex items-center justify-between flex-row sidebar-btn" title="Today">
+          <div class="flex flex-row items-center justify-center gap-2">
+            <svg xmlns="http://www.w3.org/2000/svg" height="24px" viewBox="0 -960 960 960" width="24px" fill="#e3e3e3"
+              class="shrink-0">
+              <path
+                d="M440-760v-160h80v160h-80Zm266 110-55-55 112-115 56 57-113 113Zm54 210v-80h160v80H760ZM440-40v-160h80v160h-80ZM254-652 140-763l57-56 113 113-56 54Zm508 512L651-255l54-54 114 110-57 59ZM40-440v-80h160v80H40Zm157 300-56-57 112-112 29 27 29 28-114 114Zm113-170q-70-70-70-170t70-170q70-70 170-70t170 70q70 70 70 170t-70 170q-70 70-170 70t-170-70Z" />
+            </svg>
+            <span class="sidebar-text">Today</span>
+          </div>
+          <span id="today-count-lists" class="sidebar-text">
+            <span class="loading loading-spinner loading-xs"></span>
+          </span>
+        </a>
+        <a href="/dashboard?view=calendar" onclick="event.preventDefault(); navigateTo('calendar');"
+          class="btn btn-primary w-full flex items-center justify-between flex-row sidebar-btn" title="Calendar">
+          <div class="flex flex-row items-center justify-center gap-2">
+            <svg xmlns="http://www.w3.org/2000/svg" height="24px" viewBox="0 -960 960 960" width="24px" fill="#e3e3e3"
+              class="shrink-0">
+              <path
+                d="M200-80q-33 0-56.5-23.5T120-160v-560q0-33 23.5-56.5T200-800h40v-80h80v80h320v-80h80v80h40q33 0 56.5 23.5T840-720v560q0 33-23.5 56.5T760-80H200Zm0-80h560v-400H200v400Zm0-480h560v-80H200v80Zm0 0v-80 80Zm280 240q-17 0-28.5-11.5T440-440q0-17 11.5-28.5T480-480q17 0 28.5 11.5T520-440q0 17-11.5 28.5T480-400Zm-188.5-11.5Q280-423 280-440t11.5-28.5Q303-480 320-480t28.5 11.5Q360-457 360-440t-11.5 28.5Q337-400 320-400t-28.5-11.5ZM640-400q-17 0-28.5-11.5T600-440q0-17 11.5-28.5T640-480q17 0 28.5 11.5T680-440q0 17-11.5 28.5T640-400ZM480-240q-17 0-28.5-11.5T440-280q0-17 11.5-28.5T480-320q17 0 28.5 11.5T520-280q0 17-11.5 28.5T480-240Zm-188.5-11.5Q280-263 280-280t11.5-28.5Q303-320 320-320t28.5 11.5Q360-297 360-280t-11.5 28.5Q337-240 320-240t-28.5-11.5ZM640-240q-17 0-28.5-11.5T600-280q0-17 11.5-28.5T640-320q17 0 28.5 11.5T680-280q0 17-11.5 28.5T640-240Z" />
+            </svg>
+            <span class="sidebar-text">Calendar</span>
+          </div>
+          <span id="today-date" class="sidebar-text">(25/7)</span>
+        </a>
+        <a href="/dashboard?view=all" onclick="event.preventDefault(); navigateTo('all');"
+          class="btn btn-primary w-full flex items-center justify-between flex-row sidebar-btn" title="All Todos">
+          <div class="flex flex-row items-center justify-center gap-2">
+            <svg xmlns="http://www.w3.org/2000/svg" height="24px" viewBox="0 -960 960 960" width="24px" fill="#e3e3e3"
+              class="shrink-0">
+              <path
+                d="M160-160q-33 0-56.5-23.5T80-240v-480q0-33 23.5-56.5T160-800h240l80 80h320q33 0 56.5 23.5T880-640v400q0 33-23.5 56.5T800-160H160Zm0-80h640v-400H447l-80-80H160v480Zm0 0v-480 480Z" />
+            </svg>
+            <span class="sidebar-text">All Todos</span>
+          </div>
+          <span id="todos-count-lists" class="sidebar-text">
+            <span class="loading loading-spinner loading-xs"></span>
+          </span>
+        </a>
+      </div>
+      <ul id="lists-two" class="w-full gap-2 flex flex-col items-center justify-center">
+        <span class="loading loading-spinner loading-xs"></span>
+      </ul>
+      <button type="button" onclick="openAddListModal()"
+        class="btn btn-primary btn-outline w-full sidebar-btn flex items-center justify-center" title="New List">
+        <span class="sidebar-text">New List +</span>
+        <span class="hidden sidebar-icon text-xl font-bold">+</span>
+      </button>
     </div>
   `
 }
