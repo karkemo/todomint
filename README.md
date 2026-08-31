@@ -73,6 +73,11 @@ Make sure you have Node.js and npm installed on your system:
    Create a `.env` file in the root directory:
    ```env
    PORT=3000
+
+   BREVO_USER=your_brevo_user
+   BREVO_API_KEY=your_brevo_api_key
+   BREVO_SMTP_KEY=your_brevo_smtp_key
+   
    TURSO_DATABASE_URL=your_turso_db_url
    TURSO_AUTH_TOKEN=your_turso_auth_token
    ```
