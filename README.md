@@ -2,6 +2,8 @@
 
 A modern fullstack task management application designed to boost productivity with daily scheduling, a 24 hour visual timeline, and clear organization.
 
+🚀 **Live Demo:** [https://todomint.vercel.app](https://todomint.vercel.app)
+
 ---
 
 ## 📸 Screenshots 
