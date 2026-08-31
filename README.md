@@ -30,6 +30,7 @@ A modern fullstack task management application designed to boost productivity wi
 todomint/
 ├── controllers/
 ├── middleware/
+├── public/
 ├── routes/
 ├── schemas/
 ├── services/
@@ -77,7 +78,7 @@ Make sure you have Node.js and npm installed on your system:
    BREVO_USER=your_brevo_user
    BREVO_API_KEY=your_brevo_api_key
    BREVO_SMTP_KEY=your_brevo_smtp_key
-   
+
    TURSO_DATABASE_URL=your_turso_db_url
    TURSO_AUTH_TOKEN=your_turso_auth_token
    ```
