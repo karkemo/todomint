@@ -2,7 +2,9 @@
 
 A modern fullstack task management application designed to boost productivity with daily scheduling, a 24 hour visual timeline, and clear organization.
 
-🚀 **Live Demo:** [https://todomint.vercel.app](https://todomint.vercel.app)
+[![Buy Me a Coffee](https://img.shields.io/badge/Buy%20Me%20a%20Coffee-ffdd00?style=for-the-badge&logo=buy-me-a-coffee&logoColor=black)](https://buymeacoffee.com/karem_amr)
+
+🚀 **Live Demo:** [todomint.vercel.app](https://todomint.vercel.app)
 
 ---
 
